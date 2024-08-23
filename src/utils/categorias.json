@@ -1,0 +1,184 @@
+[
+    {
+        "id": 1,
+        "nombre": "30 - 34",
+        "edadMinima": 30,
+        "edadMaxima": 34,
+        "genero": "M"
+    },
+    {
+        "id": 2,
+        "nombre": "30 - 34",
+        "edadMinima": 30,
+        "edadMaxima": 34,
+        "genero": "F"
+    },
+    {
+        "id": 3,
+        "nombre": "35 - 39",
+        "edadMinima": 35,
+        "edadMaxima": 39,
+        "genero": "M"
+    },
+    {
+        "id": 4,
+        "nombre": "35 - 39",
+        "edadMinima": 35,
+        "edadMaxima": 39,
+        "genero": "F"
+    },
+    {
+        "id": 5,
+        "nombre": "40 - 44",
+        "edadMinima": 40,
+        "edadMaxima": 44,
+        "genero": "M"
+    },
+    {
+        "id": 6,
+        "nombre": "40 - 44",
+        "edadMinima": 40,
+        "edadMaxima": 44,
+        "genero": "F"
+    },
+    {
+        "id": 7,
+        "nombre": "45 - 49",
+        "edadMinima": 45,
+        "edadMaxima": 49,
+        "genero": "M"
+    },
+    {
+        "id": 8,
+        "nombre": "45 - 49",
+        "edadMinima": 45,
+        "edadMaxima": 49,
+        "genero": "F"
+    },
+    {
+        "id": 9,
+        "nombre": "50 - 54",
+        "edadMinima": 50,
+        "edadMaxima": 54,
+        "genero": "M"
+    },
+    {
+        "id": 10,
+        "nombre": "50 - 54",
+        "edadMinima": 50,
+        "edadMaxima": 54,
+        "genero": "F"
+    },
+    {
+        "id": 11,
+        "nombre": "55 - 59",
+        "edadMinima": 55,
+        "edadMaxima": 59,
+        "genero": "M"
+    },
+    {
+        "id": 12,
+        "nombre": "55 - 59",
+        "edadMinima": 55,
+        "edadMaxima": 59,
+        "genero": "F"
+    },
+    {
+        "id": 13,
+        "nombre": "60 - 64",
+        "edadMinima": 60,
+        "edadMaxima": 64,
+        "genero": "M"
+    },
+    {
+        "id": 14,
+        "nombre": "60 - 64",
+        "edadMinima": 60,
+        "edadMaxima": 64,
+        "genero": "F"
+    },
+    {
+        "id": 15,
+        "nombre": "65 - 69",
+        "edadMinima": 65,
+        "edadMaxima": 69,
+        "genero": "M"
+    },
+    {
+        "id": 16,
+        "nombre": "65 - 69",
+        "edadMinima": 65,
+        "edadMaxima": 69,
+        "genero": "F"
+    },
+    {
+        "id": 17,
+        "nombre": "70 - 74",
+        "edadMinima": 70,
+        "edadMaxima": 74,
+        "genero": "M"
+    },
+    {
+        "id": 18,
+        "nombre": "70 - 74",
+        "edadMinima": 70,
+        "edadMaxima": 74,
+        "genero": "F"
+    },
+    {
+        "id": 19,
+        "nombre": "75 - 79",
+        "edadMinima": 75,
+        "edadMaxima": 79,
+        "genero": "M"
+    },
+    {
+        "id": 20,
+        "nombre": "75 - 79",
+        "edadMinima": 75,
+        "edadMaxima": 79,
+        "genero": "F"
+    },
+    {
+        "id": 21,
+        "nombre": "80 - 84",
+        "edadMinima": 80,
+        "edadMaxima": 84,
+        "genero": "M"
+    },
+    {
+        "id": 22,
+        "nombre": "80 - 84",
+        "edadMinima": 80,
+        "edadMaxima": 84,
+        "genero": "F"
+    },
+    {
+        "id": 23,
+        "nombre": "85 - 89",
+        "edadMinima": 85,
+        "edadMaxima": 89,
+        "genero": "M"
+    },
+    {
+        "id": 24,
+        "nombre": "85 - 89",
+        "edadMinima": 85,
+        "edadMaxima": 89,
+        "genero": "F"
+    },
+    {
+        "id": 25,
+        "nombre": "90 - 95",
+        "edadMinima": 90,
+        "edadMaxima": 95,
+        "genero": "M"
+    },
+    {
+        "id": 26,
+        "nombre": "90 - 95",
+        "edadMinima": 90,
+        "edadMaxima": 95,
+        "genero": "F"
+    }
+]

@@ -1,0 +1,162 @@
+<template lang="">
+    <div>
+      <DataTable
+        :value="documentosUsuarios"
+        tableStyle="min-width: 50rem"
+        paginator
+        :rows="5"
+        :rowsPerPageOptions="[5, 10, 20, 50]"
+      >
+        <template #header>
+          <Toast></Toast>
+          <ConfirmDialog></ConfirmDialog>
+        <div class="card flex flex-wrap gap-2 justify-content-center">
+          <Button @click="cambiarEstado()" label="Cambiar estado" ></Button>
+      </div>
+        </template>
+        <Column field="nombre" header="Nombre"></Column>
+        <Column field="link" header="Ver">
+          <template #body="slotProps">
+            <span class="p-buttonset">
+              <Button
+                label="Ver"
+                icon="pi pi-eye"
+                @click="abrirUrl(slotProps.data)"
+              />
+            </span>
+          </template>
+        </Column>
+      </DataTable>
+    </div>
+    <div>
+  
+      </div>
+  </template>
+  <script>
+  import { enviarcorreoFachada } from '../helpers/enviarCorrreo';
+  import { actualizarEstadoUsuarioFachada, eliminarUsuarioFachada } from '../helpers/actualizarEstadoUsuario';
+  import { storage } from '@/modules/Registro/helpers/firebase';
+  
+  export default {
+    props: ["docs","correo","id"],
+    data() {
+      return {
+        documentosUsuarios: null,
+        cambioEstadoVisible:false,
+        cuerpoCorreo:{
+          destinatario:this.correo,
+          asunto:"Notificación de cambio de estado",
+          cuerpo:"",
+          mensajeHtml:""
+        }
+      };
+    },
+    methods: {
+      abrirUrl(data) {
+        window.open(data.link, "_blank");
+      },
+      async enviarCorreo(val){
+        
+        if(val){
+          this.cuerpoCorreo.cuerpo="Tu suscripción fue aprobada.";
+          this.cuerpoCorreo.mensajeHtml = `
+          <body>
+            <div style="color:rgb(144,221,240); text-align: center;">
+              <img width="100%" height="100%" src="../../Inicio/aname-footer.png"/>
+            </div>
+            <br>
+            <p style="color:rgb(44, 102, 110); font-family: Arial; font-size:12px; line-height: 1em;">
+              El presente correo es para informar el siguiente comunicado: <br>  
+            </p>
+            <p style="color:rgb(44, 102, 110); font-family: Arial; font-size:12px; line-height: 1em;" > `+
+              this.cuerpoCorreo.cuerpo + 
+              `
+            </p>
+            <p style="font-family: Arial; font-size:12px; line-height: 1em;">
+              <b>Gracias por la atención</b><br>
+              <b>Saludos cordiales,</b> <br><br>
+            </p>
+            <img src="../../Inicio/Aletismo.jpg" width="100%" height="100%"/>
+          </body>
+        `;
+          await actualizarEstadoUsuarioFachada(this.id);
+        }
+        else{
+          this.cuerpoCorreo.cuerpo="Tu comprobante de pago no es correcto, suscripción denegada!";
+          this.cuerpoCorreo.mensajeHtml = `
+          <body>
+            <div style="color:rgb(144,221,240); text-align: center;">
+              <img width="100%" height="100%" src="../../Inicio/aname-footer.png"/>
+            </div>
+            <br>
+            <p style="color:rgb(44, 102, 110); font-family: Arial; font-size:12px; line-height: 1em;">
+              El presente correo es para informar el siguiente comunicado: <br>  
+            </p>
+            <p style="color:rgb(44, 102, 110); font-family: Arial; font-size:12px; line-height: 1em;" > `+
+              this.cuerpoCorreo.cuerpo + 
+              `
+            </p>
+            <p style="font-family: Arial; font-size:12px; line-height: 1em;">
+              <b>Gracias por la atención</b><br>
+              <b>Saludos cordiales,</b> <br><br>
+            </p>
+            <img src="../../Inicio/Aletismo.jpg" width="100%" height="100%"/>
+          </body>
+        `;
+          await eliminarUsuarioFachada(this.id);
+        }
+  
+        await enviarcorreoFachada(this.cuerpoCorreo);
+      },
+      cambiarEstado() {
+              this.$confirm.require({
+                  message: '¿Está seguro que desea cambiar el estado de este usuario?',
+                  icon: 'pi pi-exclamation-triangle',
+                  rejectClass: 'p-button-secondary p-button-outlined',
+                  rejectLabel: 'Denegar',
+                  acceptLabel: 'Aprobar',
+                  accept: () => {
+                      this.enviarCorreo(true).then(()=>{ this.$emit('cambioEstado',true)});
+                  },
+                  reject: () => {
+                      this.eliminarCarpeta();
+                      this.enviarCorreo(false).then(()=>{ this.$emit('cambioEstado',false)});
+                  }
+              });
+          },
+          async eliminarCarpeta() {
+            const ref = storage.ref(this.correo);
+  
+            try {
+              // Listar todos los archivos en la carpeta
+              const listResult = await ref.listAll();
+  
+              // Eliminar todos los archivos encontrados
+              const deletePromises = listResult.items.map((itemRef) =>
+                itemRef.delete()
+              );
+              await Promise.all(deletePromises);
+  
+              // Verificar si hay subcarpetas y eliminarlas recursivamente
+              const deleteSubfolderPromises = listResult.prefixes.map((folderRef) =>
+                this.eliminarCarpeta(folderRef.fullPath)
+              );
+              await Promise.all(deleteSubfolderPromises);
+  
+              console.log(`Carpeta '${this.correo}' eliminada con éxito.`);
+            } catch (error) {
+              console.error("Error al eliminar la carpeta:", error);
+            }
+      },
+    },
+    
+    mounted() {
+      console.log(this.id)
+      this.documentosUsuarios = this.docs;
+    },
+  };
+  </script>
+  <style>
+   
+  </style>
+  
