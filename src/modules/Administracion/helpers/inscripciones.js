@@ -1,22 +1,36 @@
 import axios from "axios";
+import { getApiUrl } from "@/utils/apiUtil.js";
 
+// Fachada
 export const consultarInscripcionFachada = async (consulta) => {
-    return await consultarSuscripcion(consulta)
-}
+    return await consultarSuscripcion(consulta);
+};
 
-export const eliminarDocumentoSocioFachada = async (consulta) => {
-    return await eliminarDocumentoSocio(consulta)
-}
+export const eliminarDocumentoSocioFachada = async (id) => {
+    return await eliminarDocumentoSocio(id);
+};
 
+// Consumir
 const consultarSuscripcion = async (consulta) => {
     const usuario = JSON.parse(localStorage.getItem('userdata'));
     consulta.ciudad = usuario.ciudad;
-    const data = axios.post(`https://atletismonacional.azurewebsites.net/API/Atletismo/competidores/tipoCompetidor`,consulta).then(r => r.data);
-    return data;
-}
+    const url = getApiUrl('competidores/tipoCompetidor');
+    try {
+        const response = await axios.post(url, consulta);
+        return response.data;
+    } catch (error) {
+        console.error("Error consultando suscripción:", error);
+        throw error;
+    }
+};
 
 const eliminarDocumentoSocio = async (id) => {
-    const data = axios.delete(`https://atletismonacional.azurewebsites.net/API/Atletismo/documentos/${id}`).then(r => r.data);
-    return data;
-}
-
+    const url = getApiUrl(`documentos/${id}`);
+    try {
+        const response = await axios.delete(url);
+        return response.data;
+    } catch (error) {
+        console.error("Error eliminando documento socio:", error);
+        throw error;
+    }
+};

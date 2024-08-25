@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = " https://atletismonacional.azurewebsites.net/API/Atletismo/campeonatos/dto";
+const API_URL = "https://atletismonacional.azurewebsites.net/API/Atletismo/campeonatos/dto";
 
 // Crear un campeonato
 export const crearCampeonatoFachada = async (bodyCampeonato) => {
@@ -76,7 +76,7 @@ export const eliminarCampeonatoFachada = async (idCampeonato) => {
   return await eliminarCampeonato(idCampeonato);
 };
 
-const eliminarCampeonato = async () => {
+const eliminarCampeonato = async (idCampeonato) => {
   try {
     const response = await axios.delete(`${API_URL}/${idCampeonato}`);
     return response.data;

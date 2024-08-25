@@ -141,8 +141,8 @@ export default {
 
     if (usuario) {
       this.user = usuario;
-      if (this.user.roles.id === 1) {
-        this.admin = this.user.roles.id === 1;
+      if (this.user.rol.id === 1) {
+        this.admin = this.user.rol.id === 1;
 
         // Actualizar visibilidad de los ítems del menú
         this.items.forEach(item => {
@@ -159,8 +159,8 @@ export default {
           }
         });
 
-      } else if (this.user.roles.id === 6) {
-        this.adminN = this.user.roles.id === 6;
+      } else if (this.user.rol.id === 6) {
+        this.adminN = this.user.rol.id === 6;
 
         // Actualizar visibilidad de los ítems del menú
         this.items.forEach(item => {
@@ -200,7 +200,7 @@ export default {
         });
       }
 
-      this.adminN = this.user.roles.id === 6;
+      this.adminN = this.user.rol.id === 6;
       console.log("user ls ", this.user);
       console.log("admin ls ", this.admin);
 
