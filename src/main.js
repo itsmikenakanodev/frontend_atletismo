@@ -49,58 +49,61 @@ import AccordionTab from 'primevue/accordiontab';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 
-// import as directive
+// Define la URL base
+const URL = "http://localhost:8080/API/Atletismo/";
+
+// Importar como directiva
 import BadgeDirective from 'primevue/badgedirective';
 const app = createApp(App);
 
 app.use(ToastService);
 app.use(ConfirmationService);
-app.component("Menubar",Menubar)
-app.component("ConfirmDialog",ConfirmDialog)
-app.component("Badge",Badge)
-app.component("InputText",InputText)
-app.component("Avatar",Avatar)
-app.component("TabMenu",TabMenu)
-app.component("InputNumber",InputNumber)
+app.component("Menubar", Menubar)
+app.component("ConfirmDialog", ConfirmDialog)
+app.component("Badge", Badge)
+app.component("InputText", InputText)
+app.component("Avatar", Avatar)
+app.component("TabMenu", TabMenu)
+app.component("InputNumber", InputNumber)
 
 app.directive('ripple', Ripple);
 
-app.component("DataTable",DataTable)
-app.component("Column",Column)
-app.component("ColumnGroup",ColumnGroup)
-app.component("Row",Row)
+app.component("DataTable", DataTable)
+app.component("Column", Column)
+app.component("ColumnGroup", ColumnGroup)
+app.component("Row", Row)
 // eslint-disable-next-line vue/no-reserved-component-names
-app.component("Menu",Menu)
-app.component("Button",Button)
-app.component("Dialog",Dialog)
-app.component("Skeleton",Skeleton)
-app.component("Card",Card)
-app.component("Image",Image)
-app.component("MultiSelect",MultiSelect)
-app.component("Listbox",Listbox)
-app.component("Dropdown",Dropdown)
+app.component("Menu", Menu)
+app.component("Button", Button)
+app.component("Dialog", Dialog)
+app.component("Skeleton", Skeleton)
+app.component("Card", Card)
+app.component("Image", Image)
+app.component("MultiSelect", MultiSelect)
+app.component("Listbox", Listbox)
+app.component("Dropdown", Dropdown)
 // eslint-disable-next-line vue/multi-word-component-names
-app.component("Toast",Toast)
-app.component("ConfirmPopup",ConfirmPopup)
-app.component("Message",Message)
-app.component("Password",Password)
-app.component("Checkbox",Checkbox)
-app.component("ProgressSpinner",ProgressSpinner)
+app.component("Toast", Toast)
+app.component("ConfirmPopup", ConfirmPopup)
+app.component("Message", Message)
+app.component("Password", Password)
+app.component("Checkbox", Checkbox)
+app.component("ProgressSpinner", ProgressSpinner)
 
-app.component("ScrollPanel",ScrollPanel)
-app.component("Panel",Panel)
-app.component("Carousel",Carousel)
-app.component("Tag",Tag)
-app.component("Chart",Chart)
-app.component("FileUpload",FileUpload)
-app.component("ProgressBar",ProgressBar)
-app.component("FloatLabel",FloatLabel)
-app.component("Fieldset",Fieldset)
+app.component("ScrollPanel", ScrollPanel)
+app.component("Panel", Panel)
+app.component("Carousel", Carousel)
+app.component("Tag", Tag)
+app.component("Chart", Chart)
+app.component("FileUpload", FileUpload)
+app.component("ProgressBar", ProgressBar)
+app.component("FloatLabel", FloatLabel)
+app.component("Fieldset", Fieldset)
 
-app.component("Accordion",Accordion)
-app.component("AccordionTab",AccordionTab)
-app.component("IconField",IconField)
-app.component("InputIcon",InputIcon)
+app.component("Accordion", Accordion)
+app.component("AccordionTab", AccordionTab)
+app.component("IconField", IconField)
+app.component("InputIcon", InputIcon)
 
 app.directive('badge', BadgeDirective);
 
@@ -108,3 +111,5 @@ app.directive('badge', BadgeDirective);
 app.use(router)
 app.use(PrimeVue);
 app.mount('#app')
+
+export { URL }; // Exportar la variable para su uso en otros archivos
