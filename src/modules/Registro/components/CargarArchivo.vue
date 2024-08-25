@@ -141,7 +141,7 @@ export default {
                 nombre: "",
                 link: "",
                 extension: "",
-                usuarios: {
+                usuario: {
                     "id": null,
                 },
                 tipo: "Registro"
@@ -174,7 +174,7 @@ export default {
                         const obj = await guardarUsuarioFachada(usuario);
                         console.log("Objeto del backend ", obj);
 
-                        doc.usuarios.id = obj;
+                        doc.usuario.id = obj;
                         doc.nombre = name;
                         doc.extension = extension;
                         doc.link = url;

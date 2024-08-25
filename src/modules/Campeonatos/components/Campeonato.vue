@@ -30,7 +30,7 @@
         </AccordionTab>
       </Accordion>
       <div class="centeredItem">
-        <button class="mb-3" v-if="usuario.roles.id===5" @click="mostrarInscripcionCampeonato(campeonato.id)">Inscripciones</button>
+        <button class="mb-3" v-if="usuario.rol.id===5" @click="mostrarInscripcionCampeonato(campeonato.id)">Inscripciones</button>
       </div>
     </div>
 

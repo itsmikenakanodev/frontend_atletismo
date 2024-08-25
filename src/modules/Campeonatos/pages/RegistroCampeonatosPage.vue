@@ -10,7 +10,7 @@
                         v-model="campeonato.nombre" />
                 </div>
             </div>
-            <div class="form-row" v-if="usuario.roles.id === 1">
+            <div class="form-row" v-if="usuario.rol.id === 1">
                 <div class="form-group">
                     <label for="organizator">Organizador</label>
                     <input type="text" id="organizator" disabled placeholder="Ingresa organizador..." required
@@ -30,7 +30,7 @@
                     </select>
                 </div> -->
             </div>
-            <div class="form-row" v-if="usuario.roles.id === 6">
+            <div class="form-row" v-if="usuario.rol.id === 6">
                 <div class="form-group">
                     <label for="organizator">Organizador</label>
                     <input type="text" id="organizator" disabled placeholder="Ingresa organizador..." required
@@ -146,7 +146,7 @@ export default {
     },
     mounted() {
         console.log(this.usuario);
-        if (this.usuario.roles.id === 1) {
+        if (this.usuario.rol.id === 1) {
             this.organizador = this.usuario.nombres + " " + this.usuario.apellidos;
             this.ciudad = this.usuario.ciudad;
             this.campeonato.organizador = this.organizador;
