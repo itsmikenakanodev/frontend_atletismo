@@ -207,7 +207,7 @@ export default {
                 nombre: "",
                 link: "",
                 extension: "",
-                usuarios: {
+                usuario: {
                     "id": user.id,
                 },
                 tipo: "Inscripcion"
@@ -267,7 +267,7 @@ export default {
                 nombre: "",
                 link: "",
                 extension: "",
-                usuarios: {
+                usuario: {
                     "id": user.id,
                 },
                 tipo: "Socio"

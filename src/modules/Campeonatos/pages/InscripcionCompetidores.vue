@@ -158,7 +158,7 @@
 import $ from "jquery";
 import { registroCompetidorFachada } from "../helpers/CompetidorHelper";
 import { obtenerCampeonatoFachada } from "../helpers/ObtenerCampeonatosHelper";
-import { registroCampeonatoPruebaCompetidorFachada } from "../helpers/CampeonatoPruebaCompetidorHelper";
+import { registroPruebasCompetidorFachada } from "../helpers/CampeonatoPruebaCompetidorHelper";
 
 import categorias from "@/utils/categorias.json";
 import CargarArchivo from "@/modules/Registro/components/CargarArchivo.vue";
@@ -180,7 +180,7 @@ export default {
         telefono: "",
         categoria: "",
       },
-      campeonato: { nombre: "", pruebas: null, fecha: "" },
+      campeonato: { id: null, nombre: "", pruebas: null, fecha: "" },
       competidor: null,
       camp_id: 1,
       userData: null,
@@ -223,7 +223,7 @@ export default {
 
   async mounted() {
     const c = await obtenerCampeonatoFachada(this.$route.params.id);
-
+    this.campeonato.id = c.id;
     this.campeonato.nombre = c.nombre;
     this.campeonato.fecha = c.fechaFin;
     this.campeonato.pruebas = c.pruebas;
@@ -278,7 +278,10 @@ export default {
           id: null,
           fechaInscripcion: hoy.toISOString(),
           estadoParticipacion: "Pendiente",
-          usuarios: this.userData,
+          usuario: this.userData,
+          campeonato: {
+            id: this.campeonato.id
+          }
         };
         try {
           this.comp_id = await registroCompetidorFachada(this.competidor);
@@ -291,11 +294,16 @@ export default {
         if (this.competidor) {
           pruebasS.map(async (p) => {
             const cuerpoCPC = {
-              campeonatosPruebas: p,
-              competidores: this.competidor,
+              prueba: p,
+              competidor: {
+                id: this.competidor.id
+              },
+              campeonato: {
+                id: this.campeonato.id
+              }
             };
             try {
-              await registroCampeonatoPruebaCompetidorFachada(cuerpoCPC);
+              await registroPruebasCompetidorFachada(cuerpoCPC);
             } catch (error) {
               this.$toast.add({
                 severity: "danger",
@@ -354,6 +362,7 @@ export default {
           cat.edadMaxima >= edad &&
           cat.genero === genero
       );
+      console.log("categoria",categoria);
       return categoria ? { id: categoria.id, nombre: categoria.nombre } : null;
     },
     verificarSubida(uploaded) {
