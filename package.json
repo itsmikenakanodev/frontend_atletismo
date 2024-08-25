@@ -13,8 +13,6 @@
     "@stripe/stripe-js": "^3.5.0",
     "axios": "^1.7.2",
     "chart.js": "^4.4.3",
-    "datatables.net": "^2.0.8",
-    "datatables.net-dt": "^2.0.8",
     "firebase": "^8.10.0",
     "jquery": "^3.7.1",
     "primeflex": "^3.3.1",
