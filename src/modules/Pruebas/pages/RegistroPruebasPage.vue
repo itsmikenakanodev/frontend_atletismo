@@ -74,56 +74,60 @@ export default {
       tipos: ["Pista", "Campo"],
       categorias: ["Individual", "Colectiva"],
       loading: false,
-      pruebas: null,
-      selectedPrueba: null,
+      pruebas: [],
+      selectedPrueba: [],
     };
   },
   methods: {
     async listarPruebas() {
-      await obtenerPruebasFachada().then(r => {
-        this.pruebas = r
-      })
+      try {
+        const response = await obtenerPruebasFachada();
+        this.pruebas = response;
+      } catch (error) {
+        console.error("Error al listar las pruebas:", error);
+      }
     },
-    // Método para registrar pruebas
     async registrar() {
       this.prueba.pruebasCombinadas = this.prueba.combinada;
       this.loading = true;
-      this.selectedPrueba.forEach((prueba, index) => {
-        this.prueba.descripcion += prueba.nombre;
-        if (index < this.selectedPrueba.length - 1) {
-          this.prueba.descripcion += ", ";
-        }
-      });
+
+      // Asegúrate de que selectedPrueba sea un array antes de llamar a forEach
+      if (Array.isArray(this.selectedPrueba)) {
+        this.prueba.descripcion = this.selectedPrueba.map(prueba => prueba.nombre).join(", ");
+      } else {
+        this.prueba.descripcion = "";
+      }
+
       this.prueba.tipo = this.prueba.tipo.toLowerCase();
       console.log(this.prueba);
       console.log(this.selectedPrueba);
-      await registrarPruebaFachada(this.prueba)
-        .then(() => {
-          this.loading = false;
-          this.$toast.add({
-            severity: "info",
-            summary: "Info",
-            detail: "Registro de prueba completado",
-            life: 3000,
-          });
-          this.prueba = {
-            nombre: "",
-            categoria: "",
-            tipo: "",
-            combinada: false,
-            descripcion: null
-          };
-        })
-        .catch((e) => {
-          console.error(e);
-          this.loading = false;
-          this.$toast.add({
-            severity: "error",
-            summary: "Error",
-            detail: "No se pudo completar el registro de prueba",
-            life: 3000,
-          });
+
+      try {
+        await registrarPruebaFachada(this.prueba);
+        this.loading = false;
+        this.$toast.add({
+          severity: "info",
+          summary: "Info",
+          detail: "Registro de prueba completado",
+          life: 3000,
         });
+        this.prueba = {
+          nombre: "",
+          categoria: "",
+          tipo: "",
+          combinada: false,
+          descripcion: ""
+        };
+      } catch (e) {
+        console.error(e);
+        this.loading = false;
+        this.$toast.add({
+          severity: "error",
+          summary: "Error",
+          detail: "No se pudo completar el registro de prueba",
+          life: 3000,
+        });
+      }
     }
   },
   watch: {
@@ -135,10 +139,11 @@ export default {
     }
   },
   mounted() {
-    this.listarPruebas()
+    this.listarPruebas();
   },
 };
 </script>
+
 
 <style scoped>
 .register-container {

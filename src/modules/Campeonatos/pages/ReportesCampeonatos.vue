@@ -91,7 +91,6 @@ export default {
             selectedPruebasCompetidores: null,
             pruebasCompetidores: null,
             selectedCampeonatoPrueba: null,
-            selectedPruebasCompetidores: null,
             campeonatosPruebas: [],
             competidores:[],
             

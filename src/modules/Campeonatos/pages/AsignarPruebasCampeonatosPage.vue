@@ -4,9 +4,7 @@
     <h2>Asignar Pruebas al Campeonato</h2>
     <h3>Seleccione el campeonato al que desea asignar las pruebas</h3>
     <div class="flex flex-column">
-      <Dropdown v-model="selectedCampeonato" optionLabel="nombre" :options="campeonatos"  class="mt-3 mb-3" placeholder="Seleccione el campeonato">
-     
-    </Dropdown>
+      <Dropdown v-model="selectedCampeonato" optionLabel="nombre" :options="campeonatos"  class="mt-3 mb-3" placeholder="Seleccione el campeonato"/>
     </div>
     
     <DataTable v-model:selection="selectedPrueba" :value="pruebas" paginator showGridlines :rows="5"
@@ -15,8 +13,9 @@
       <Column field="nombre" header="Nombre" sortable></Column>
       <Column field="tipo" header="Tipo" sortable></Column>
     </DataTable>
+    
     <div class="centerElement mt-3">
-      <Button @click="asignarPruebas" >Finalizar registro</Button>
+      <Button @click="asignarPruebas">Finalizar registro</Button>
     </div>
   </div>
 </template>
@@ -25,7 +24,6 @@
 import { obtenerPruebasFachada } from '@/modules/Campeonatos/helpers/ObtenerPruebasHelper.js'
 import { obtenerCampeonatosFachada } from '@/modules/Campeonatos/helpers/ObtenerCampeonatosHelper.js'
 import { actualizarCampeonatoFachada } from '@/modules/Campeonatos/helpers/ActualizarCampenatoHelper.js'
-import { isProxy, toRaw } from 'vue';
 
 export default {
   mounted() {
