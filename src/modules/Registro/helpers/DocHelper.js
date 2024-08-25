@@ -1,11 +1,24 @@
 import axios from "axios";
+import { getApiUrl } from "@/utils/apiUtil.js";
 
+// Fachada
 export const guardarDocFachada = async (bodyDoc) => {
-    return await guardarDoc(bodyDoc)
-}
+  try {
+    return await guardarDoc(bodyDoc);
+  } catch (error) {
+    console.error("Error al guardar el documento:", error);
+    throw error;
+  }
+};
 
-const guardarDoc= async (bodyDoc) => {
-    const data = axios.post(`http://localhost:8080/API/Atletismo/documentos`, bodyDoc).then(r => r.data);
-    return data;
-}
-
+// Consumir
+const guardarDoc = async (bodyDoc) => {
+  const url = getApiUrl('documentos');
+  try {
+    const response = await axios.post(url, bodyDoc);
+    return response.data;
+  } catch (error) {
+    console.error("Error en la llamada API para guardar el documento:", error);
+    throw error;
+  }
+};

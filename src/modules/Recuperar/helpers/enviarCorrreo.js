@@ -1,13 +1,24 @@
 import axios from "axios";
-import { getApiUrl  } from "@/utils/apiUtil.js"
-//Fachada
-export const enviarcorreoFachada= async(cuerpoCorreo)=>{
-    return await enviarcorreoApi(cuerpoCorreo)
-}
+import { getApiUrl } from "@/utils/apiUtil.js";
 
-//Consumir
-const enviarcorreoApi= async (cuerpoCorreo)=>{
-    const url=getApiUrl('emails/sendNotif')
-    return await axios.post('https://proyectocloudbackend.onrender.com/API/Atletismo/emails/sendNotif', cuerpoCorreo).then(r => r.data)
-   
-}
+// Fachada
+export const enviarcorreoFachada = async (cuerpoCorreo) => {
+  try {
+    return await enviarCorreoApi(cuerpoCorreo);
+  } catch (error) {
+    console.error("Error al enviar el correo:", error);
+    throw error;
+  }
+};
+
+// Consumir
+const enviarCorreoApi = async (cuerpoCorreo) => {
+  const url = getApiUrl('emails/sendNotif');
+  try {
+    const response = await axios.post(url, cuerpoCorreo);
+    return response.data;
+  } catch (error) {
+    console.error("Error en la llamada API para enviar correo:", error);
+    throw error;
+  }
+};

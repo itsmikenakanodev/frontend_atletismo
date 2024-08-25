@@ -29,7 +29,7 @@
     data() {
       return {
         email: null,
-        url: "https://cloudcomptest-e86ae.web.app/#/cambio-contrasenia/",
+        url: "http://localhost:3000/#/cambio-contrasenia/",
         cuerpoCorreo:{
         destinatario:this.email,
         asunto:"Notificación de cambio de estado",

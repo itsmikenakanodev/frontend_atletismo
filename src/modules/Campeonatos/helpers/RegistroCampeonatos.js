@@ -1,29 +1,44 @@
 import axios from "axios";
-import { getApiUrl  } from "@/utils/apiUtil.js"
-//Fachada
-export const registroCampeonatosFachada= async(cuerpoCampeonato)=>{
+import { getApiUrl } from "@/utils/apiUtil.js";
+
+// Fachada
+export const registroCampeonatosFachada = async (cuerpoCampeonato) => {
+  try {
     return await registroCampeonatosApi(cuerpoCampeonato);
-}
+  } catch (error) {
+    console.error("Error al registrar campeonato:", error);
+    throw error; 
+  }
+};
 
-export const consultarAdminsFachada= async()=>{
+export const consultarAdminsFachada = async () => {
+  try {
     return await consultarAdmins();
-}
+  } catch (error) {
+    console.error("Error al consultar administradores:", error);
+    throw error; 
+  }
+};
 
+// Consumir
+const registroCampeonatosApi = async (cuerpoCampeonato) => {
+  try {
+    const url = getApiUrl('campeonatos');
+    const response = await axios.post(url, cuerpoCampeonato);
+    return response.data;
+  } catch (error) {
+    console.error("Error en la llamada API para registrar campeonato:", error);
+    throw error; 
+  }
+};
 
-
-//Consumir
-const registroCampeonatosApi= async (cuerpoCampeonato)=>{
-    const url=getApiUrl('campeonatos');
-    return await axios.post(url,cuerpoCampeonato).then(r => r.data);
-   
-}
-
-const consultarAdmins= async ()=>{
-    const url=getApiUrl('usuarios/admins');
-    return await axios.get(url).then(r => r.data).catch(e => {
-        console.error(e)
-        this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo consultar los administradores', life: 3000 });
-    });
-   
-}
-    
+const consultarAdmins = async () => {
+  try {
+    const url = getApiUrl('usuarios/admins');
+    const response = await axios.get(url);
+    return response.data;
+  } catch (error) {
+    console.error("Error en la llamada API para consultar administradores:", error);
+    throw error; 
+  }
+};

@@ -3,7 +3,12 @@ import { getApiUrl } from "@/utils/apiUtil.js";
 
 // Fachada
 export const obtenerUsuarioFachada = async (bodyUsuario) => {
-  return await obtenerUsuario(bodyUsuario);
+  try {
+    return await obtenerUsuario(bodyUsuario);
+  } catch (error) {
+    console.error("Error al obtener usuario:", error);
+    throw error;
+  }
 };
 
 // Consumir
@@ -16,6 +21,7 @@ const obtenerUsuario = async (bodyUsuario) => {
     });
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error("Error en la llamada API para obtener usuario:", error);
+    throw error;
   }
 };

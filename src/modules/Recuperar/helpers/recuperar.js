@@ -1,22 +1,30 @@
+import axios from "axios";
+import { getApiUrl } from "@/utils/apiUtil.js";
 
-import axios from 'axios';
+// Fachada
 export const recuperarContraseniaFachada = async (correo, password) => {
+  try {
     return await recuperarContrasenia(correo, password);
-}
+  } catch (error) {
+    console.error("Error al recuperar la contraseña:", error);
+    throw error;
+  }
+};
 
-
-const apiUrl = 'https://atletismonacional.azurewebsites.net/API/Atletismo';
-
+// Consumir
 const recuperarContrasenia = async (correo, password) => {
-    const data = await axios.put(`https://atletismonacional.azurewebsites.net/API/Atletismo/auth/recuperarPass`, null, {
-        params: { correo, password }
-    }).then(r => r.data)
-    .catch(error => {
-        if (error.response && error.response.status === 400) {
-            return false;
-        } else {
-            throw error; 
-        }
+  const url = getApiUrl('auth/recuperarPass');
+  try {
+    const response = await axios.put(url, null, {
+      params: { correo, password }
     });
-    return data;
-}
+    return response.data;
+  } catch (error) {
+    console.error("Error en la llamada API para recuperar contraseña:", error);
+    if (error.response && error.response.status === 400) {
+      return false;
+    } else {
+      throw error; 
+    }
+  }
+};
