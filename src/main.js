@@ -49,8 +49,6 @@ import AccordionTab from 'primevue/accordiontab';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 
-// Define la URL base
-const URL = "http://localhost:8080/API/Atletismo/";
 
 // Importar como directiva
 import BadgeDirective from 'primevue/badgedirective';
@@ -111,5 +109,3 @@ app.directive('badge', BadgeDirective);
 app.use(router)
 app.use(PrimeVue);
 app.mount('#app')
-
-export { URL }; // Exportar la variable para su uso en otros archivos
