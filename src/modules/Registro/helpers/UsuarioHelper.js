@@ -1,11 +1,14 @@
 import axios from "axios";
+import { getApiUrl } from "@/utils/apiUtil.js";
+
+const url = getApiUrl("auth/registro"); 
 
 export const guardarUsuarioFachada = async (bodyUsuario) => {
     return await guardarUsuario(bodyUsuario)
 }
 
 const guardarUsuario = async (bodyUsuario) => {
-    const data = axios.post(`https://atletismonacional.azurewebsites.net/API/Atletismo/auth/registro`, bodyUsuario).then(r => r.data);
+    const data = axios.post(url, bodyUsuario).then(r => r.data);
     return data;
 }
 
