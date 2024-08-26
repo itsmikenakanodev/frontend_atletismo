@@ -12,7 +12,7 @@
         </div>
 
       </div>
-      <div class="contenedorImagen">
+      <div class="contenedorImagen"> 
         <div class="image-item">
           <img id="imagenCarousel" :src="provincias_urls[campeonato.sede]" alt="No se pudo cargar imagen" />
         </div>
