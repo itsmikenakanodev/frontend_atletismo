@@ -1,44 +1,44 @@
 <template>
-    <h2 >Reporte {{ nombreCampeonato}}</h2>
-    <Dropdown v-model="selectedCampeonato" :options="campeonatos" filter optionLabel="nombre" placeholder="Seleccione" class="w-full md:w-30rem"></Dropdown>
-    <Button  v-if="selectedCampeonato!==null" @click="cargar" label="Cargar Reporte"></Button >
-        <span></span>
-    <DataTable :value="generosPruebas" showGridlines class="mt-3"
-        tableStyle="min-width: 50rem">
+    <h2>Reporte {{ nombreCampeonato }}</h2>
+    <Dropdown v-model="selectedCampeonato" :options="campeonatos" filter optionLabel="nombre" placeholder="Seleccione"
+        class="w-full md:w-30rem"></Dropdown>
+    <Button v-if="selectedCampeonato !== null" @click="cargar" label="Cargar Reporte"></Button>
+    <span></span>
+    <DataTable :value="generosPruebas" showGridlines class="mt-3" tableStyle="min-width: 50rem">
         <Column field="genero" header="Género">
-        </Column> 
+        </Column>
         <Column field="cantidad" header="Cantidad"></Column>
 
     </DataTable>
 
     <span></span>
     <div class="contenedorInicio">
-        
+
 
         <Accordion v-if="campeonatosPruebas.length > 0" :activeIndex="0">
             <AccordionTab v-for="(item, index) in campeonatosPruebas" :key="index">
                 <template #header>
                     <span>
-                        <h3>Damas: {{ calcularCantidadGenero(item.competidores,"F") }}</h3>
-                        <h3>Varones: {{ calcularCantidadGenero(item.competidores,"M") }}</h3>
+                        <h3>Damas: {{ calcularCantidadGenero(item.competidores, "F") }}</h3>
+                        <h3>Varones: {{ calcularCantidadGenero(item.competidores, "M") }}</h3>
 
                     </span>
                     <h2>{{ item.prueba.nombre }}</h2>
                 </template>
-                <DataTable  v-model:selection="selectedCampeonatoPrueba" :value="item.competidores" showGridlines
+                <DataTable v-model:selection="selectedCampeonatoPrueba" :value="item.competidores" showGridlines
                     tableStyle="min-width: 50rem">
                     <Column field="competidor.usuarios.ciudad" header="Provincia"></Column>
                     <Column field="competidor.usuarios.nombres" header="Nombre"></Column>
                     <Column field="competidor.usuarios.sexo" header="Genero"></Column>
                     <Column field="competidor.usuarios.estado" header="Socio">
-                        <template #body="{data}">
+                        <template #body="{ data }">
                             <span v-if="data.competidor.usuarios.estado === true">
                                 Si
                             </span>
                             <span v-if="data.competidor.usuarios.estado === false">
                                 No
                             </span>
-                            
+
                         </template>
                     </Column>
 
@@ -53,9 +53,9 @@
 </template>
 <script>
 import { obtenerCampeonatosPruebasFachada } from "../helpers/ObtenerPruebasCompetidores.js"
-import {obtenerCampeonatosSinPruebasFachada} from "../helpers/ObtenerCampeonatosHelper.js"
-import {obtenerPruebasDadoCampeonatoFachada} from "../helpers/ObtenerPruebasHelper.js"
-import {obtenerCompetidoresDadoCampeonatoyPruebaFachada} from "../helpers/CampeonatosPruebasCompetidoresHelper.js"
+import { obtenerCampeonatosSinPruebasFachada } from "../helpers/ObtenerCampeonatosHelper.js"
+import { obtenerPruebasDadoCampeonatoFachada } from "../helpers/ObtenerPruebasHelper.js"
+import { obtenerCompetidoresDadoCampeonatoyPruebaFachada } from "../helpers/CampeonatosPruebasCompetidoresHelper.js"
 export default {
     data() {
         return {
@@ -86,15 +86,15 @@ export default {
                 "Zamora Chinchipe",
             ],
             campeonatos: [],
-            selectedCampeonato:null,
+            selectedCampeonato: null,
 
             selectedPruebasCompetidores: null,
             pruebasCompetidores: null,
             selectedCampeonatoPrueba: null,
             selectedPruebasCompetidores: null,
             campeonatosPruebas: [],
-            competidores:[],
-            
+            competidores: [],
+
             generosPruebas: [{
                 genero: "F",
                 cantidad: 0
@@ -114,24 +114,24 @@ export default {
     },
 
     computed: {
-    nombreCampeonato() {
-      return this.selectedCampeonato ? this.selectedCampeonato.nombre : '';
-    }
-  },
+        nombreCampeonato() {
+            return this.selectedCampeonato ? this.selectedCampeonato.nombre : '';
+        }
+    },
 
     methods: {
 
         async consultarCampeonatos() {
             this.campeonatos = await obtenerCampeonatosSinPruebasFachada();
-        },   
+        },
 
-        cargar(){
+        cargar() {
             this.consultarPruebasDeCampeonato();
         },
 
-        async consultarPruebasDeCampeonato(){
+        async consultarPruebasDeCampeonato() {
             this.campeonatosPruebas = [];
-            this.generosPruebas= [{
+            this.generosPruebas = [{
                 genero: "F",
                 cantidad: 0
             },
@@ -144,15 +144,15 @@ export default {
 
             var campeonatosPruebasAux = await obtenerPruebasDadoCampeonatoFachada(this.selectedCampeonato.id);
             for (let prueba of campeonatosPruebasAux) {
-    prueba.competidores = await obtenerCompetidoresDadoCampeonatoyPruebaFachada(this.selectedCampeonato.id, prueba.prueba.id);
-  }
+                prueba.competidores = await obtenerCompetidoresDadoCampeonatoyPruebaFachada(this.selectedCampeonato.id, prueba.prueba.id);
+            }
 
             this.campeonatosPruebas = campeonatosPruebasAux;
             await this.calcularCantidadGeneroTotal();
-            
+
         },
 
-        async consultarCompetidores(campeonatoId, pruebaId){
+        async consultarCompetidores(campeonatoId, pruebaId) {
             this.competidores = await obtenerCompetidoresDadoCampeonatoyPruebaFachada(campeonatoId, pruebaId);
         },
 
@@ -170,10 +170,10 @@ export default {
             this.campeonatosPruebas.forEach(element => {
                 element.competidores.forEach(comp => {
                     if (comp.competidor.usuarios.sexo === "F") {
-                        this.generosPruebas[0].cantidad ++
+                        this.generosPruebas[0].cantidad++
                     }
                     if (comp.competidor.usuarios.sexo === "M") {
-                        this.generosPruebas[1].cantidad ++
+                        this.generosPruebas[1].cantidad++
                     }
                 })
 
@@ -181,14 +181,14 @@ export default {
 
             console.log('this.generosPruebas', this.generosPruebas)
         },
-        calcularCantidadGenero(datos,genero) {
-            var cantidad=0;
+        calcularCantidadGenero(datos, genero) {
+            var cantidad = 0;
             datos.forEach(element => {
-                
+
                 if (element.competidor.usuarios.sexo === genero) {
                     cantidad++
-                    }
-            
+                }
+
             })
             return cantidad;
         }

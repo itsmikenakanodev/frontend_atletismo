@@ -275,7 +275,6 @@ export default {
 
             if (this.files.length > 0) {
                 const file = this.files[0];
-                /*console.log('doc',file);*/
 
                 let name = "";
                 let extension = "";

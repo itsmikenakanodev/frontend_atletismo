@@ -278,6 +278,7 @@ export default {
           id: null,
           fechaInscripcion: hoy.toISOString(),
           estadoParticipacion: "Pendiente",
+          categoria: this.form.categoria,
           usuario: this.userData,
           campeonato: {
             id: this.campeonato.id
@@ -304,6 +305,7 @@ export default {
             };
             try {
               await registroPruebasCompetidorFachada(cuerpoCPC);
+              console.log(cuerpoCPC)
             } catch (error) {
               this.$toast.add({
                 severity: "danger",
