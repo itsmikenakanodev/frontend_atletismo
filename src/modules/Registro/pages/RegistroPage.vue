@@ -1,31 +1,28 @@
 <template>
     <div class="register-container">
+        <Toast />
         <h2>Crea tu cuenta</h2>
         <form @submit.prevent="registrar">
             <div class="form-row">
                 <div class="form-group">
                     <label for="firstName">Nombres</label>
-                    <input type="text" id="firstName" v-model="form.firstName" placeholder="Ingresa tus 2 nombres..."
-                        required />
+                    <input type="text" id="firstName" v-model="form.firstName" placeholder="Ingresa tus 2 nombres..." required />
                 </div>
                 <div class="form-group">
                     <label for="lastName">Apellidos</label>
-                    <input type="text" id="lastName" placeholder="Ingresa tus 2 apellidos..." v-model="form.lastName"
-                        required />
+                    <input type="text" id="lastName" placeholder="Ingresa tus 2 apellidos..." v-model="form.lastName" required />
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label for="address">Dirección</label>
-                    <input type="text" id="address" placeholder="Ingresa tu dirección..." v-model="form.address"
-                        required />
+                    <input type="text" id="address" placeholder="Ingresa tu dirección..." v-model="form.address" required />
                 </div>
                 <div class="form-group">
                     <label for="city">Provincia</label>
                     <select id="city" v-model="form.city" required class="center-aligned">
                         <option disabled value="">Selecciona tu provincia</option>
-                        <option class="options" v-for="(option, index) in provincias" :key="index" :value="option">{{
-                            option }}</option>
+                        <option class="options" v-for="(option, index) in provincias" :key="index" :value="option">{{ option }}</option>
                     </select>
                 </div>
             </div>
@@ -36,8 +33,7 @@
                 </div>
                 <div class="form-group">
                     <label for="password">Contraseña</label>
-                    <input type="password" id="password" placeholder="***********************" v-model="form.password"
-                        required />
+                    <input type="password" id="password" placeholder="***********************" v-model="form.password" required />
                 </div>
             </div>
             <div class="form-row">
@@ -49,8 +45,7 @@
                     <label for="genre">Género</label>
                     <select id="genre" v-model="form.gender" required class="center-aligned">
                         <option disabled value="">Selecciona tu genero</option>
-                        <option class="options" v-for="(option, index) in genders" :key="index" :value="option">{{
-                            option }}</option>
+                        <option class="options" v-for="(option, index) in genders" :key="index" :value="option">{{ option }}</option>
                     </select>
                 </div>
             </div>
@@ -61,8 +56,7 @@
                 </div>
                 <div class="form-group">
                     <label for="nameContact">Nombre Contacto</label>
-                    <input type="text" id="nameContact" placeholder="Ingrese nombre de contacto" v-model="form.contact"
-                        required />
+                    <input type="text" id="nameContact" placeholder="Ingrese nombre de contacto" v-model="form.contact" required />
                 </div>
             </div>
             <div class="form-row centerElement">
@@ -84,10 +78,15 @@
 
 <script>
 import CargarArchivo from "../components/CargarArchivo.vue";
+import { useToast } from 'primevue/usetoast';
 
 export default {
     components: {
         CargarArchivo
+    },
+    setup() {
+        const toast = useToast();
+        return { toast };
     },
     data() {
         return {
@@ -140,23 +139,25 @@ export default {
     methods: {
         verificarSubida(uploaded) {
             this.upload = uploaded;
-            console.log(this.upload);
         },
-        registrar() {
-            //console.log(this.upload)
+        async registrar() {
             if (this.upload) {
-                this.$refs.cargarArchivo.uploadEvent(this.form);
-                console.log(this.upload);
+                try {
+                    // Esperar a que el archivo se suba antes de registrar
+                    await this.$refs.cargarArchivo.uploadEvent(this.form);
+
+                    // Mostrar toast de éxito solo después de la carga
+                    this.$toast.add({ severity: 'success', summary: 'Registro Exitoso', detail: 'Subiendo archivo elegido...', life: 6000 });
+                } catch (error) {
+                    this.$toast.add({ severity: 'error', summary: 'Error', detail: 'Hubo un error al registrar su cuenta. Por favor, intente de nuevo.', life: 3000 });
+                }
             } else {
-                alert('Debe subir el archivo para poder registrarse!');
+                this.$toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'Debe subir el archivo para poder registrarse.', life: 3000 });
             }
-        },
-    },
+        }
+    }
 };
 </script>
-
-
-
 <style scoped>
 .register-container {
     display: block;
