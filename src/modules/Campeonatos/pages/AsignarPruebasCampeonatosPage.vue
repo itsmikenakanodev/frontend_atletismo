@@ -1,14 +1,22 @@
 <template>
   <div class="register-container">
-    <Toast/>
+    <Toast />
     <h2>Asignar Pruebas al Campeonato</h2>
     <h3>Seleccione el campeonato al que desea asignar las pruebas</h3>
     <div class="flex flex-column">
-      <Dropdown v-model="selectedCampeonato" optionLabel="nombre" :options="campeonatos"  class="mt-3 mb-3" placeholder="Seleccione el campeonato"/>
+      <Dropdown v-model="selectedCampeonato" optionLabel="nombre" :options="campeonatos" class="mt-3 mb-3" placeholder="Seleccione el campeonato" />
     </div>
     
-    <DataTable v-model:selection="selectedPrueba" :value="pruebas" paginator showGridlines :rows="5"
-      :rowsPerPageOptions="[5, 10, 20, 50]" tableStyle="min-width: 50rem">
+    <DataTable
+      :value="pruebas"
+      selectionMode="multiple"
+      v-model:selection="selectedPrueba"
+      paginator
+      showGridlines
+      :rows="5"
+      :rowsPerPageOptions="[5, 10, 20, 50]"
+      tableStyle="min-width: 50rem"
+    >
       <Column selectionMode="multiple" headerStyle="width: 3rem;"></Column>
       <Column field="nombre" header="Nombre" sortable></Column>
       <Column field="tipo" header="Tipo" sortable></Column>
@@ -21,52 +29,69 @@
 </template>
 
 <script>
-import { obtenerPruebasFachada } from '@/modules/Campeonatos/helpers/ObtenerPruebasHelper.js'
-import { obtenerCampeonatosFachada } from '@/modules/Campeonatos/helpers/ObtenerCampeonatosHelper.js'
-import { actualizarCampeonatoFachada } from '@/modules/Campeonatos/helpers/ActualizarCampenatoHelper.js'
+import { obtenerPruebasFachada } from '@/modules/Campeonatos/helpers/ObtenerPruebasHelper.js';
+import { obtenerCampeonatosFachada } from '@/modules/Campeonatos/helpers/ObtenerCampeonatosHelper.js';
+import { registroCampeonatoPruebaFachada } from '@/modules/Campeonatos/helpers/CampeonatoPruebaHelper';
 
 export default {
   mounted() {
-    this.listarPruebas()
-    this.listarCampeonatos()
+    this.listarPruebas();
+    this.listarCampeonatos();
   },
   methods: {
- 
     async listarPruebas() {
-      await obtenerPruebasFachada().then(r => {
-        this.pruebas = r
-      })
+      try {
+        this.pruebas = await obtenerPruebasFachada();
+        console.log('Pruebas obtenidas:', this.pruebas); 
+      } catch (error) {
+        console.error('Error al obtener las pruebas:', error);
+      }
     },
     async listarCampeonatos() {
-      await obtenerCampeonatosFachada(this.usuario.ciudad).then(r => {
-        this.campeonatos = r
-      })
+      try {
+        this.campeonatos = await obtenerCampeonatosFachada(this.usuario.ciudad);
+        console.log('Campeonatos obtenidos:', this.campeonatos); 
+      } catch (error) {
+        console.error('Error al obtener los campeonatos:', error);
+      }
     },
     async asignarPruebas() {
+  if (!this.selectedCampeonato || !this.selectedPrueba.length) {
+    this.$toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'Debe seleccionar un campeonato y al menos una prueba', life: 3000 });
+    return;
+  }
 
-      //this.selectedCampeonato.pruebas = this.selectedPrueba;
+  try {
+    for (const prueba of this.selectedPrueba) {
+      const cuerpoCPC = {
+        campeonato: { id: this.selectedCampeonato.id },
+        prueba: { id: prueba.id }
+      };
 
-      await actualizarCampeonatoFachada(this.selectedCampeonato.id,this.selectedPrueba).then(r => {
-        this.$toast.add({ severity: 'info', summary: 'Info', detail: 'Campeonato actualizado', life: 3000 });
-        console.log(r)
-      }).catch(e => {
-        console.error(e)
-        this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar el campeonato', life: 3000 });
-      })
-    },
+      console.log('Datos a enviar:', JSON.stringify(cuerpoCPC)); 
+
+      await registroCampeonatoPruebaFachada(cuerpoCPC);
+    }
+
+    this.$toast.add({ severity: 'info', summary: 'Info', detail: 'Pruebas asignadas al campeonato', life: 3000 });
+  } catch (error) {
+    console.error('Error al registrar las pruebas:', error);
+    this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo asignar las pruebas al campeonato', life: 3000 });
+  }
+},
   },
   data() {
-
     return {
       usuario: JSON.parse(localStorage.getItem('userdata')),
-      pruebas:null,
-      selectedPrueba: null,
-      campeonatos:null,
-      selectedCampeonato:null,
+      pruebas: [], 
+      selectedPrueba: [], 
+      campeonatos: [],
+      selectedCampeonato: null,
     };
   },
 };
 </script>
+
 
 <style scoped>
 .register-container {
@@ -91,7 +116,6 @@ h2 {
 .centerElement {
   display: flex;
   justify-content: center;
-
 }
 
 button {

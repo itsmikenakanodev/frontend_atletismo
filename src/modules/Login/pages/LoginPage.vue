@@ -1,5 +1,6 @@
 <template>
   <div class="cont-sup">
+    <Toast />
     <div class="cont-log">
       <form class="surface-card" @submit.prevent="submitForm">
         <div class="text-center">
@@ -18,7 +19,12 @@
             <label for="password">Contraseña</label>
           </FloatLabel>
 
-          <Button type="submit" label="Iniciar sesión" icon="pi pi-user"></Button>
+          <Button 
+            type="submit" 
+            label="Iniciar sesión" 
+            icon="pi pi-user" 
+            :disabled="loading"
+          />
         </div>
 
         <div class="links">
@@ -32,48 +38,53 @@
 </template>
 
 <script>
+import { useToast } from 'primevue/usetoast';
 import { obtenerUsuarioFachada } from "../helpers/UsuarioHelper";
+
 export default {
   data() {
     return {
       email: null,
       password: null,
+      loading: false,
     };
+  },
+  setup() {
+    const toast = useToast();
+    return { toast };
   },
   methods: {
     async submitForm() {
+      this.loading = true;
       try {
         const usuario = {
           email: this.email,
           password: this.password,
         };
-        let data = null;
-        await obtenerUsuarioFachada(usuario).then((response) => {
-          data = response;
-        });
-
-        localStorage.setItem('userdata', JSON.stringify(data));
+        const response = await obtenerUsuarioFachada(usuario);
+        localStorage.setItem('userdata', JSON.stringify(response));
         this.$router.push("/");
         setTimeout(() => {
           window.location.reload();
         }, 0);
-
       } catch (error) {
         console.error("Error al enviar la solicitud:", error);
-
         if (error.response && error.response.status === 404) {
-          alert("El usuario no está aprobado.");
+          this.toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'El usuario no está aprobado.', life: 3000 });
         } else if (error.response && error.response.status === 401) {
-          alert("El email o la contraseña son incorrectos");
+          this.toast.add({ severity: 'error', summary: 'Error', detail: 'El email o la contraseña son incorrectos', life: 3000 });
+        } else {
+          this.toast.add({ severity: 'error', summary: 'Error', detail: 'Hubo un problema al iniciar sesión. Inténtalo de nuevo.', life: 3000 });
         }
-
+      } finally {
+        this.loading = false;
       }
     },
   },
 };
 </script>
 
-<style>
+<style scoped>
 input#password.p-inputtext.p-component.p-password-input {
   width: 100%;
 }

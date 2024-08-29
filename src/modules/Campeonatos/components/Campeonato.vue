@@ -25,7 +25,6 @@
             <Column field="nombre" header="Nombre" sortable></Column>
             <Column field="descripcion" header="Descripción" sortable></Column>
             <Column field="tipo" header="Tipo" sortable></Column>
-            <Column field="categoria" header="Categoría" sortable></Column>
           </DataTable>
         </AccordionTab>
       </Accordion>

@@ -73,9 +73,13 @@
 import { guardarDocFachada } from "../helpers/DocHelper";
 import { guardarUsuarioFachada } from "../helpers/UsuarioHelper";
 import { storage } from "../helpers/firebase";
+import { useToast } from 'primevue/usetoast';
 
 export default {
-    props:["campeonatoNombre"],
+    components: {
+        useToast
+    },
+    props: ["campeonatoNombre"],
     data() {
         return {
             files: [],
@@ -85,6 +89,10 @@ export default {
             seleccion: false,
             url: ''
         };
+    },
+    setup() {
+        const toast = useToast();
+        return { toast };
     },
     methods: {
         onRemoveTemplatingFile(file, removeFileCallback, index) {
@@ -104,22 +112,18 @@ export default {
             });
         },
         onFileUpload(callbackSelect, callbackUpload) {
-            //console.log("Va a ejecutar el callback1 en cargar archivo");
             callbackSelect();
             this.seleccion = true;
             this.$emit('uploaded', true);
-            //console.log("Va a ejecutar el callback2 en cargar archivo");
             callbackUpload();
         },
         onFileClear(callbackClear) {
-            console.log("Va a ejecutar el callbackClear");
             this.seleccion = false;
             this.$emit('uploaded', false);
             callbackClear();
         },
         async uploadEvent(user) {
             this.carga = true;
-            console.log("Usuario de la pag", user);
 
             const usuario = {
                 nombres: user.firstName,
@@ -149,7 +153,6 @@ export default {
 
             if (this.files.length > 0) {
                 const file = this.files[0];
-                /*console.log('doc',file);*/
 
                 let name = "";
                 let extension = "";
@@ -157,7 +160,6 @@ export default {
                 if (file.type === 'image/png') {
                     extension = file.type.split('/')[1];
                     name = "ID." + extension;
-                    console.log("name");
                 } else {
                     name = "ID.pdf";
                     extension = ".pdf";
@@ -166,42 +168,33 @@ export default {
                 const storageRef = storage.ref(`${user.email}/${name}`);
                 const task = storageRef.put(file);
                 task.then(snapshot => {
-                    alert('Archivo subido correctamente');
+                    this.toast.add({ severity: 'success', summary: 'Success', detail: 'Archivo subido con exito, un administrador evaluará su solicitud, estar atendo a su correo electrónico', life: 15000 });
                     storageRef.getDownloadURL().then(async url => {
-                        //console.log('URL del archivo:', url);
-                        //alert('El archivo se guardó en: ' + url);
                         this.$emit('uploaded', url);
                         const obj = await guardarUsuarioFachada(usuario);
-                        console.log("Objeto del backend ", obj);
-
                         doc.usuario.id = obj;
                         doc.nombre = name;
                         doc.extension = extension;
                         doc.link = url;
 
-                        console.log("doc obj antes de ingresar", doc)
-
-                        const obj2 = await guardarDocFachada(doc).then(this.$router.push("/"));
-                        console.log("Objeto doc del backend ", obj2);
+                        const obj2 = await guardarDocFachada(doc);
+                        setTimeout(() => {
+                            this.$router.push("/");
+                        }, 2000);  // 2000 milisegundos = 2 segundos
 
                     }).catch(error => {
-                        console.error('Error al obtener la URL del archivo:', error);
+                        this.toast.add({ severity: 'error', summary: 'Error', detail: 'Error al obtener su archivo.', life: 3000 });
                     });
 
                 }).catch(error => {
-                    alert('Error al subir el archivo');
-                    console.error('Error al subir el archivo:', error);
+                    this.toast.add({ severity: 'error', summary: 'Error', detail: 'Error al cargar archivo', life: 3000 });
                 });
             }
 
-            //this.$emit('uploaded', this.url);
-
             this.totalSizePercent = 100;
-            //console.log('total size percent: ',  this.totalSizePercent);
         },
         async uploadInscripcionEvent(user) {
             this.carga = true;
-            console.log("Usuario de la pag", user);
 
             const doc = {
                 nombre: "",
@@ -215,7 +208,6 @@ export default {
 
             if (this.files.length > 0) {
                 const file = this.files[0];
-                /*console.log('doc',file);*/
 
                 let name = "";
                 let extension = "";
@@ -223,45 +215,37 @@ export default {
                 if (file.type === 'image/png') {
                     extension = file.type.split('/')[1];
                     name = "ID." + extension;
-                    console.log("name");
                 } else {
-                    name = "PagoInscripcion_"+this.campeonatoNombre+".pdf";
+                    name = "PagoInscripcion_" + this.campeonatoNombre + ".pdf";
                     extension = ".pdf";
                 }
 
                 const storageRef = storage.ref(`${user.email}/${name}`);
                 const task = storageRef.put(file);
                 task.then(snapshot => {
-                    alert('Archivo subido correctamente');
+                    this.toast.add({ severity: 'success', summary: 'Success', detail: 'Archivo subido con exito, un administrador evaluará su solicitud, estar atendo a su correo electrónico', life: 15000 });
                     storageRef.getDownloadURL().then(async url => {
-
                         doc.nombre = name;
                         doc.extension = extension;
                         doc.link = url;
 
-                        console.log("doc obj antes de ingresar", doc)
-
-                        const obj2 = await guardarDocFachada(doc).then(this.$router.push("/"));
-                        console.log("Objeto doc del backend ", obj2);
-
+                        await guardarDocFachada(doc);
+                        setTimeout(() => {
+                            this.$router.push("/");
+                        }, 2000);  // 2000 milisegundos = 2 segundos
                     }).catch(error => {
-                        console.error('Error al obtener la URL del archivo:', error);
+                        this.toast.add({ severity: 'error', summary: 'Error', detail: 'Error al obtener su archivo.', life: 3000 });
                     });
 
                 }).catch(error => {
-                    alert('Error al subir el archivo');
-                    console.error('Error al subir el archivo:', error);
+                    this.toast.add({ severity: 'error', summary: 'Error', detail: 'Error al actualizar su archivo.', life: 3000 });
                 });
             }
 
-            //this.$emit('uploaded', this.url);
-
             this.totalSizePercent = 100;
-            //console.log('total size percent: ',  this.totalSizePercent);
         },
         async uploadPagoEvent(user) {
             this.carga = true;
-            console.log("Usuario de la pag", user);
 
             const doc = {
                 nombre: "",
@@ -282,7 +266,6 @@ export default {
                 if (file.type === 'image/png') {
                     extension = file.type.split('/')[1];
                     name = "ID." + extension;
-                    console.log("name");
                 } else {
                     name = "Pago.pdf";
                     extension = ".pdf";
@@ -291,44 +274,36 @@ export default {
                 const storageRef = storage.ref(`${user.email}/${name}`);
                 const task = storageRef.put(file);
                 task.then(snapshot => {
-                    alert('Archivo subido correctamente');
+                    this.toast.add({ severity: 'success', summary: 'Success', detail: 'Archivo subido con exito, un administrador evaluará su solicitud, estar atendo a su correo electrónico', life: 15000 });
                     storageRef.getDownloadURL().then(async url => {
-
                         doc.nombre = name;
                         doc.extension = extension;
                         doc.link = url;
 
-                        console.log("doc obj antes de ingresar", doc)
-
-                        const obj2 = await guardarDocFachada(doc).then(this.$router.push("/"));
-                        console.log("Objeto doc del backend ", obj2);
-
+                        await guardarDocFachada(doc);
+                        setTimeout(() => {
+                            this.$router.push("/");
+                        }, 2000); 
                     }).catch(error => {
-                        console.error('Error al obtener la URL del archivo:', error);
+                        this.toast.add({ severity: 'error', summary: 'Error', detail: 'Error al obtener su archivo.', life: 3000 });
                     });
 
                 }).catch(error => {
-                    alert('Error al subir el archivo');
-                    console.error('Error al subir el archivo:', error);
+                    this.toast.add({ severity: 'error', summary: 'Error', detail: 'Error al actualizar su archivo.', life: 3000 });
                 });
             }
 
-            //this.$emit('uploaded', this.url);
-
             this.totalSizePercent = 100;
-            //console.log('total size percent: ',  this.totalSizePercent);
         },
         onTemplatedUpload() {
-            this.$toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
+            this.toast.add({ severity: 'info', summary: 'Success', detail: 'Archivo actualizado', life: 3000 });
         },
         formatSize(bytes) {
             const k = 1024;
             const dm = 3;
-            const sizes = this.$primevue.config.locale.fileSizeTypes;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
 
-            if (bytes === 0) {
-                return `0 ${sizes[0]}`;
-            }
+            if (bytes === 0) return `0 ${sizes[0]}`;
 
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
@@ -337,21 +312,19 @@ export default {
         },
         getDate() {
             const hoy = new Date();
-
             const dia = String(hoy.getDate()).padStart(2, '0');
-            const mes = String(hoy.getMonth() + 1).padStart(2, '0'); // Mes con dos dígitos (enero es 0)
+            const mes = String(hoy.getMonth() + 1).padStart(2, '0');
             const año = hoy.getFullYear();
-
             const horas = String(hoy.getHours()).padStart(2, '0');
             const minutos = String(hoy.getMinutes()).padStart(2, '0');
             const segundos = String(hoy.getSeconds()).padStart(2, '0');
 
             return `${año}-${mes}-${dia}T${horas}:${minutos}:${segundos}`;
         }
-    },
-
+    }
 };
 </script>
+
 
 <style scoped>
 .button-search,
