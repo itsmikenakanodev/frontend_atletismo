@@ -4,7 +4,7 @@
     <Toast></Toast>
     <Dialog v-model:visible="documentosVisible" :modal="true" :style="{ width: '75vw' }">
       <TablaComprobanteInscrito :docs="documentosUsuarios" :correo="usuarioCorreo" :id="usuarioId"
-        @cambioEstado="(val) => cambioEstado(val)"></TablaComprobanteInscrito>
+        @cambioEstado="(val) => cambioEstado(val)" @competidor="(val) => eliminarCompetidor(val)"></TablaComprobanteInscrito>
     </Dialog>
     <DataTable :value="usuarios" tableStyle="min-width: 50rem" paginator :rows="5"
       :rowsPerPageOptions="[5, 10, 20, 50]">
@@ -24,7 +24,7 @@
           <Tag :severity=getSeverety(slotProps) :value=getValue(slotProps) rounded></Tag>
         </template>
       </Column>
-      <Column field="documentos" header="Documentos">
+      <Column field="documento" header="Documentos">
         <template #body="slotProps">
           <span class="p-buttonset">
             <Button label="Ver" icon="pi pi-eye" @click="verDocumentos(slotProps.data)" />
@@ -95,7 +95,7 @@
 
 
 <script>
-import { consultarInscripcionFachada } from '../helpers/inscripciones';
+import { consultarInscripcionFachada, eliminarCompetidorFachada } from '../helpers/inscripciones';
 import TablaComprobanteInscrito from './TablaComprobanteInscrito.vue';
 export default {
   components: { TablaComprobanteInscrito },
@@ -126,14 +126,25 @@ export default {
       else {
         this.$toast.add({ severity: 'error', summary: 'Rechazado', detail: 'Denegado', life: 3000 });
       }
-      this.usuarios = []
+      /*this.usuarios = []
       this.documentosVisible = false
-      await this.getUsuarios()
+      await this.getUsuarios()*/
+    },
+    async eliminarCompetidor(val) {
+      console.log("val de eliminar competidor",val);
+      console.log(this.usuarios);
+      const competidor = this.usuarios.find(usuario => usuario.documento.id == val);
+      if(competidor){
+        await eliminarCompetidorFachada(competidor.id);
+        this.$toast.add({ severity:'success', summary: 'Eliminado', detail: 'Competidor eliminado', life: 3000 });
+        this.usuarios = []
+        this.documentosVisible = false
+        await this.getUsuarios()
+      }
     },
     verDocumentos(data) {
       this.documentosUsuarios = []
-      console.log(data.documentos)
-      this.documentosUsuarios.push(data.documentos)
+      this.documentosUsuarios.push(data.documento)
       this.documentosVisible = true
       this.usuarioCorreo = data.email
       this.usuarioId = data.id
@@ -141,7 +152,7 @@ export default {
     async getUsuarios() {
       let tipoSus = {
         tipo: "Pendiente",
-        estado: false
+        estado: "Pendiente"
       };
       await consultarInscripcionFachada(tipoSus).then((response) => this.usuarios = response);
     },

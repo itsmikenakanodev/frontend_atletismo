@@ -11,7 +11,7 @@
           <Toast></Toast>
           <ConfirmDialog></ConfirmDialog>
         <div class="card flex flex-wrap gap-2 justify-content-center">
-          <Button @click="cambiarEstado()" label="Cambiar estado" ></Button>
+          <Button v-if="campeonato" @click="cambiarEstado()" label="Cambiar estado" ></Button>
       </div>
         </template>
 <Column field="nombre" header="Nombre"></Column>
@@ -64,7 +64,6 @@ export default {
       // Extraer el resultado, si existe
       const resultado = match ? match[1] : null;
 
-      console.log(resultado);
       this.campeonato = resultado;
       window.open(data.link, "_blank");
     },
@@ -95,7 +94,7 @@ export default {
         await actualizarEstadoFachada(this.id, "Confirmado");
       }
       else {
-        this.cuerpoCorreo.cuerpo = "Tu comprobante de pago no es válido, inscripción al campeonato "+ this.campeonato+ " denegada! Por favor, verifica que tu pago o documento sea válido e intenta enviar tu comprobante nuevamente.";
+        this.cuerpoCorreo.cuerpo = "Tu comprobante de pago no es válido, inscripción al campeonato " + this.campeonato + " denegada! Por favor, verifica que tu pago o documento sea válido e intenta enviar tu comprobante nuevamente.";
         this.cuerpoCorreo.mensajeHtml = `
           <body>
             <div style="color:rgb(144,221,240); text-align: center;">
@@ -117,7 +116,7 @@ export default {
           </body>
         `;
       }
-
+      this.campeonato = null;
       await enviarcorreoFachada(this.cuerpoCorreo);
     },
     cambiarEstado() {
@@ -132,7 +131,11 @@ export default {
         },
         reject: async () => {
           await eliminarDocumentoSocioFachada(this.documentosUsuarios[0].id);
-          this.enviarCorreo(false).then(() => { this.$emit('cambioEstado', false) });
+          this.enviarCorreo(false).then(() => { 
+            this.$emit('cambioEstado', false);
+            this.$emit('competidor', this.documentosUsuarios[0].id);
+           });
+          
           //falta eliminar el documento de pago del firebase
         }
       });
