@@ -104,7 +104,7 @@
         >La categoria asignada se calcula a partir de su fecha de nacimiento y
         la fecha del campeonato.</span
       >
-      <div class="form-row">
+      <!-- <div class="form-row">
         <div class="form-group">
           <input
             type="text"
@@ -115,7 +115,7 @@
             disabled
           />
         </div>
-      </div>
+      </div> -->
 
       <h3>Pruebas</h3>
       <table id="pruebasTable" class="display pruebas-table">

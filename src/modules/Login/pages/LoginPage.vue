@@ -17,6 +17,7 @@
           <FloatLabel>
             <Password id="ipt-pass" v-model="password" inputId="password" :feedback="false" toggleMask required />
             <label for="password">Contraseña</label>
+          
           </FloatLabel>
 
           <Button 
