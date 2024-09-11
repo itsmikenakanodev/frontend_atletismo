@@ -140,7 +140,7 @@ export default {
     async getUsuarios() {
       let tipoSus = {
         tipo: "Socio",
-        estado: false
+        estadoUsuario: false
       };
       await consultarSuscripcionFachada(tipoSus).then((response) => this.usuarios = response);
     },
