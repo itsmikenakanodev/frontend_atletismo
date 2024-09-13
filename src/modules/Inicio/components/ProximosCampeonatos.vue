@@ -33,7 +33,7 @@
     data() {
       return {
         campeonatos: [],
-        cargando: true // Estado para controlar el mensaje de carga
+        cargando: true 
       };
     },
     async mounted() {
