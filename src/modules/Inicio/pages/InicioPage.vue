@@ -5,9 +5,12 @@
       <p id="bienvenidos">Bienvenidos al sistema de inscripción de atletas a los campeonatos de atletismo máster.</p>
       <img id="imgAtletismo" src="../assets/Atletismo.jpg" alt="" />
     </div>
-    <div>
+
+    <div class="contenedorCampeonatos">
+      <ProximosCampeonatos />
       <Campeonatos />
     </div>
+
     <div>
       <SobreNosotros />
     </div>
@@ -17,12 +20,14 @@
 <script>
 import Campeonatos from "../components/Campeonatos.vue";
 import SobreNosotros from "../components/SobreNosotros.vue";
+import ProximosCampeonatos from "../components/ProximosCampeonatos.vue"; 
 
 export default {
   components: {
     Campeonatos,
     SobreNosotros,
-  },
+    ProximosCampeonatos 
+  }
 };
 </script>
 
@@ -38,8 +43,6 @@ export default {
 }
 
 .contenedorInicio {
-  align-content: center;
-  align-items: center;
   text-align: center;
   border-radius: 20px;
   box-shadow: 5px 5px 5px #2C666E;
@@ -56,5 +59,17 @@ export default {
   width: 100%;
   border-radius: 20px;
   padding: 5px 10px;
+}
+
+.contenedorCampeonatos {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem; /* Reducción del espacio entre los componentes */
+  margin: 20px 0;
+}
+
+.contenedorCampeonatos > * {
+  flex: 1; /* Cada componente tomará el mismo espacio disponible */
+  padding: 0.5rem; /* Añade un pequeño relleno para separación interna */
 }
 </style>

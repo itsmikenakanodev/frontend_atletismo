@@ -123,6 +123,14 @@ export default {
           visible: false, // Inicializado como falso
         },
         {
+        label: "Atletas",
+        icon: "pi pi-users",
+        command: () => {
+          router.push("/atletas");
+        },
+        visible: true,
+      },
+        {
           label: "Campeonatos Nacionales",
           icon: "pi pi-book",
           command: () => {

@@ -88,7 +88,9 @@ export default {
 
   .p-datatable .p-datatable-tbody > tr > td {
     color: #000000; /* Color del texto del cuerpo de la tabla */
+    text-align: center;
   }
+  
 
   .p-datatable .p-sortable-column .p-sortable-column-icon {
     color: #07393c;
@@ -136,5 +138,12 @@ export default {
     margin-bottom: 0.5rem
   }
 
+.p-datatable .p-column-header-content {
+  justify-content: center;
+}
+
+.p-datatable-tbody {
+  justify-content: center;
+}
 
 </style>
