@@ -130,6 +130,14 @@ export default {
         },
         visible: true,
       },
+      {
+        label: "Calendario",
+        icon: "pi pi-calendar",
+        command: () => {
+          router.push("/calendarios");
+        },
+        visible: true,
+      },
         {
           label: "Campeonatos Nacionales",
           icon: "pi pi-book",

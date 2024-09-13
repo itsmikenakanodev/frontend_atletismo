@@ -17,6 +17,7 @@ import RegistroPruebas from '../modules/Pruebas/pages/RegistroPruebasPage.vue';
 import InscripcionCompetidores from '../modules/Campeonatos/pages/InscripcionCompetidores.vue';
 import ReportesCampeonatos from '@/modules/Campeonatos/pages/ReportesCampeonatos.vue';
 import AdministracionInscripcion from '../modules/Administracion/pages/AdmInscripciones.vue';
+import CalendarioPage from '../modules/Calendario/pages/CalendarioPage.vue';
 
 // Importa el nuevo componente para Atletas
 import AtletasPage from '../modules/Atletas/pages/AtletasPage.vue';
@@ -40,6 +41,7 @@ const routes = [
   { path: '/inscripcionCompetidores/:id', name: 'InscripcionCompetidores', component: InscripcionCompetidores },
   { path: '/login', component: LoginPage },
   { path: '/atletas', component: AtletasPage },
+  { path: '/calendarios', component: CalendarioPage },
 ];
 
 const router = createRouter({
