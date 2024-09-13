@@ -249,7 +249,7 @@ export default {
     this.form.email = this.userData.email;
     this.form.telefono = this.userData.telefono;
     this.form.genero = this.userData.sexo;
-
+    console.log(this.userData.fechaNacimiento);
     if (this.userData.fechaNacimiento) {
       this.form.fechaNacimiento = this.userData.fechaNacimiento.split("T")[0];
       const edad = this.calcularEdad(this.form.fechaNacimiento);

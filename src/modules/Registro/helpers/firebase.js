@@ -2,19 +2,19 @@ import firebase from "firebase/app";
 import "firebase/storage";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBrNBFYXNLyrkr5wWhioEsYi3vJVh5f_OM",
-    authDomain: "cloudcomptest-e86ae.firebaseapp.com",
-    projectId: "cloudcomptest-e86ae",
-    storageBucket: "cloudcomptest-e86ae.appspot.com",
-    messagingSenderId: "1074388374614",
-    appId: "1:1074388374614:web:aa48d1f3597d090d5217f7"
+  apiKey: "AIzaSyA7IX7eXKPu-sZnuv6-3A_6QxD1nBtWbCM",
+  authDomain: "tesisatletismo-5bb09.firebaseapp.com",
+  projectId: "tesisatletismo-5bb09",
+  storageBucket: "tesisatletismo-5bb09.appspot.com",
+  messagingSenderId: "243610299498",
+  appId: "1:243610299498:web:fe44f9af333f35e6f32e13"
 };
 
 // Initialize Firebase
 if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-  }
-  
+  firebase.initializeApp(firebaseConfig);
+}
+
 
 const storage = firebase.storage();
 
