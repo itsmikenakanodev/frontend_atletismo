@@ -138,14 +138,14 @@ export default {
         },
         visible: true,
       },
-        {
-          label: "Campeonatos Nacionales",
-          icon: "pi pi-book",
-          command: () => {
-            router.push("/campeonatos-n");
-          },
-          visible: false,
-        },
+        // {
+        //   label: "Campeonatos Nacionales",
+        //   icon: "pi pi-book",
+        //   command: () => {
+        //     router.push("/campeonatos-n");
+        //   },
+        //   visible: false,
+        // },
       ],
       user: null,
       admin: false, // Inicializado como falso
