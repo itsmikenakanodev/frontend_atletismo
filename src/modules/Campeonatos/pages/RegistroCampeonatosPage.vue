@@ -38,7 +38,8 @@
                 </div>
                 <div class="form-group">
                     <label for="sede">Sede</label>
-                    <select id="sede" v-model="campeonato.sede" required class="center-aligned" @change="designarOrganizador">
+                    <select id="sede" v-model="campeonato.sede" required class="center-aligned"
+                        @change="designarOrganizador">
                         <option disabled value="">Selecciona tu provincia</option>
                         <option class="options" v-for="(option, index) in admins" :key="index" :value="option.ciudad">{{
                             option.ciudad }}</option>
@@ -65,9 +66,24 @@
                     <input type="date" id="regFinDate" required v-model="campeonato.inscripcionFin" />
                 </div>
             </div>
+            <div class="form-row centerElement">
+                <div class="form-group">
+                    <label for="name">Agregar Documento?</label>
+                    <div class="form-row centerElement">
+                        <label for="si">Sí</label>
+                        <input type="radio" id="si" name="respuesta" v-model="hasDoc" :value="true">
+
+                        <label for="no">No</label>
+                        <input type="radio" id="no" name="respuesta" v-model="hasDoc" :value="false">
+                    </div>
+                    <CargarArchivo ref="cargarChampDoc" v-if="hasDoc === true" @uploaded="(val) => comprobarSubida(val)"
+                        @champDoc="(val) => asignarDocumento(val)"></CargarArchivo>
+                </div>
+            </div>
             <div class="centerElement">
                 <div class="form-group">
-                    <Button type="submit" :loading="loading">Continuar</Button>
+                    <Button v-if="(hasDoc === true && docUploaded === true) || (hasDoc === false)" type="submit"
+                        :loading="loading">Continuar</Button>
                 </div>
             </div>
         </form>
@@ -76,12 +92,19 @@
 
 <script>
 import { registroCampeonatosFachada, consultarAdminsFachada } from "@/modules/Campeonatos/helpers/RegistroCampeonatos.js"
+import CargarArchivo from "@/modules/Registro/components/CargarArchivo.vue";
+
 export default {
+    components: {
+        CargarArchivo
+    },
     data() {
         return {
             usuario: JSON.parse(localStorage.getItem('userdata')),
             organizador: "",
             ciudad: "",
+            hasDoc: false,
+            docUploaded: false,
             campeonato: {
                 nombre: '',
                 organizador: '',
@@ -90,6 +113,7 @@ export default {
                 fechaFin: '',
                 inscripcionInicio: '',
                 inscripcionFin: '',
+                documentos: [],
             },
             provincias: [
                 "Azuay",
@@ -123,16 +147,35 @@ export default {
     },
     methods: {
         async registrar() {
+            await this.$refs.cargarChampDoc.uploadCampeonatoEvent()
+        },
+        async registrarCampeonato() {
             this.loading = true
+            console.log(this.campeonato);
             await registroCampeonatosFachada(this.campeonato).then(r => {
                 this.loading = false
                 this.$toast.add({ severity: 'info', summary: 'Info', detail: 'Registro de campeonato completado', life: 3000 });
-
+                setTimeout(() => {
+                    this.$router.push("/");
+                }, 2000);
             }).catch(e => {
                 console.error(e)
                 this.loading = false
                 this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo completar el registro de campeonato', life: 3000 });
             })
+        },
+        async asignarDocumento(documento) {
+            console.log("Doc uploaded", documento);
+            if (documento) {
+                this.campeonato.documentos.push(documento);
+                this.registrarCampeonato();
+            } else {
+                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se subio el archivo correctamente', life: 3000 });
+            }
+
+        },
+        comprobarSubida(uploaded) {
+            this.docUploaded = uploaded;
         },
         async consultarAdmins() {
             this.admins = await consultarAdminsFachada();
@@ -140,7 +183,7 @@ export default {
         },
         designarOrganizador() {
             const organizadorProvincia = this.admins.find(admin => admin.ciudad === this.campeonato.sede);
-            console.log("handle",organizadorProvincia);
+            console.log("handle", organizadorProvincia);
             this.campeonato.organizador = organizadorProvincia.nombres + " " + organizadorProvincia.apellidos;
         },
     },

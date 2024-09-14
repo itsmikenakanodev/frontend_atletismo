@@ -295,6 +295,42 @@ export default {
 
             this.totalSizePercent = 100;
         },
+        async uploadCampeonatoEvent() {
+            this.carga = true;
+
+            const doc = {
+                nombre: "",
+                link: "",
+                extension: "",
+            }
+
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                console.log("doc: ",file)
+                let name = file.name;
+                let extension = ".pdf";
+
+                const storageRef = storage.ref(`campeonatos/${name}`);
+                const task = storageRef.put(file);
+                task.then(snapshot => {
+                    this.toast.add({ severity: 'success', summary: 'Success', detail: 'Archivo subido con exito, un administrador evaluará su solicitud, estar atendo a su correo electrónico', life: 15000 });
+                    storageRef.getDownloadURL().then(async url => {
+                        doc.nombre = name;
+                        doc.extension = extension;
+                        doc.link = url;
+
+                        this.$emit('champDoc', doc);
+                    }).catch(error => {
+                        this.toast.add({ severity: 'error', summary: 'Error', detail: 'Error al obtener su archivo.', life: 3000 });
+                    });
+
+                }).catch(error => {
+                    this.toast.add({ severity: 'error', summary: 'Error', detail: 'Error al actualizar su archivo.', life: 3000 });
+                });
+            }
+
+            this.totalSizePercent = 100;
+        },
         onTemplatedUpload() {
             this.toast.add({ severity: 'info', summary: 'Success', detail: 'Archivo actualizado', life: 3000 });
         },
