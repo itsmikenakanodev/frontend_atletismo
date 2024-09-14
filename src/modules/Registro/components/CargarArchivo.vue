@@ -298,7 +298,7 @@ export default {
         async uploadCampeonatoEvent() {
             this.carga = true;
 
-            const doc = {
+            let doc = {
                 nombre: "",
                 link: "",
                 extension: "",

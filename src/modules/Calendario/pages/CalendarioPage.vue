@@ -16,12 +16,8 @@
       <div class="filtro">
         <span class="filtro-text">Año:</span>
         <div class="filtro-opciones filtro-anos">
-          <button
-            v-for="year in availableYears"
-            :key="year"
-            :class="['filtro-boton', { activo: year === selectedYear }]"
-            @click="filtrarCampeonatosPorAno(year)"
-          >
+          <button v-for="year in availableYears" :key="year"
+            :class="['filtro-boton', { activo: year === selectedYear }]" @click="filtrarCampeonatosPorAno(year)">
             {{ year }}
           </button>
         </div>
@@ -30,12 +26,9 @@
       <div class="filtro">
         <span class="filtro-text">Mes:</span>
         <div class="filtro-opciones filtro-meses">
-          <button
-            v-for="(mes, index) in meses"
-            :key="index"
+          <button v-for="(mes, index) in meses" :key="index"
             :class="['filtro-boton', { activo: index + 1 === selectedMonth }]"
-            @click="filtrarCampeonatosPorMes(index + 1)"
-          >
+            @click="filtrarCampeonatosPorMes(index + 1)">
             {{ mes }}
           </button>
         </div>
@@ -53,18 +46,26 @@
           <h3 class="campeonato-title">{{ campeonato.nombre }}</h3>
           <p class="campeonato-organizador">Organizado por: {{ campeonato.organizador }}</p>
           <p class="campeonato-sede">Sede: {{ campeonato.sede }}</p>
-          <p class="campeonato-fechas">Fechas de inicio - fin del campeonato: {{ formatDate(campeonato.fechaInicio) }} - {{ formatDate(campeonato.fechaFin) }}</p>
-          
+          <p class="campeonato-fechas">Fechas de inicio - fin del campeonato: {{ formatDate(campeonato.fechaInicio) }} -
+            {{ formatDate(campeonato.fechaFin) }}</p>
+
           <div class="campeonato-actions">
             <!-- Botón para mostrar/ocultar tabla de pruebas -->
             <div @click="togglePruebas(campeonato.id)" class="toggle-pruebas-btn">
-              <i :class="{'pi pi-chevron-down': !expandedCampeonatos.includes(campeonato.id), 'pi pi-chevron-up': expandedCampeonatos.includes(campeonato.id)}"></i>
+              <i
+                :class="{ 'pi pi-chevron-down': !expandedCampeonatos.includes(campeonato.id), 'pi pi-chevron-up': expandedCampeonatos.includes(campeonato.id) }"></i>
               <span>{{ expandedCampeonatos.includes(campeonato.id) ? ' Ocultar pruebas del campeonato' : ' Mostrar pruebas del campeonato' }}</span>
             </div>
 
             <!-- Botón de inscripción solo para usuarios con rol 5 -->
-            <button class="inscribirse-boton" v-if="usuario && usuario.rol && usuario.rol.id === 5" @click="mostrarInscripcionCampeonato(campeonato.id)">
+            <button class="inscribirse-boton" v-if="usuario && usuario.rol && usuario.rol.id === 5"
+              @click="mostrarInscripcionCampeonato(campeonato.id)">
               Inscribirse
+            </button>
+            <!-- Botón de edicion solo para usuarios con rol 1 y 6 -->
+            <button class="editar-boton" v-if="usuario && usuario.rol && (usuario.rol.id === 1 || usuario.rol.id === 6)"
+              @click="mostrarEdicionCampeonato(campeonato.id)">
+              Editar
             </button>
           </div>
 
@@ -118,7 +119,21 @@ export default {
         this.usuario = { rol: { id: null } };
       }
 
-      const campeonatos = await consultarCampeonatosFachada();
+      let campeonatos = localStorage.getItem('campeonatos');
+
+      if (campeonatos) {
+        // Si existen, parsear y usar los campeonatos guardados
+        console.log("Campeonatos obtenidos desde Local Storage");
+        campeonatos = JSON.parse(campeonatos);
+      } else {
+        // Si no existen, consultar a la fachada
+        console.log("Campeonatos obtenidos desde LA API");
+        campeonatos = await consultarCampeonatosFachada();
+        // Guardar campeonatos en Local Storage para futuras consultas
+        localStorage.setItem('campeonatos', JSON.stringify(campeonatos));
+      }
+
+      //const campeonatos = await consultarCampeonatosFachada();
       this.campeonatos = campeonatos;
       this.availableYears = this.getAvailableYears(campeonatos);
       this.filtrarCampeonatos();
@@ -128,10 +143,20 @@ export default {
       this.loading = false;
     }
   },
+  beforeUnmount() {
+    // Eliminar campeonatos del Local Storage antes de que el componente se destruya
+    window.addEventListener('beforeunload', () => {
+      localStorage.removeItem('campeonatos');
+    });
+  },
   methods: {
     // Método para redirigir a la página de inscripción de competidores
     mostrarInscripcionCampeonato(campeonatoId) {
       this.$router.push({ name: 'InscripcionCompetidores', params: { id: campeonatoId } });
+    },
+    // Método para redirigir a la página de edicion de campeonato
+    mostrarEdicionCampeonato(campeonatoId) {
+      this.$router.push({ name: 'EdicionCampeonatos', params: { id: campeonatoId } });
     },
     filtrarCampeonatosPorAno(year) {
       this.selectedYear = year;
@@ -177,7 +202,7 @@ export default {
 };
 </script>
 
-  
+
 <style scoped>
 /* Estilo de los botones de prueba */
 .prueba-button,
@@ -214,17 +239,51 @@ export default {
   transition: background-color 0.3s ease;
 }
 
+.inscribirse-boton {
+  background-color: #2c666e;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
 .inscribirse-boton:hover {
   background-color: #ffffff;
   color: #07393c;
 }
 
+
+.editar-boton {
+  background-color: #F0EDEE;
+  color: #0A090C;
+  border: #0A090C 2px solid;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.editar-boton:hover {
+  background-color: #0A090C;
+  color: #F0EDEE;
+  border: #F0EDEE 2px solid;
+}
+
 /* Contenedor para acciones del campeonato */
 .campeonato-actions {
   display: flex;
-  gap: 10px; /* Espacio entre los botones */
+  gap: 10px;
+  /* Espacio entre los botones */
   align-items: center;
-  justify-content: flex-start; /* Alinea los botones a la izquierda */
+  justify-content: flex-start;
+  /* Alinea los botones a la izquierda */
 }
 
 /* Estilo para detalles de la prueba */
@@ -320,7 +379,8 @@ p {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 200px; /* Ajusta la altura según sea necesario */
+  height: 200px;
+  /* Ajusta la altura según sea necesario */
 }
 
 .spinner {
@@ -333,8 +393,13 @@ p {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Campeonatos */
@@ -413,19 +478,19 @@ p {
   background-color: #1e4d53;
 }
 
-.datatable .p-datatable .p-datatable-thead > tr > th {
+.datatable .p-datatable .p-datatable-thead>tr>th {
   color: #ffffff;
 }
 
-.datatable .p-datatable .p-datatable-tbody > tr > td {
+.datatable .p-datatable .p-datatable-tbody>tr>td {
   color: #ffffff;
 }
 
-.datatable .p-datatable .p-datatable-tbody > tr:nth-child(even) {
+.datatable .p-datatable .p-datatable-tbody>tr:nth-child(even) {
   background-color: #4b8b92;
 }
 
-.datatable .p-datatable .p-datatable-tbody > tr:nth-child(odd) {
+.datatable .p-datatable .p-datatable-tbody>tr:nth-child(odd) {
   background-color: #2c666e;
 }
 

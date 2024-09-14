@@ -21,6 +21,7 @@ import CalendarioPage from '../modules/Calendario/pages/CalendarioPage.vue';
 
 // Importa el nuevo componente para Atletas
 import AtletasPage from '../modules/Atletas/pages/AtletasPage.vue';
+import EdicionCampeonatosPage from '@/modules/Campeonatos/pages/EdicionCampeonatosPage.vue';
 
 const routes = [
   { path: '/administracion/usuarios', component: AdministrationView },
@@ -35,6 +36,7 @@ const routes = [
   { path: '/recuperar', component: RecuperarContrasenia },
   { path: '/socio', component: suscripcionPage },
   { path: '/registrarCampeonatos', component: CampeonatosPage },
+  { path: '/editarCampeonatos/:id', name: 'EdicionCampeonatos', component: EdicionCampeonatosPage },
   { path: '/registrarCampeonatos/asignarPruebas', component: AsignarPruebasPage },
   { path: '/campeonatos-n', component: CampeonatosNacionales },
   { path: '/registrarPruebas', component: RegistroPruebas },
