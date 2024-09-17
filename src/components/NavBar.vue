@@ -6,8 +6,7 @@
         <span :class="item.icon" />
         <span class="ml-2">{{ item.label }}</span>
         <Badge v-if="item.badge" :class="{ 'ml-auto': !root, 'ml-2': root }" :value="item.badge" />
-        <span v-if="item.shortcut" class="ml-auto border-1 surface-border border-round surface-100 text-xs p-1">{{
-          item.shortcut }}</span>
+        <span v-if="item.shortcut" class="ml-auto border-1 surface-border border-round surface-100 text-xs p-1">{{ item.shortcut }}</span>
         <i v-if="hasSubmenu" :class="[
           'pi pi-angle-down',
           { 'pi-angle-down ml-2': root, 'pi-angle-right ml-auto': !root },
@@ -27,6 +26,54 @@ export default {
   data() {
     return {
       items: [
+        {
+          label: "Inicio",
+          icon: "pi pi-home",
+          command: () => {
+            router.push("/");
+          },
+          visible: true, // Siempre visible
+        },
+        {
+          label: "Registrarse",
+          icon: "pi pi-pen-to-square",
+          command: () => {
+            router.push("/registro");
+          },
+          visible: true, // Visible solo si no hay un usuario
+        },
+        {
+          label: "Socio",
+          icon: "pi pi-pen-to-square",
+          command: () => {
+            router.push("/socio");
+          },
+          visible: false, // Inicializado como falso
+        },
+        {
+          label: "Atletas",
+          icon: "pi pi-users",
+          command: () => {
+            router.push("/atletas");
+          },
+          visible: true,
+        },
+        {
+          label: "Campeonatos",
+          icon: "pi pi-calendar",
+          command: () => {
+            router.push("/calendarios");
+          },
+          visible: true,
+        },
+        {
+          label: "Contáctanos",
+          icon: "pi pi-envelope",
+          command: () => {
+            router.push("/contacto");
+          },
+          visible: false, // Inicializado como falso
+        },
         {
           label: "Adm",
           icon: "pi pi-crown",
@@ -56,6 +103,14 @@ export default {
                   icon: "pi pi-pencil",
                   command: () => {
                     router.push("/administracion/inscripciones");
+                  },
+                  visible: true,
+                },
+                {
+                  label: "Correos de ayuda",
+                  icon: "pi pi-envelope",
+                  command: () => {
+                    router.push("/administracion/correos-ayuda");
                   },
                   visible: true,
                 },
@@ -98,58 +153,11 @@ export default {
           ],
           visible: false,
         },
-        {
-          label: "Inicio",
-          icon: "pi pi-home",
-          command: () => {
-            router.push("/");
-          },
-          visible: true, // Siempre visible
-        },
-        {
-          label: "Registrarse",
-          icon: "pi pi-pen-to-square",
-          command: () => {
-            router.push("/registro");
-          },
-          visible: true, // Visible solo si no hay un usuario
-        },
-        {
-          label: "Socio",
-          icon: "pi pi-pen-to-square",
-          command: () => {
-            router.push("/socio");
-          },
-          visible: false, // Inicializado como falso
-        },
-        {
-        label: "Atletas",
-        icon: "pi pi-users",
-        command: () => {
-          router.push("/atletas");
-        },
-        visible: true,
-      },
-      {
-        label: "Campeonatos",
-        icon: "pi pi-calendar",
-        command: () => {
-          router.push("/calendarios");
-        },
-        visible: true,
-      },
-        // {
-        //   label: "Campeonatos Nacionales",
-        //   icon: "pi pi-book",
-        //   command: () => {
-        //     router.push("/campeonatos-n");
-        //   },
-        //   visible: false,
-        // },
       ],
       user: null,
       admin: false, // Inicializado como falso
-      adminN: false
+      adminN: false,
+      contac: false // Inicializado como falso
     };
   },
   created() {
@@ -157,9 +165,9 @@ export default {
 
     if (usuario) {
       this.user = usuario;
+
       if (this.user.rol.id === 1) {
         this.admin = this.user.rol.id === 1;
-
         // Actualizar visibilidad de los ítems del menú
         this.items.forEach(item => {
           if (item.label === "Adm") {
@@ -174,10 +182,8 @@ export default {
             item.visible = true; // Ocultar el registro si el usuario está conectado
           }
         });
-
       } else if (this.user.rol.id === 6) {
         this.adminN = this.user.rol.id === 6;
-
         // Actualizar visibilidad de los ítems del menú
         this.items.forEach(item => {
           if (item.label === "Adm") {
@@ -199,7 +205,14 @@ export default {
             item.visible = true; // Ocultar el registro si el usuario está conectado
           }
         });
-
+      } else if (this.user.rol.id === 5) {
+        this.contac = true;
+        // Actualizar visibilidad de los ítems del menú
+        this.items.forEach(item => {
+          if (item.label === "Contáctanos") {
+            item.visible = this.contac;
+          }
+        });
       } else {
         this.items.forEach(item => {
           if (item.label === "Adm") {
@@ -220,8 +233,6 @@ export default {
       console.log("user ls ", this.user);
       console.log("admin ls ", this.admin);
 
-
-
       this.items.unshift({
         label: "Cerrar sesión",
         icon: "pi pi-sign-out",
@@ -234,7 +245,11 @@ export default {
         },
       });
     } else {
+      this.contac = true; // Mostrar "Contáctanos" si no hay usuario
       this.items.forEach(item => {
+        if (item.label === "Contáctanos") {
+          item.visible = this.contac;
+        }
         if (item.label === "Adm") {
           item.visible = false;
         } else if (item.label === "Cerrar sesión") {
