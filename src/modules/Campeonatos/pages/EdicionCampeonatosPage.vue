@@ -2,7 +2,7 @@
     <div class="register-container">
         <Toast />
         <h2>Editar campeonato</h2>
-        <form @submit.prevent="registrar">
+        <form @submit.prevent="hasDoc===true ? registrar():actualizarCampeonato()">
             <div class="form-row centerElement">
                 <div class="form-group">
                     <label for="name">Nombre</label>
@@ -43,7 +43,7 @@
                 </div>
             </div>
             <div class="form group">
-                <div v-if="campeonato.documentos.length != 0">
+                <div v-if="campeonato.documentos">
                     <DataTable :value="campeonato.documentos" class="datatable">
                         <Column field="nombre" header="Nombre"></Column>
                         <Column header="Link">
@@ -53,7 +53,7 @@
                         </Column>
                         <Column header="Acciones">
                             <template #body="slotProps">
-                                <button @click="eliminarDocumento(slotProps.data)">Eliminar</button>
+                                <button @click="eliminarDocCampeonato(slotProps.data.id)">Eliminar</button>
                             </template>
                         </Column>
                     </DataTable>
@@ -84,9 +84,10 @@
 </template>
 
 <script>
-import {actualizarCampeonatosFachada } from "@/modules/Campeonatos/helpers/RegistroCampeonatos.js"
+import { actualizarCampeonatosFachada } from "@/modules/Campeonatos/helpers/RegistroCampeonatos.js"
 import CargarArchivo from "@/modules/Registro/components/CargarArchivo.vue";
 import { consultarCampeonatosFachada } from "../helpers/CampeonatosNacionalHelper";
+import { guardarDocCampeonatosFachada, eliminarDocCampeonatosFachada } from "../helpers/DocumentoCampeonatoHelper";
 
 export default {
     components: {
@@ -107,8 +108,7 @@ export default {
                 fechaInicio: '',
                 fechaFin: '',
                 inscripcionInicio: '',
-                inscripcionFin: '',
-                documentos: [],
+                inscripcionFin: ''
             },
             provincias: [
                 "Azuay",
@@ -144,30 +144,60 @@ export default {
         async registrar() {
             await this.$refs.cargarChampDoc.uploadCampeonatoEvent()
         },
-        async registrarCampeonato() {
+        async actualizarCampeonato() {
             this.loading = true
             console.log(this.campeonato);
             await actualizarCampeonatosFachada(this.campeonato).then(r => {
                 this.loading = false
-                this.$toast.add({ severity: 'info', summary: 'Info', detail: 'Registro de campeonato completado', life: 3000 });
+                this.$toast.add({ severity: 'info', summary: 'Info', detail: 'Actualizacion de campeonato completado', life: 3000 });
                 setTimeout(() => {
                     this.$router.push("/");
                 }, 2000);
+
+                setTimeout(async () => {
+                    localStorage.removeItem('campeonatos');
+                    await this.obtenerCampeonatos();
+                    console.log('Método de fondo completado');
+                }, 10);
             }).catch(e => {
                 console.error(e)
                 this.loading = false
                 this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo completar el registro de campeonato', life: 3000 });
             })
         },
+        async guardarDocCampeonato(documento) {
+            this.loading = true
+            await guardarDocCampeonatosFachada(documento).then(r => {
+                this.loading = false
+                this.$toast.add({ severity: 'info', summary: 'Info', detail: 'Documento agregado', life: 3000 });
+            }).catch(e => {
+                console.error(e)
+                this.loading = false
+                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo agregar el documento', life: 3000 });
+            })
+        },
+        async eliminarDocCampeonato(id) {
+            this.loading = true
+            console.log(id);
+            const documentos = this.campeonato.documentos.filter(doc => doc.id != id);
+            this.campeonato.documentos = documentos;
+            await eliminarDocCampeonatosFachada(id).then(r => {
+                this.loading = false
+                this.$toast.add({ severity: 'info', summary: 'Info', detail: 'Documento eliminado', life: 3000 });
+            }).catch(e => {
+                console.error(e)
+                this.loading = false
+                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar el documento', life: 3000 });
+            })
+        },
         async asignarDocumento(documento) {
             console.log("Doc uploaded", documento);
             if (documento) {
-                console.log("id de campeonato",this.campeonato.id); 
-                documento.campeonato = {
-                    id: this.campeonato.id,
-                }
-                this.campeonato.documentos.push(documento);
-                this.registrarCampeonato();
+                console.log("id de campeonato", this.campeonato.id);
+                //this.campeonato.documentos.push(documento);
+                documento.idCampeonato = this.campeonato.id;
+                await this.guardarDocCampeonato(documento);
+                this.actualizarCampeonato();
             } else {
                 this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se subio el archivo correctamente', life: 3000 });
             }
@@ -179,29 +209,32 @@ export default {
         obtenerCampeonatoPorId(id) {
             this.campeonato = this.campeonatos.find(c => c.id == id);
         },
+        async obtenerCampeonatos() {
+            try {
+                let campeonatos = localStorage.getItem('campeonatos');
+
+                if (campeonatos) {
+                    // Si existen, parsear y usar los campeonatos guardados
+                    console.log("Campeonatos obtenidos desde Local Storage");
+                    campeonatos = JSON.parse(campeonatos);
+                } else {
+                    // Si no existen, consultar a la fachada
+                    console.log("Campeonatos obtenidos desde LA API");
+                    campeonatos = await consultarCampeonatosFachada();
+                    // Guardar campeonatos en Local Storage para futuras consultas
+                    localStorage.setItem('campeonatos', JSON.stringify(campeonatos));
+                }
+                //const campeonatos = await consultarCampeonatosFachada();
+                this.campeonatos = campeonatos;
+                this.obtenerCampeonatoPorId(this.$route.params.id);
+                console.log(this.campeonato);
+            } catch (error) {
+                console.error("Error obteniendo campeonatos:", error);
+            }
+        }
     },
     async mounted() {
-        try {
-            let campeonatos = localStorage.getItem('campeonatos');
-
-            if (campeonatos) {
-                // Si existen, parsear y usar los campeonatos guardados
-                console.log("Campeonatos obtenidos desde Local Storage");
-                campeonatos = JSON.parse(campeonatos);
-            } else {
-                // Si no existen, consultar a la fachada
-                console.log("Campeonatos obtenidos desde LA API");
-                campeonatos = await consultarCampeonatosFachada();
-                // Guardar campeonatos en Local Storage para futuras consultas
-                localStorage.setItem('campeonatos', JSON.stringify(campeonatos));
-            }
-            //const campeonatos = await consultarCampeonatosFachada();
-            this.campeonatos = campeonatos;
-            this.obtenerCampeonatoPorId(this.$route.params.id);
-            console.log(this.campeonato);
-        } catch (error) {
-            console.error("Error obteniendo campeonatos:", error);
-        }
+        await this.obtenerCampeonatos();
     }
 }
 </script>
