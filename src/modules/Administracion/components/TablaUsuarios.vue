@@ -95,7 +95,7 @@
 
 
 <script>
-import { getUsuariosFachada } from '../helpers/getUsuarios';
+// import { getUsuariosFachada } from '../helpers/getUsuarios';
 import { consultarSuscripcionFachada } from '../helpers/suscripciones';
 import TablaDocumentos from './TablaDocumentos.vue'
 export default {

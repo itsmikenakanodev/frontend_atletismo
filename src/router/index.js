@@ -18,9 +18,9 @@ import InscripcionCompetidores from '../modules/Campeonatos/pages/InscripcionCom
 import ReportesCampeonatos from '@/modules/Campeonatos/pages/ReportesCampeonatos.vue';
 import AdministracionInscripcion from '../modules/Administracion/pages/AdmInscripciones.vue';
 import CalendarioPage from '../modules/Calendario/pages/CalendarioPage.vue';
-// import CentroAyudaPage from  '../modules/Ayuda/pages/CentroAyudaPage.vue';
+ import CentroAyudaPage from  '../modules/Ayuda/pages/CentroAyudaPage.vue';
  import ContactanosPage from  '../modules/Ayuda/pages/ContactanosPage.vue';
-
+ import Documentos from  '../modules/Documentos/pages/Documentos.vue';
 // Importa el nuevo componente para Atletas
 import AtletasPage from '../modules/Atletas/pages/AtletasPage.vue';
 import EdicionCampeonatosPage from '@/modules/Campeonatos/pages/EdicionCampeonatosPage.vue';
@@ -31,8 +31,8 @@ const routes = [
   { path: '/administracion/suscripciones', component: AdministrationSuscriptionView },
   { path: '/administracion/campeonatos-p', component: CampeonatosProvincialesView },
   { path: '/administracion/inscripciones', component: AdministracionInscripcion },
-  { path: '/administracion/correos-ayuda', component: AdministracionInscripcion },
-
+  { path: '/administracion/correos-ayuda', component: CentroAyudaPage },
+  { path: '/campeonatos/:id/documentos', name: 'documentos', component: Documentos },
   { path: '/contacto', component: ContactanosPage },
   { path: '/', component: HomeView },
   { path: '/registro', component: RegistroPage },

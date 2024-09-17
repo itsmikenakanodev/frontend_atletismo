@@ -67,6 +67,9 @@
               @click="mostrarEdicionCampeonato(campeonato.id)">
               Editar
             </button>
+            <!-- Agrega este botón justo antes del cierre de la sección -->
+            <button class="ver-documentos-boton" @click="verDocumentos(campeonato.id)">Ver Documentos</button>
+
           </div>
 
           <!-- Tabla de pruebas -->
@@ -150,6 +153,9 @@ export default {
     });
   },
   methods: {
+    verDocumentos(campeonatoId) {
+      this.$router.push({ name: 'documentos', params: { id: campeonatoId } });
+    },
     // Método para redirigir a la página de inscripción de competidores
     mostrarInscripcionCampeonato(campeonatoId) {
       this.$router.push({ name: 'InscripcionCompetidores', params: { id: campeonatoId } });
@@ -497,4 +503,20 @@ p {
 .centeredItem {
   text-align: center;
 }
+/* Estilo del botón "Ver Documentos" */
+.ver-documentos-boton {
+  background-color: #2c666e;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  margin-top: 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.ver-documentos-boton:hover {
+  background-color: #4b8b92;
+} 
 </style>
