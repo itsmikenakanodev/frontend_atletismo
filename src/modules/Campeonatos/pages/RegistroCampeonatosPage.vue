@@ -2,7 +2,7 @@
     <div class="register-container">
         <Toast />
         <h2>Crea nuevo campeonato</h2>
-        <form @submit.prevent="registrar">
+        <form @submit.prevent="hasDoc===true ? registrar():registrarCampeonato()">
             <div class="form-row centerElement">
                 <div class="form-group">
                     <label for="name">Nombre</label>

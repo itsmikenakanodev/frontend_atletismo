@@ -4,24 +4,17 @@
     <h2>Asignar Pruebas al Campeonato</h2>
     <h3>Seleccione el campeonato al que desea asignar las pruebas</h3>
     <div class="flex flex-column">
-      <Dropdown v-model="selectedCampeonato" optionLabel="nombre" :options="campeonatos" class="mt-3 mb-3" placeholder="Seleccione el campeonato" />
+      <Dropdown v-model="selectedCampeonato" optionLabel="nombre" :options="campeonatos" class="mt-3 mb-3"
+        placeholder="Seleccione el campeonato" @change="obtenerPruebasIngresadas" />
     </div>
-    
-    <DataTable
-      :value="pruebas"
-      selectionMode="multiple"
-      v-model:selection="selectedPrueba"
-      paginator
-      showGridlines
-      :rows="5"
-      :rowsPerPageOptions="[5, 10, 20, 50]"
-      tableStyle="min-width: 50rem"
-    >
+
+    <DataTable v-if="selectedCampeonato" :value="pruebas.filter(prueba => pruebasCampeonato.some(p => p.id != prueba.id))" selectionMode="multiple" v-model:selection="selectedPrueba" paginator showGridlines
+      :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]" tableStyle="min-width: 50rem" :rowClass="getRowClass">
       <Column selectionMode="multiple" headerStyle="width: 3rem;"></Column>
       <Column field="nombre" header="Nombre" sortable></Column>
       <Column field="tipo" header="Tipo" sortable></Column>
     </DataTable>
-    
+
     <div class="centerElement mt-3">
       <Button @click="asignarPruebas">Finalizar registro</Button>
     </div>
@@ -32,6 +25,7 @@
 import { obtenerPruebasFachada } from '@/modules/Campeonatos/helpers/ObtenerPruebasHelper.js';
 import { obtenerCampeonatosFachada } from '@/modules/Campeonatos/helpers/ObtenerCampeonatosHelper.js';
 import { registroCampeonatoPruebaFachada } from '@/modules/Campeonatos/helpers/CampeonatoPruebaHelper';
+import { consultarCampeonatosFachada } from '../helpers/CampeonatosNacionalHelper';
 
 export default {
   mounted() {
@@ -42,7 +36,7 @@ export default {
     async listarPruebas() {
       try {
         this.pruebas = await obtenerPruebasFachada();
-        console.log('Pruebas obtenidas:', this.pruebas); 
+        console.log('Pruebas obtenidas:', this.pruebas);
       } catch (error) {
         console.error('Error al obtener las pruebas:', error);
       }
@@ -50,41 +44,72 @@ export default {
     async listarCampeonatos() {
       try {
         this.campeonatos = await obtenerCampeonatosFachada(this.usuario.ciudad);
-        console.log('Campeonatos obtenidos:', this.campeonatos); 
+        console.log('Campeonatos obtenidos:', this.campeonatos);
       } catch (error) {
         console.error('Error al obtener los campeonatos:', error);
       }
     },
     async asignarPruebas() {
-  if (!this.selectedCampeonato || !this.selectedPrueba.length) {
-    this.$toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'Debe seleccionar un campeonato y al menos una prueba', life: 3000 });
-    return;
-  }
+      if (!this.selectedCampeonato || !this.selectedPrueba.length) {
+        this.$toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'Debe seleccionar un campeonato y al menos una prueba', life: 3000 });
+        return;
+      }
+      console.log('id campeonato: ', this.selectedCampeonato.id);
+      try {
+        for (const prueba of this.selectedPrueba) {
+          const cuerpoCPC = {
+            campeonato: { id: this.selectedCampeonato.id },
+            prueba: { id: prueba.id }
+          };
 
-  try {
-    for (const prueba of this.selectedPrueba) {
-      const cuerpoCPC = {
-        campeonato: { id: this.selectedCampeonato.id },
-        prueba: { id: prueba.id }
-      };
+          console.log('Datos a enviar:', JSON.stringify(cuerpoCPC));
 
-      console.log('Datos a enviar:', JSON.stringify(cuerpoCPC)); 
+          await registroCampeonatoPruebaFachada(cuerpoCPC);
+        }
 
-      await registroCampeonatoPruebaFachada(cuerpoCPC);
+        this.$toast.add({ severity: 'info', summary: 'Info', detail: 'Pruebas asignadas al campeonato', life: 3000 });
+      } catch (error) {
+        console.error('Error al registrar las pruebas:', error);
+        this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo asignar las pruebas al campeonato', life: 3000 });
+      }
+    },
+    async obtenerPruebasIngresadas() {
+      try {
+        let campeonatos = localStorage.getItem('campeonatos');
+        console.log(campeonatos);
+        if (campeonatos) {
+          // Si existen, parsear y usar los campeonatos guardados
+          console.log("Campeonatos obtenidos desde Local Storage");
+          campeonatos = JSON.parse(campeonatos);
+          let campeonato = campeonatos.find(c => c.id === this.selectedCampeonato.id);
+          this.pruebasCampeonato = campeonato.pruebas;
+          console.log("Pruebas del campeonato:", this.pruebasCampeonato);
+        } else {
+          // Si no existen, consultar a la fachada
+          console.log("Campeonatos obtenidos desde LA API");
+          campeonatos = await consultarCampeonatosFachada();
+          // Guardar campeonatos en Local Storage para futuras consultas
+          localStorage.setItem('campeonatos', JSON.stringify(campeonatos));
+          let campeonato = campeonatos.find(c => c.id === this.selectedCampeonato.id);
+          this.pruebasCampeonato = campeonato.pruebas;
+          console.log("Pruebas del campeonato:", this.pruebasCampeonato);
+        }
+
+      } catch (error) {
+        console.error("Error obteniendo campeonatos:", error);
+      }
+    },
+    getRowClass(data) {
+      // Si el tipo es inactivo, añadimos una clase que deshabilite la selección
+      return this.pruebasCampeonato.some(prueba => prueba.id === data.id) ? 'row-disabled' : '';
     }
-
-    this.$toast.add({ severity: 'info', summary: 'Info', detail: 'Pruebas asignadas al campeonato', life: 3000 });
-  } catch (error) {
-    console.error('Error al registrar las pruebas:', error);
-    this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo asignar las pruebas al campeonato', life: 3000 });
-  }
-},
   },
   data() {
     return {
       usuario: JSON.parse(localStorage.getItem('userdata')),
-      pruebas: [], 
-      selectedPrueba: [], 
+      pruebas: [],
+      pruebasCampeonato: null,
+      selectedPrueba: [],
       campeonatos: [],
       selectedCampeonato: null,
     };
@@ -151,5 +176,10 @@ button:hover {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+}
+
+.row-disabled {
+  pointer-events: none; /* Desactiva la interacción */
+  opacity: 0.5;         /* Reduce la opacidad para indicar que está deshabilitado */
 }
 </style>
