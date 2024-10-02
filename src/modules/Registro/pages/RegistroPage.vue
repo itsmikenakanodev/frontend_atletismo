@@ -15,9 +15,15 @@
             </div>
             <div class="form-row">
                 <div class="form-group">
+                    <label for="cedula">Cédula</label>
+                    <input type="text" id="cedula" v-model="form.cedula" placeholder="Ingresa tu cédula..." required />
+                </div>
+                <div class="form-group">
                     <label for="address">Dirección</label>
                     <input type="text" id="address" placeholder="Ingresa tu dirección..." v-model="form.address" required />
                 </div>
+            </div>
+            <div class="form-row">
                 <div class="form-group">
                     <label for="city">Provincia</label>
                     <select id="city" v-model="form.city" required class="center-aligned">
@@ -25,22 +31,23 @@
                         <option class="options" v-for="(option, index) in provincias" :key="index" :value="option">{{ option }}</option>
                     </select>
                 </div>
-            </div>
-            <div class="form-row">
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" placeholder="example@email.com" v-model="form.email" required />
                 </div>
+            </div>
+            <div class="form-row">
                 <div class="form-group">
                     <label for="password">Contraseña</label>
                     <input type="password" id="password" placeholder="***********************" v-model="form.password" required />
                 </div>
-            </div>
-            <div class="form-row">
                 <div class="form-group ">
                     <label for="birthDate">Fecha de Nacimiento</label>
                     <input type="date" id="birthDate" v-model="form.birthDate" required />
                 </div>
+            </div>
+            <div class="form-row">
+                
                 <div class="form-group">
                     <label for="genre">Género</label>
                     <select id="genre" v-model="form.gender" required class="center-aligned">
@@ -48,24 +55,26 @@
                         <option class="options" v-for="(option, index) in genders" :key="index" :value="option">{{ option }}</option>
                     </select>
                 </div>
-            </div>
-            <div class="form-row">
                 <div class="form-group">
                     <label for="phone">Número de celular</label>
                     <input type="text" maxlength="10" minlength="10" onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" inputmode="numeric" pattern="\d*" id="phone" placeholder="Ingrese su numero telefónico" v-model="form.phone" required />
                 </div>
+            </div>
+            <div class="form-row">
+                
                 <div class="form-group">
                     <label for="nameContact">Nombre Contacto</label>
                     <input type="text" id="nameContact" placeholder="Ingrese nombre de contacto" v-model="form.contact" required />
                 </div>
-            </div>
-            <div class="form-row centerElement">
                 <div class="form-group">
                     <label for="phoneContact">Número de celular de contacto</label>
-                    <input type="text" maxlength="10" minlength="10" onkeypress="return (event.charCode >= 48 && event.charCode <= 57)"  id="phoneContact" placeholder="Ingrese número teléfono de contacto" v-model="form.phoneContact" required />
+                    <input type="text" maxlength="10" minlength="10" onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" id="phoneContact" placeholder="Ingrese número teléfono de contacto" v-model="form.phoneContact" required />
                 </div>
             </div>
-            <h3 class="centerElement">Ingrese un archivo pdf que contenga su identificacion</h3>
+            <div class="form-row centerElement">
+                
+            </div>
+            <h3 class="centerElement">Ingrese un archivo pdf que contenga su identificación</h3>
             <CargarArchivo ref="cargarArchivo" @uploaded="verificarSubida" />
             <div class="centerElement">
                 <div class="form-group">
@@ -93,6 +102,7 @@ export default {
             form: {
                 firstName: "",
                 lastName: "",
+                cedula: "", // Agregado aquí
                 address: "",
                 city: "",
                 email: "",
@@ -158,6 +168,7 @@ export default {
     }
 };
 </script>
+
 <style scoped>
 .register-container {
     display: block;

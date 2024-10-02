@@ -51,6 +51,8 @@
           <h3 class="campeonato-title">{{ campeonato.nombre }}</h3>
           <p class="campeonato-organizador">Organizado por: {{ campeonato.organizador }}</p>
           <p class="campeonato-sede">Sede: {{ campeonato.sede }}</p>
+          <p class="campeonato-fechas">Plazo de inscripción: {{ formatDate(campeonato.inscripcionInicio) }} - 
+            {{ formatDate(campeonato.inscripcionFin) }}</p>
           <p class="campeonato-fechas">Fechas de inicio - fin del campeonato: {{ formatDate(campeonato.fechaInicio) }} -
             {{ formatDate(campeonato.fechaFin) }}</p>
 

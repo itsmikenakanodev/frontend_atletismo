@@ -131,6 +131,7 @@ export default {
                 direccion: user.address,
                 ciudad: user.city,
                 email: user.email,
+                cedula: user.cedula,
                 password: user.password,
                 fechaNacimiento: user.birthDate,
                 sexo: user.gender,

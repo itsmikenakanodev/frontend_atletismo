@@ -17,6 +17,7 @@ export const guardarUsuarioFachada = async (bodyUsuario) => {
 // Consumir
 const guardarUsuario = async (bodyUsuario) => {
   try {
+    console.log(bodyUsuario)
     const response = await axios.post(url, bodyUsuario);
     return response.data;
   } catch (error) {
