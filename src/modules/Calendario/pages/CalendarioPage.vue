@@ -38,9 +38,14 @@
     <!-- Campeonatos filtrados -->
     <section v-if="filteredCampeonatos.length > 0 && !loading" class="campeonatos-grid">
       <div v-for="campeonato in filteredCampeonatos" :key="campeonato.id" class="campeonato-card">
-        <div class="calendar-icon">
-          <div class="day">{{ getDay(campeonato.fechaInicio) }}</div>
-          <div class="month">{{ getMonth(campeonato.fechaInicio) }}</div>
+        <div class="info-tags">
+          <div class="calendar-icon">
+            <div class="day">{{ getDay(campeonato.fechaInicio) }}</div>
+            <div class="month">{{ getMonth(campeonato.fechaInicio) }}</div>
+          </div>
+          <div class="tag-icon">
+            <Tag :severity="getTagSeverity(campeonato)" :value="getTagValue(campeonato)"></Tag>
+          </div>
         </div>
         <div class="campeonato-info">
           <h3 class="campeonato-title">{{ campeonato.nombre }}</h3>
@@ -203,6 +208,49 @@ export default {
       } else {
         this.expandedCampeonatos.push(campeonatoId);
       }
+    },
+    getTagSeverity(campeonato) {
+      const today = new Date();
+      const fechaInicio = new Date(campeonato.fechaInicio);
+      const fechaFin = new Date(campeonato.fechaFin);
+      const InscripcionInicio = new Date(campeonato.inscripcionInicio);
+      const InscripcionFin = new Date(campeonato.inscripcionFin);
+      
+      if(today < InscripcionInicio) {
+        return "info"; // Por iniciar inscripciones
+      } else if(today >= InscripcionInicio && today <= InscripcionFin) {
+        return "warning"; // Inscripciones abiertas
+      }
+
+      if (today < fechaInicio) {
+        return "info"; // Por iniciar
+      } else if (today >= fechaInicio && today <= fechaFin) {
+        return "warning"; // En progreso
+      } else {
+        return "success"; // Finalizado
+      }
+    },
+    getTagValue(campeonato) {
+      const today = new Date();
+      const fechaInicio = new Date(campeonato.fechaInicio);
+      const fechaFin = new Date(campeonato.fechaFin);
+      
+      const InscripcionInicio = new Date(campeonato.inscripcionInicio);
+      const InscripcionFin = new Date(campeonato.inscripcionFin);
+      
+      if(today < InscripcionInicio) {
+        return "Por iniciar Inscripciones"; 
+      } else if(today >= InscripcionInicio && today <= InscripcionFin) {
+        return "Inscripciones abiertas"; 
+      }
+
+      if (today < fechaInicio) {
+        return "Por iniciar";
+      } else if (today >= fechaInicio && today <= fechaFin) {
+        return "En progreso";
+      } else {
+        return "Finalizado";
+      }
     }
   }
 };
@@ -299,6 +347,19 @@ export default {
   background-color: #07393c;
   border: 1px solid #ddd;
   border-radius: 5px;
+}
+
+/* estilo para tag*/
+.info-tags {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 5px;
+}
+
+.tag-icon {
+  margin : 5px;
 }
 
 /* Estilo general */
@@ -503,6 +564,7 @@ p {
 .centeredItem {
   text-align: center;
 }
+
 /* Estilo del botón "Ver Documentos" */
 .ver-documentos-boton {
   background-color: #2c666e;
@@ -518,5 +580,5 @@ p {
 
 .ver-documentos-boton:hover {
   background-color: #4b8b92;
-} 
+}
 </style>
