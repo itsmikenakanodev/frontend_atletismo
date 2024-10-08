@@ -8,7 +8,8 @@
         placeholder="Seleccione el campeonato" @change="obtenerPruebasIngresadas" />
     </div>
 
-    <DataTable v-if="selectedCampeonato" :value="pruebas.filter(prueba => pruebasCampeonato.some(p => p.id != prueba.id))" selectionMode="multiple" v-model:selection="selectedPrueba" paginator showGridlines
+    <DataTable v-if="selectedCampeonato" :value="pruebas.filter(prueba => !pruebasCampeonato || !pruebasCampeonato.some(p => p.id === prueba.id))"
+      selectionMode="multiple" v-model:selection="selectedPrueba" paginator showGridlines
       :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]" tableStyle="min-width: 50rem" :rowClass="getRowClass">
       <Column selectionMode="multiple" headerStyle="width: 3rem;"></Column>
       <Column field="nombre" header="Nombre" sortable></Column>
@@ -100,7 +101,7 @@ export default {
       }
     },
     getRowClass(data) {
-      // Si el tipo es inactivo, añadimos una clase que deshabilite la selección
+      
       return this.pruebasCampeonato.some(prueba => prueba.id === data.id) ? 'row-disabled' : '';
     }
   },
