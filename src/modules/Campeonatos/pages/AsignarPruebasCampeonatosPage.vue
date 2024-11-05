@@ -8,9 +8,10 @@
         placeholder="Seleccione el campeonato" @change="obtenerPruebasIngresadas" />
     </div>
 
-    <DataTable v-if="selectedCampeonato" :value="pruebas.filter(prueba => !pruebasCampeonato || !pruebasCampeonato.some(p => p.id === prueba.id))"
-      selectionMode="multiple" v-model:selection="selectedPrueba" paginator showGridlines
-      :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]" tableStyle="min-width: 50rem" :rowClass="getRowClass">
+    <DataTable v-if="selectedCampeonato"
+      :value="pruebas"
+      selectionMode="multiple" v-model:selection="selectedPrueba" paginator showGridlines :rows="5"
+      :rowsPerPageOptions="[5, 10, 20, 50]" tableStyle="min-width: 50rem" >
       <Column selectionMode="multiple" headerStyle="width: 3rem;"></Column>
       <Column field="nombre" header="Nombre" sortable></Column>
       <Column field="tipo" header="Tipo" sortable></Column>
@@ -78,7 +79,7 @@ export default {
       try {
         let campeonatos = localStorage.getItem('campeonatos');
         console.log(campeonatos);
-        if (campeonatos) {
+        /*if (campeonatos) {
           // Si existen, parsear y usar los campeonatos guardados
           console.log("Campeonatos obtenidos desde Local Storage");
           campeonatos = JSON.parse(campeonatos);
@@ -94,14 +95,21 @@ export default {
           let campeonato = campeonatos.find(c => c.id === this.selectedCampeonato.id);
           this.pruebasCampeonato = campeonato.pruebas;
           console.log("Pruebas del campeonato:", this.pruebasCampeonato);
-        }
+        }*/
+        // Si no existen, consultar a la fachada
+        console.log("Campeonatos obtenidos desde LA API");
+        campeonatos = await consultarCampeonatosFachada();
+        // Guardar campeonatos en Local Storage para futuras consultas
+        localStorage.setItem('campeonatos', JSON.stringify(campeonatos));
+        let campeonato = campeonatos.find(c => c.id === this.selectedCampeonato.id);
+        this.pruebasCampeonato = campeonato.pruebas;
+        console.log("Pruebas del campeonato:", this.pruebasCampeonato);
 
       } catch (error) {
         console.error("Error obteniendo campeonatos:", error);
       }
     },
     getRowClass(data) {
-      
       return this.pruebasCampeonato.some(prueba => prueba.id === data.id) ? 'row-disabled' : '';
     }
   },
@@ -180,7 +188,9 @@ button:hover {
 }
 
 .row-disabled {
-  pointer-events: none; /* Desactiva la interacción */
-  opacity: 0.5;         /* Reduce la opacidad para indicar que está deshabilitado */
+  pointer-events: none;
+  /* Desactiva la interacción */
+  opacity: 0.5;
+  /* Reduce la opacidad para indicar que está deshabilitado */
 }
 </style>
