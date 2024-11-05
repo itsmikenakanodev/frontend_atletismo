@@ -51,7 +51,7 @@
           <h3 class="campeonato-title">{{ campeonato.nombre }}</h3>
           <p class="campeonato-organizador">Organizado por: {{ campeonato.organizador }}</p>
           <p class="campeonato-sede">Sede: {{ campeonato.sede }}</p>
-          <p class="campeonato-fechas">Plazo de inscripción: {{ formatDate(campeonato.inscripcionInicio) }} - 
+          <p class="campeonato-fechas">Plazo de inscripción: {{ formatDate(campeonato.inscripcionInicio) }} -
             {{ formatDate(campeonato.inscripcionFin) }}</p>
           <p class="campeonato-fechas">Fechas de inicio - fin del campeonato: {{ formatDate(campeonato.fechaInicio) }} -
             {{ formatDate(campeonato.fechaFin) }}</p>
@@ -131,17 +131,11 @@ export default {
 
       let campeonatos = localStorage.getItem('campeonatos');
 
-      if (campeonatos) {
-        // Si existen, parsear y usar los campeonatos guardados
-        console.log("Campeonatos obtenidos desde Local Storage");
-        campeonatos = JSON.parse(campeonatos);
-      } else {
-        // Si no existen, consultar a la fachada
-        console.log("Campeonatos obtenidos desde LA API");
-        campeonatos = await consultarCampeonatosFachada();
-        // Guardar campeonatos en Local Storage para futuras consultas
-        localStorage.setItem('campeonatos', JSON.stringify(campeonatos));
-      }
+      // Si no existen, consultar a la fachada
+      console.log("Campeonatos obtenidos desde LA API");
+      campeonatos = await consultarCampeonatosFachada();
+      // Guardar campeonatos en Local Storage para futuras consultas
+      localStorage.setItem('campeonatos', JSON.stringify(campeonatos));
 
       //const campeonatos = await consultarCampeonatosFachada();
       this.campeonatos = campeonatos;
@@ -217,10 +211,10 @@ export default {
       const fechaFin = new Date(campeonato.fechaFin);
       const InscripcionInicio = new Date(campeonato.inscripcionInicio);
       const InscripcionFin = new Date(campeonato.inscripcionFin);
-      
-      if(today < InscripcionInicio) {
+
+      if (today < InscripcionInicio) {
         return "info"; // Por iniciar inscripciones
-      } else if(today >= InscripcionInicio && today <= InscripcionFin) {
+      } else if (today >= InscripcionInicio && today <= InscripcionFin) {
         return "warning"; // Inscripciones abiertas
       }
 
@@ -236,14 +230,14 @@ export default {
       const today = new Date();
       const fechaInicio = new Date(campeonato.fechaInicio);
       const fechaFin = new Date(campeonato.fechaFin);
-      
+
       const InscripcionInicio = new Date(campeonato.inscripcionInicio);
       const InscripcionFin = new Date(campeonato.inscripcionFin);
-      
-      if(today < InscripcionInicio) {
-        return "Por iniciar Inscripciones"; 
-      } else if(today >= InscripcionInicio && today <= InscripcionFin) {
-        return "Inscripciones abiertas"; 
+
+      if (today < InscripcionInicio) {
+        return "Por iniciar Inscripciones";
+      } else if (today >= InscripcionInicio && today <= InscripcionFin) {
+        return "Inscripciones abiertas";
       }
 
       if (today < fechaInicio) {
@@ -361,7 +355,7 @@ export default {
 }
 
 .tag-icon {
-  margin : 5px;
+  margin: 5px;
 }
 
 /* Estilo general */
