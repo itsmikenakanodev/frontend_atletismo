@@ -110,3 +110,25 @@ const obtenerTodosCampeonatosPruebas = async (url) => {
     throw error;
   }
 };
+
+// Eliminar (DELETE) - por campeonatoId y pruebaId
+export const eliminarCampeonatoPruebaFachada2 = async (campeonatoId, pruebaId) => {
+  try {
+    const url = getApiUrl(`campeonatosPruebas/${pruebaId}/${campeonatoId}`); // Construir URL con ambos IDs
+    const response = await eliminarCampeonatoPrueba2(url);
+    return response;
+  } catch (error) {
+    console.error("Error eliminando campeonato prueba:", error);
+    throw error;
+  }
+};
+
+const eliminarCampeonatoPrueba2 = async (url) => {
+  try {
+    const response = await axios.delete(url);
+    return response.data;
+  } catch (error) {
+    console.error("Error en la llamada API para eliminar campeonato prueba:", error);
+    throw error;
+  }
+};

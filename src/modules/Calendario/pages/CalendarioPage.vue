@@ -79,13 +79,22 @@
 
           </div>
 
-          <!-- Tabla de pruebas -->
-          <div v-if="expandedCampeonatos.includes(campeonato.id)" class="pruebas-list">
+ <!-- Tabla de pruebas -->
+ <div v-if="expandedCampeonatos.includes(campeonato.id)" class="pruebas-list">
             <DataTable v-if="campeonato.pruebas.length > 0" :value="campeonato.pruebas" class="datatable">
               <Column field="nombre" header="Nombre"></Column>
               <Column field="descripcion" header="Descripción"></Column>
               <Column field="tipo" header="Tipo"></Column>
+              
+              <!-- Columna de eliminar visible solo para roles 1 o 6 -->
+              <Column v-if="usuario && (usuario.rol.id === 1 || usuario.rol.id === 6)" header="Eliminar">
+                <template #body="slotProps">
+                  <Button label="Eliminar" icon="pi pi-trash" class="p-button-danger" 
+                    @click="eliminarPrueba(slotProps.data, campeonato.id)" />
+                </template>
+              </Column>
             </DataTable>
+
             <div v-if="campeonato.pruebas.length === 0" class="no-pruebas">
               <p>Sin detalle de las pruebas que tendrá esta competencia.</p>
             </div>
@@ -103,6 +112,7 @@
 
 <script>
 import { consultarCampeonatosFachada } from "../../Campeonatos/helpers/CampeonatosNacionalHelper";
+import { eliminarCampeonatoPruebaFachada2 } from "../../Campeonatos/helpers/CampeonatoPruebaHelper";
 
 export default {
   data() {
@@ -253,7 +263,26 @@ export default {
       } else {
         return "Finalizado";
       }
-    }
+    },
+    eliminarPrueba(prueba, campeonatoId) {
+      // Confirmación antes de eliminar
+      if (confirm(`¿Estás seguro de que quieres eliminar la prueba "${prueba.nombre}" del campeonato?`)) {
+        // Lógica de eliminación usando el helper
+        eliminarCampeonatoPruebaFachada2(prueba.id, campeonatoId)
+          .then(() => {
+            // Aquí puedes realizar la actualización de la lista de pruebas del campeonato después de la eliminación
+            const campeonato = this.filteredCampeonatos.find(c => c.id === campeonatoId);
+            if (campeonato) {
+              campeonato.pruebas = campeonato.pruebas.filter(p => p.id !== prueba.id);
+            }
+            alert("Prueba eliminada con éxito.");
+          })
+          .catch(error => {
+            console.error("Error eliminando prueba:", error);
+            alert("Hubo un error al intentar eliminar la prueba.");
+          });
+      }
+  }
   }
 };
 </script>

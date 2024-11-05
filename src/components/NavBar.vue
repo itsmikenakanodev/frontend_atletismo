@@ -209,10 +209,12 @@ export default {
         this.contac = true;
         // Actualizar visibilidad de los ítems del menú
         this.items.forEach(item => {
-          if (item.label === "Contáctanos") {
-            item.visible = this.contac;
-          }
-        });
+        if (item.label === "Contáctanos") {
+            item.visible = true;
+        } else if (item.label === "Registrarse") {
+            item.visible = false; // Ocultar "Registrarse" si el usuario está conectado
+        }
+    });
       } else {
         this.items.forEach(item => {
           if (item.label === "Adm") {
