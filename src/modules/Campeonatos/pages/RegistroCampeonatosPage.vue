@@ -42,7 +42,7 @@
             <div class="form-row">
                 <div class="form-group ">
                     <label for="startDate">Fecha Inicio</label>
-                    <input type="date" id="startDate" required v-model="campeonato.fechaInicio" :min="minFechaInicio" />
+                    <input type="date" id="startDate" required v-model="campeonato.fechaInicio" :min="minFechaInicio" :max="campeonato.fechaFin" />
                 </div>
                 <div class="form-group ">
                     <label for="finDate">Fecha Fin</label>
@@ -53,12 +53,12 @@
                 <div class="form-group ">
                     <label for="regStartDate">Fecha Inicio Inscripción</label>
                     <input type="date" id="regStartDate" required v-model="campeonato.inscripcionInicio"
-                        :max="campeonato.fechaInicio" />
+                        :max="campeonato.fechaInicio" :min="minFechaInicio"/>
                 </div>
                 <div class="form-group ">
                     <label for="regFinDate">Fecha Fin Inscripción</label>
                     <input type="date" id="regFinDate" required v-model="campeonato.inscripcionFin"
-                        :max="campeonato.fechaInicio" />
+                        :max="campeonato.fechaInicio" :min="campeonato.inscripcionInicio"/>
                 </div>
             </div>
             <div class="form-row centerElement">
