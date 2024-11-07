@@ -12,6 +12,16 @@ export const consultarCampeonatosFachada = async () => {
   }
 };
 
+export const consultarCampeonatosFachadaFiltro = async (anio, mes) => {
+  try {
+    const data = await consultarCampeonatoFiltro(anio, mes);
+    return data;
+  } catch (error) {
+    console.error("Error consultando campeonatos:", error);
+    throw error; // Re-lanzar el error para que pueda ser manejado en el componente
+  }
+};
+
 // Consumir
 const consultarCampeonato = async () => {
   try {
@@ -20,6 +30,17 @@ const consultarCampeonato = async () => {
     return response.data;
   } catch (error) {
     console.error("Error en la llamada API para consultar campeonatos:", error);
+    throw error; // Re-lanzar el error para que pueda ser manejado en `consultarCampeonatosFachada`
+  }
+};
+
+const consultarCampeonatoFiltro = async (anio, mes) => {
+  try {
+    const url = getApiUrl("campeonatos/filtrar");
+    const response = await axios.get(url+`?anio=${anio}&mes=${mes}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error en la llamada API para consultar campeonatos por filtro:", error);
     throw error; // Re-lanzar el error para que pueda ser manejado en `consultarCampeonatosFachada`
   }
 };

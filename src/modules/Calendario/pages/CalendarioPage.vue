@@ -36,8 +36,8 @@
     </section>
 
     <!-- Campeonatos filtrados -->
-    <section v-if="filteredCampeonatos.length > 0 && !loading" class="campeonatos-grid">
-      <div v-for="campeonato in filteredCampeonatos" :key="campeonato.id" class="campeonato-card">
+    <section v-if="campeonatos.length > 0 && !loading" class="campeonatos-grid">
+      <div v-for="campeonato in campeonatos" :key="campeonato.id" class="campeonato-card">
         <div class="info-tags">
           <div class="calendar-icon">
             <div class="day">{{ getDay(campeonato.fechaInicio) }}</div>
@@ -79,17 +79,17 @@
 
           </div>
 
- <!-- Tabla de pruebas -->
- <div v-if="expandedCampeonatos.includes(campeonato.id)" class="pruebas-list">
+          <!-- Tabla de pruebas -->
+          <div v-if="expandedCampeonatos.includes(campeonato.id)" class="pruebas-list">
             <DataTable v-if="campeonato.pruebas.length > 0" :value="campeonato.pruebas" class="datatable">
               <Column field="nombre" header="Nombre"></Column>
               <Column field="descripcion" header="Descripción"></Column>
               <Column field="tipo" header="Tipo"></Column>
-              
+
               <!-- Columna de eliminar visible solo para roles 1 o 6 -->
               <Column v-if="usuario && (usuario.rol.id === 1 || usuario.rol.id === 6)" header="Eliminar">
                 <template #body="slotProps">
-                  <Button label="Eliminar" icon="pi pi-trash" class="p-button-danger" 
+                  <Button label="Eliminar" icon="pi pi-trash" class="p-button-danger"
                     @click="eliminarPrueba(slotProps.data, campeonato.id)" />
                 </template>
               </Column>
@@ -111,7 +111,7 @@
 
 
 <script>
-import { consultarCampeonatosFachada } from "../../Campeonatos/helpers/CampeonatosNacionalHelper";
+import { consultarCampeonatosFachadaFiltro } from "../../Campeonatos/helpers/CampeonatosNacionalHelper";
 import { eliminarCampeonatoPruebaFachada2 } from "../../Campeonatos/helpers/CampeonatoPruebaHelper";
 
 export default {
@@ -139,18 +139,8 @@ export default {
         this.usuario = { rol: { id: null } };
       }
 
-      let campeonatos = localStorage.getItem('campeonatos');
-
-      // Si no existen, consultar a la fachada
-      console.log("Campeonatos obtenidos desde LA API");
-      campeonatos = await consultarCampeonatosFachada();
-      // Guardar campeonatos en Local Storage para futuras consultas
-      localStorage.setItem('campeonatos', JSON.stringify(campeonatos));
-
-      //const campeonatos = await consultarCampeonatosFachada();
-      this.campeonatos = campeonatos;
-      this.availableYears = this.getAvailableYears(campeonatos);
-      this.filtrarCampeonatos();
+      this.obtenerCampeonatos();
+      this.availableYears = this.getAvailableYears(2024);
     } catch (error) {
       console.error("Error obteniendo campeonatos:", error);
     } finally {
@@ -164,6 +154,9 @@ export default {
     });
   },
   methods: {
+    async obtenerCampeonatos(anio=new Date().getFullYear(), mes=new Date().getMonth() + 1) {
+      this.campeonatos = await consultarCampeonatosFachadaFiltro(anio, mes);
+    },
     verDocumentos(campeonatoId) {
       this.$router.push({ name: 'documentos', params: { id: campeonatoId } });
     },
@@ -177,13 +170,13 @@ export default {
     },
     filtrarCampeonatosPorAno(year) {
       this.selectedYear = year;
-      this.filtrarCampeonatos();
+      this.obtenerCampeonatos(this.selectedYear, this.selectedMonth);
     },
     filtrarCampeonatosPorMes(month) {
       this.selectedMonth = month;
-      this.filtrarCampeonatos();
+      this.obtenerCampeonatos(this.selectedYear, this.selectedMonth);
     },
-    filtrarCampeonatos() {
+    /*filtrarCampeonatos() {
       this.filteredCampeonatos = this.campeonatos.filter(campeonato => {
         const campeonatoFecha = new Date(campeonato.fechaInicio);
         return campeonatoFecha.getFullYear() === this.selectedYear && campeonatoFecha.getMonth() + 1 === this.selectedMonth;
@@ -192,10 +185,20 @@ export default {
       this.filteredCampeonatos.sort((a, b) => {
         return new Date(a.fechaInicio) - new Date(b.fechaInicio);
       });
-    },
-    getAvailableYears(campeonatos) {
+    },*/
+    /*getAvailableYears(campeonatos) {
       const years = campeonatos.map(campeonato => new Date(campeonato.fechaInicio).getFullYear());
       return [...new Set(years)];
+    },*/
+    getAvailableYears(startYear) {
+      const currentYear = new Date().getFullYear();
+      const years = [];
+
+      for (let year = startYear; year <= currentYear; year++) {
+        years.push(year);
+      }
+
+      return years;
     },
     formatDate(dateString) {
       const options = { year: "numeric", month: "long", day: "numeric" };
@@ -276,7 +279,7 @@ export default {
             alert("Hubo un error al intentar eliminar la prueba.");
           });
       }
-  }
+    }
   }
 };
 </script>
