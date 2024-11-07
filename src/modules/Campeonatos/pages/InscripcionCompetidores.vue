@@ -1,5 +1,22 @@
 <template>
-  <div class="register-container">
+  <div >
+    <!-- Modal de Términos y Condiciones -->
+    <div v-if="!termsAccepted" class="terms-modal">
+      <h2 class="terms-title">Términos y Condiciones de Participación en el Campeonato</h2>
+      <div class="terms-content">
+        <p>
+          Al inscribirme en este Campeonato, acepto y declaro lo siguiente:
+        </p>
+        <ul>
+          <li><strong>Cierre de Inscripciones:</strong> Entiendo que, una vez finalizado el proceso de inscripción, la plataforma cerrará y no se realizarán modificaciones en ninguna inscripción. Esto incluye, pero no se limita a, cambios en pruebas, correcciones de nombre o género, ni eliminación o adición de inscripciones.</li>
+          <li><strong>Responsabilidad sobre Pertenencias:</strong> Asumo total responsabilidad por el cuidado de mis pertenencias durante el evento.</li>
+          <li><strong>Exoneración de Responsabilidad:</strong> Libero de toda responsabilidad a los organizadores, colaboradores y patrocinadores del Campeonato por cualquier accidente, daño, enfermedad o pérdida que pueda ocurrir antes, durante o después del evento. Renuncio a cualquier acción legal o reclamo de indemnización que pudiera derivarse de mi participación en el evento.</li>
+          <li><strong>Uso de Imagen:</strong> Autorizo el uso de mi imagen en fotografías o videos capturados durante el campeonato para fines de promoción y difusión del evento.</li>
+        </ul>
+      </div>
+      <button @click="acceptTerms" class="accept-button">Aceptar</button>
+    </div>
+  <div :class="{'terms-background': !termsAccepted}" class="register-container">
     <Toast />
     <h2>Inscripción a {{ campeonato.nombre }}</h2>
     <h3>Datos Usuario</h3>
@@ -152,6 +169,7 @@
       </div>
     </form>
   </div>
+  </div>
 </template>
 
 <script>
@@ -169,6 +187,7 @@ export default {
   },
   data() {
     return {
+      termsAccepted: false,
       form: {
         nombres: "",
         apellidos: "",
@@ -380,6 +399,9 @@ export default {
         alert("Debe subir el archivo para comprobar el pago!");
       }
     },
+    acceptTerms() {
+      this.termsAccepted = true;
+    },
   },
 };
 </script>
@@ -514,5 +536,84 @@ h2 {
   box-sizing: border-box;
   background-color: #2c666e;
   color: #90ddf0;
+}
+
+.terms-background {
+  filter: blur(5px);
+  pointer-events: none;
+  position: relative;
+}
+
+.register-container {
+  display: block;
+  max-width: 900px;
+  margin: auto;
+  margin-top: 5vh;
+  margin-bottom: 2vh;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background-color: #07393c;
+  color: #f0edee;
+  font-size: 16px;
+}
+
+.terms-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  padding: 25px;
+  max-width: 600px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  text-align: left;
+}
+
+.terms-title {
+  font-size: 1.8em;
+  color: #07393c;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.terms-content {
+  color: #333333;
+  font-size: 1em;
+  line-height: 1.6;
+}
+
+.terms-content p {
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.terms-content ul {
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.terms-content li {
+  margin-bottom: 10px;
+}
+
+.accept-button {
+  display: block;
+  margin: 20px auto 0;
+  padding: 10px 20px;
+  font-size: 1em;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #07393c;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.accept-button:hover {
+  background-color: #055a67;
 }
 </style>

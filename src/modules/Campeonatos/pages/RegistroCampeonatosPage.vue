@@ -2,7 +2,7 @@
     <div class="register-container">
         <Toast />
         <h2>Crea nuevo campeonato</h2>
-        <form @submit.prevent="hasDoc===true ? registrar():registrarCampeonato()">
+        <form @submit.prevent="hasDoc ? registrar() : registrarCampeonato()">
             <div class="form-row centerElement">
                 <div class="form-group">
                     <label for="name">Nombre</label>
@@ -21,14 +21,6 @@
                     <input type="text" id="organizator" disabled placeholder="Ingresa Sede..." required v-model="ciudad"
                         readonly />
                 </div>
-                <!-- <div class="form-group">
-                    <label for="sede">Sede</label>
-                    <select id="sede" v-model="campeonato.sede" required class="center-aligned">
-                        <option disabled value="">Selecciona tu provincia</option>
-                        <option class="options" v-for="(option, index) in provincias" :key="index" :value="option">{{
-                            option }}</option>
-                    </select>
-                </div> -->
             </div>
             <div class="form-row" v-if="usuario.rol.id === 6">
                 <div class="form-group">
@@ -41,49 +33,50 @@
                     <select id="sede" v-model="campeonato.sede" required class="center-aligned"
                         @change="designarOrganizador">
                         <option disabled value="">Selecciona tu provincia</option>
-                        <option class="options" v-for="(option, index) in admins" :key="index" :value="option.ciudad">{{
-                            option.ciudad }}</option>
+                        <option class="options" v-for="(option, index) in admins" :key="index" :value="option.ciudad">
+                            {{ option.ciudad }}
+                        </option>
                     </select>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group ">
                     <label for="startDate">Fecha Inicio</label>
-                    <input type="date" id="startDate" required v-model="campeonato.fechaInicio" />
+                    <input type="date" id="startDate" required v-model="campeonato.fechaInicio" :min="minFechaInicio" />
                 </div>
                 <div class="form-group ">
                     <label for="finDate">Fecha Fin</label>
-                    <input type="date" id="finDate" required v-model="campeonato.fechaFin" />
+                    <input type="date" id="finDate" required v-model="campeonato.fechaFin" :min="campeonato.fechaInicio" />
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group ">
                     <label for="regStartDate">Fecha Inicio Inscripción</label>
-                    <input type="date" id="regStartDate" required v-model="campeonato.inscripcionInicio" />
+                    <input type="date" id="regStartDate" required v-model="campeonato.inscripcionInicio"
+                        :max="campeonato.fechaInicio" />
                 </div>
                 <div class="form-group ">
                     <label for="regFinDate">Fecha Fin Inscripción</label>
-                    <input type="date" id="regFinDate" required v-model="campeonato.inscripcionFin" />
+                    <input type="date" id="regFinDate" required v-model="campeonato.inscripcionFin"
+                        :max="campeonato.fechaInicio" />
                 </div>
             </div>
             <div class="form-row centerElement">
                 <div class="form-group">
-                    <label for="name">Agregar Documento?</label>
+                    <label for="name">Desea adjuntar un Documento?</label>
                     <div class="form-row centerElement">
                         <label for="si">Sí</label>
                         <input type="radio" id="si" name="respuesta" v-model="hasDoc" :value="true">
-
                         <label for="no">No</label>
                         <input type="radio" id="no" name="respuesta" v-model="hasDoc" :value="false">
                     </div>
-                    <CargarArchivo ref="cargarChampDoc" v-if="hasDoc === true" @uploaded="(val) => comprobarSubida(val)"
-                        @champDoc="(val) => asignarDocumento(val)"></CargarArchivo>
+                    <CargarArchivo ref="cargarChampDoc" v-if="hasDoc" @uploaded="comprobarSubida"
+                        @champDoc="asignarDocumento"></CargarArchivo>
                 </div>
             </div>
             <div class="centerElement">
                 <div class="form-group">
-                    <Button v-if="(hasDoc === true && docUploaded === true) || (hasDoc === false)" type="submit"
-                        :loading="loading">Continuar</Button>
+                    <Button v-if="(hasDoc && docUploaded) || !hasDoc" type="submit" :loading="loading">Continuar</Button>
                 </div>
             </div>
         </form>
@@ -143,6 +136,14 @@ export default {
             ],
             loading: false,
             admins: [],
+
+        }
+    },
+    computed: {
+        // La fecha mínima de inicio es el día en que se ingresa a la página
+        minFechaInicio() {
+            const today = new Date();
+            return today.toISOString().split('T')[0]; // 'yyyy-mm-dd'
         }
     },
     methods: {

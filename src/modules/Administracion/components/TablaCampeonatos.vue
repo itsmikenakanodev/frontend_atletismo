@@ -12,12 +12,6 @@
           placeholder="Buscar"
         />
       </IconField>
-
-      <!-- Aqui puse un filter pero aun no cacho como es esa vaina de la fecha y pos ahi se queda comentado hasta que se saque de la db -->
-      <!-- <FloatLabel class="w-full md:w-14rem">
-     <Dropdown v-model="filtroSeleccionado" :options="[{opt:'Más antiguo'}, {opt:'Sede'}]" showClear  optionLabel="opt"  class="w-full md:w-14rem text-sm"/>
-     <label class="text-sm">Filtrar por</label>
-    </FloatLabel> -->
     </div>
 
     <Accordion class="custom-accordion" :multiple="true" collapsed>
@@ -44,10 +38,10 @@
             <span class="font-bold mr-2">Fecha de inicio</span>
             <span>{{ campeonato.fechaInicio }}</span>
           </div>
-        <!--  <div class="col-12 md:col-6">
+          <div class="col-12 md:col-6">
             <span class="font-bold mr-2">Fecha de finalización</span>
             <span>{{ campeonato.fechaFin }}</span>
-          </div>-->
+          </div>
           <div class="col-12 md:col-6">
             <span class="font-bold mr-2">Fecha de inscripción</span>
             <span>{{ campeonato.inscripcionInicio }}</span>
@@ -72,36 +66,50 @@
     </Accordion>
   </div>
 </template>
+
 <script>
 import { obtenerTodosLosCampeonatosFachada } from "../helpers/campeonatosHelper";
+
 export default {
   data() {
     return {
-      products: null,
-      columns: null,
-      filtroSeleccionado: null,
       filtroInput: null,
-      campeonatos: null,
+      campeonatos: [],
     };
   },
 
-  created() {},
   async mounted() {
-    this.campeonatos = await obtenerTodosLosCampeonatosFachada();
-    console.log(this.campeonatos);
-    //  ProductService.getProductsMini().then((data) => (this.products = data));
+    this.campeonatos = await this.obtenerCampeonatosValidos();
   },
 
-  methods: {},
+  methods: {
+    async obtenerCampeonatosValidos() {
+      const campeonatos = await obtenerTodosLosCampeonatosFachada();
+      const hoy = new Date().toISOString().split("T")[0]; // Fecha actual
+
+      return campeonatos.filter(campeonato => {
+        const fechaInicio = new Date(campeonato.fechaInicio).toISOString().split("T")[0];
+        const fechaFin = new Date(campeonato.fechaFin).toISOString().split("T")[0];
+        const inscripcionInicio = new Date(campeonato.inscripcionInicio).toISOString().split("T")[0];
+        const inscripcionFin = new Date(campeonato.inscripcionFin).toISOString().split("T")[0];
+
+        // Verificar que todas las fechas sean desde hoy en adelante
+        const fechasValidas = [fechaInicio, fechaFin, inscripcionInicio, inscripcionFin].every(fecha => fecha >= hoy);
+
+        // Verificar que la fecha de inscripción esté antes de la fecha de inicio
+        const inscripcionValida = inscripcionInicio < fechaInicio && inscripcionFin < fechaInicio;
+
+        return fechasValidas && inscripcionValida;
+      });
+    },
+  },
 
   computed: {
     campeonatosFiltrados() {
       if (this.filtroInput) {
-        return this.campeonatos.filter((campeonato) => {
-          return campeonato.nombre
-            .toLowerCase()
-            .includes(this.filtroInput.toLowerCase());
-        });
+        return this.campeonatos.filter(campeonato =>
+          campeonato.nombre.toLowerCase().includes(this.filtroInput.toLowerCase())
+        );
       } else {
         return this.campeonatos;
       }
@@ -109,18 +117,19 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 .custom-accordion {
-  border: 1px solid #ccc; /* Borde alrededor del acordeón */
-  border-radius: 4px; /* Esquinas redondeadas */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .custom-accordion .p-accordion-header {
-  border-bottom: 1px solid #ccc; /* Borde inferior para cada encabezado */
+  border-bottom: 1px solid #ccc;
 }
 
 .custom-accordion .p-accordion-header:not(:first-child) {
-  border-top: 1px solid #ccc; /* Borde superior para cada encabezado excepto el primero */
+  border-top: 1px solid #ccc;
 }
 </style>
