@@ -19,7 +19,7 @@
                 <template #header>
                     <span>
                         <h3>Damas: {{ item.femaleCompetitors }}</h3>
-                        <h3>Varones: {{ item.femaleCompetitors }}</h3>
+                        <h3>Varones: {{ item.maleCompetitors }}</h3>
                     </span>
                     <h2>{{ item.eventName }}</h2>
                 </template>
