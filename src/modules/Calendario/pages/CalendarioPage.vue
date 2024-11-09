@@ -4,15 +4,8 @@
       <h1>Campeonatos Nacionales</h1>
       <p>Explora los campeonatos disponibles por año y mes.</p>
     </header>
-
-    <!-- Mensaje de carga -->
-    <section v-if="loading" class="cargando">
-      <div class="spinner"></div>
-      <p>Cargando campeonatos</p>
-    </section>
-
     <!-- Filtros por año y mes -->
-    <section v-else class="filtros">
+    <section  class="filtros">
       <div class="filtro">
         <span class="filtro-text">Año:</span>
         <div class="filtro-opciones filtro-anos">
@@ -34,6 +27,13 @@
         </div>
       </div>
     </section>
+
+    <!-- Mensaje de carga -->
+    <section v-if="loading" class="cargando">
+      <div class="spinner"></div>
+      <p>Cargando campeonatos, espere un momento...</p>
+    </section>
+
 
     <!-- Campeonatos filtrados -->
     <section v-if="campeonatos.length > 0 && !loading" class="campeonatos-grid">
@@ -103,7 +103,8 @@
       </div>
     </section>
 
-    <section v-else-if="!loading" class="no-campeonatos">
+    <!-- Mensaje si no hay campeonatos disponibles -->
+    <section v-else-if="!loading && campeonatos.length === 0" class="no-campeonatos">
       <p>No hay campeonatos para el año {{ selectedYear }} y el mes seleccionado.</p>
     </section>
   </div>
@@ -131,6 +132,7 @@ export default {
   async mounted() {
     try {
       // Obtener usuario desde localStorage
+      this.loading = true; // Activa la animación de carga
       const storedUserData = localStorage.getItem('userdata');
       if (storedUserData) {
         this.usuario = JSON.parse(storedUserData);
@@ -155,7 +157,9 @@ export default {
   },
   methods: {
     async obtenerCampeonatos(anio=new Date().getFullYear(), mes=new Date().getMonth() + 1) {
+      this.loading = true;  // Inicia la carga
       this.campeonatos = await consultarCampeonatosFachadaFiltro(anio, mes);
+      this.loading = false;  // Inicia la carga
     },
     verDocumentos(campeonatoId) {
       this.$router.push({ name: 'documentos', params: { id: campeonatoId } });
@@ -169,13 +173,16 @@ export default {
       this.$router.push({ name: 'EdicionCampeonatos', params: { id: campeonatoId } });
     },
     filtrarCampeonatosPorAno(year) {
-      this.selectedYear = year;
-      this.obtenerCampeonatos(this.selectedYear, this.selectedMonth);
-    },
-    filtrarCampeonatosPorMes(month) {
-      this.selectedMonth = month;
-      this.obtenerCampeonatos(this.selectedYear, this.selectedMonth);
-    },
+    this.selectedYear = year;
+    this.loading = true;  // Inicia la carga
+    this.obtenerCampeonatos(this.selectedYear, this.selectedMonth);  // Llama a la función para obtener los campeonatos
+  },
+
+  filtrarCampeonatosPorMes(month) {
+    this.selectedMonth = month;
+    this.loading = true;  // Inicia la carga
+    this.obtenerCampeonatos(this.selectedYear, this.selectedMonth);  // Llama a la función para obtener los campeonatos
+  },
     /*filtrarCampeonatos() {
       this.filteredCampeonatos = this.campeonatos.filter(campeonato => {
         const campeonatoFecha = new Date(campeonato.fechaInicio);
@@ -608,5 +615,5 @@ p {
 
 .ver-documentos-boton:hover {
   background-color: #4b8b92;
-}
+} 
 </style>
