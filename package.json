@@ -10,6 +10,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@primevue/themes": "^4.2.1",
     "@stripe/stripe-js": "^3.5.0",
     "axios": "^1.7.2",
     "chart.js": "^4.4.3",

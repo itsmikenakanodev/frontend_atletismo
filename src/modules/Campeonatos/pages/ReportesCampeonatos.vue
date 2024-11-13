@@ -8,9 +8,6 @@
         <Column field="maleCompetitors" header="Masculino"></Column>
         <Column field="femaleCompetitors" header="Femenino"></Column>
     </DataTable>
-    <Button v-if="reporteCampeonato" @click="cargarCompetidores"
-        :label="showCompetidores == false ? 'Mostrar Competidores' : 'Ocultar Competidores'"></Button>
-    <span></span>
     <div class="contenedorInicio">
 
 
@@ -23,25 +20,25 @@
                     </span>
                     <h2>{{ item.eventName }}</h2>
                 </template>
-                <DataTable v-if="showCompetidores" :value="competidores.filter(c => c.nombreEvento === item.eventName)"
+                <DataTable v-if="item.maleCompetitors > 0 || item.femaleCompetitors > 0" :value="competidores.filter(c => c.nombreEvento === item.eventName)"
                     showGridlines tableStyle="min-width: 50rem">
                     <Column field="provincia" header="Provincia"></Column>
                     <Column field="apellidos" header="Apellido"></Column>
                     <Column field="nombres" header="Nombre"></Column>
                     <Column field="sexo" header="Genero"></Column>
-                    <Column field="esMiembro" header="Socio">
+                    <Column field="numeroCompetidor" header="Nro Competidor">
                         <template #body="{ data }">
-                            <span v-if="data.esMiembro === true">
-                                Si
-                            </span>
-                            <span v-if="data.esMiembro === false">
-                                No
-                            </span>
-
+                            {{ formatNumberWithZeros(data.numeroCompetidor) }}
                         </template>
                     </Column>
+                    <Column field="marca" header="Marca"></Column>
+                    <Column field="distancia" header="Distancia"></Column>
+                    <Column field="posicion" header="Posicion"></Column>
+                    <Column field="puntaje" header="Puntaje"></Column>
 
                 </DataTable>
+
+                <Message v-else severity="info" :closable="false">No hay competidores inscritos en esta prueba.</Message>
             </AccordionTab>
 
 
@@ -103,7 +100,7 @@ export default {
     computed: {
         nombreCampeonato() {
             return this.selectedCampeonato ? this.selectedCampeonato.nombre : '';
-        }
+        },
     },
 
     methods: {
@@ -111,7 +108,10 @@ export default {
         async consultarCampeonatos() {
             this.campeonatos = await obtenerCampeonatosSinPruebasFachada();
         },
-
+        formatNumberWithZeros(numero) {
+            // Convierte el número a string, rellena con ceros a la izquierda y corta a 5 caracteres
+            return numero.toString().padStart(5, '0').slice(0, 5);
+        },
         cargar() {
             this.consultarPruebasDeCampeonato();
         },
@@ -125,18 +125,19 @@ export default {
             this.reportePruebas = conteoPruebas;
             console.log("Pruebas", conteoPruebas)
 
+            this.cargarCompetidores();
+
         },
 
         async cargarCompetidores() {
-            if (!this.showCompetidores) {
-                var reporteCompetidores = await obtenerReporteCompetidoresCampeonatoFachada(this.selectedCampeonato.id);
-                this.competidores = reporteCompetidores;
-                console.log("Competidores", this.competidores)
-            }
+            var reporteCompetidores = await obtenerReporteCompetidoresCampeonatoFachada(this.selectedCampeonato.id);
+            this.competidores = reporteCompetidores;
+            console.log("Competidores", this.competidores)
 
-            this.showCompetidores = !this.showCompetidores;
         },
+
     },
 }
 </script>
-<style></style>
+<style>
+</style>
