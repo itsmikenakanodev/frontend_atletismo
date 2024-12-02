@@ -121,7 +121,7 @@ export default {
     computed: {
         nombreCampeonato() {
             return this.selectedCampeonato ? this.selectedCampeonato.nombre : '';
-        }
+        },
     },
 
     methods: {
@@ -211,13 +211,10 @@ export default {
         },
 
         async cargarCompetidores() {
-            if (!this.showCompetidores) {
-                var reporteCompetidores = await obtenerReporteCompetidoresCampeonatoFachada(this.selectedCampeonato.id);
-                this.competidores = reporteCompetidores;
-                console.log("Competidores", this.competidores)
-            }
+            var reporteCompetidores = await obtenerReporteCompetidoresCampeonatoFachada(this.selectedCampeonato.id);
+            this.competidores = reporteCompetidores;
+            console.log("Competidores", this.competidores)
 
-            this.showCompetidores = !this.showCompetidores;
         },
 
         async obtenerCampeonatos() {

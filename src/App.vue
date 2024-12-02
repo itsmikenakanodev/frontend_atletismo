@@ -146,4 +146,15 @@ export default {
   justify-content: center;
 }
 
+.p-message.p-message-info{
+    background: #90ddf0;
+    border: solid #0a090c;
+    border-width: 1px;
+    color: #0a090c;
+}
+
+.p-message.p-message-info .p-message-icon {
+    color: #0a090c;
+}
+
 </style>
