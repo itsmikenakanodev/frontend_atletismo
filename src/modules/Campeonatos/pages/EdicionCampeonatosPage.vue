@@ -86,7 +86,7 @@
 <script>
 import { actualizarCampeonatosFachada } from "@/modules/Campeonatos/helpers/RegistroCampeonatos.js"
 import CargarArchivo from "@/modules/Registro/components/CargarArchivo.vue";
-import { consultarCampeonatosFachada } from "../helpers/CampeonatosNacionalHelper";
+import { obtenerCampeonatoFachada } from "../helpers/ObtenerCampeonatosHelper";
 import { guardarDocCampeonatosFachada, eliminarDocCampeonatosFachada } from "../helpers/DocumentoCampeonatoHelper";
 
 export default {
@@ -206,31 +206,11 @@ export default {
         comprobarSubida(uploaded) {
             this.docUploaded = uploaded;
         },
-        obtenerCampeonatoPorId(id) {
-            this.campeonato = this.campeonatos.find(c => c.id == id);
-        },
+    
         async obtenerCampeonatos() {
-            try {
-                let campeonatos = localStorage.getItem('campeonatos');
-
-                if (campeonatos) {
-                    // Si existen, parsear y usar los campeonatos guardados
-                    console.log("Campeonatos obtenidos desde Local Storage");
-                    campeonatos = JSON.parse(campeonatos);
-                } else {
-                    // Si no existen, consultar a la fachada
-                    console.log("Campeonatos obtenidos desde LA API");
-                    campeonatos = await consultarCampeonatosFachada();
-                    // Guardar campeonatos en Local Storage para futuras consultas
-                    localStorage.setItem('campeonatos', JSON.stringify(campeonatos));
-                }
-                //const campeonatos = await consultarCampeonatosFachada();
-                this.campeonatos = campeonatos;
-                this.obtenerCampeonatoPorId(this.$route.params.id);
+                
+                this.campeonato = await obtenerCampeonatoFachada(this.$route.params.id);
                 console.log(this.campeonato);
-            } catch (error) {
-                console.error("Error obteniendo campeonatos:", error);
-            }
         }
     },
     async mounted() {

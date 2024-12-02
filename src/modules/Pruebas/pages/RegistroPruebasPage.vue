@@ -6,7 +6,7 @@
       <div class="form-row centerElement">
         <div class="form-group">
           <label for="name">Nombre</label>
-          <input type="text" id="name" placeholder="Ingresa nombre prueba..." required v-model="prueba.nombre" />
+          <input type="text" id="name" placeholder="Ingresa nombre de la prueba que desea crear" required v-model="prueba.nombre" />
         </div>
       </div>
 
@@ -34,19 +34,40 @@
         </div>
       </div>
 
-      <div class="ml-1 mb-4" v-if="prueba.categoria === 'Individual'">
-        <Checkbox v-model="prueba.combinada" inputId="combined" :binary="true" />
-        <label for="combined" class="ml-2"> Agregar Prueba Combinada </label>
-      </div>
+      <div class="form-row centerElement">
+  <div class="form-group">
+    <label for="criterio">Criterio</label>
+    <select
+      id="criterio"
+      v-model="prueba.criterio"
+      required
+      class="center-aligned"
+    >
+      <option disabled value="">Selecciona un criterio a medir en esta prueba</option>
+      <option v-for="(criterio, index) in criterios" :key="index" :value="criterio">
+        {{ criterio }}
+      </option>
+    </select>
+  </div>
+</div>
 
-      <div v-if="prueba.combinada && prueba.categoria === 'Individual'">
-        <DataTable v-model:selection="selectedPrueba" :value="pruebas" paginator showGridlines :rows="5"
-          :rowsPerPageOptions="[5, 10, 20, 50]" tableStyle="min-width: 40rem">
-          <Column selectionMode="multiple" headerStyle="width: 3rem;"></Column>
-          <Column field="nombre" header="Nombre" sortable></Column>
-          <Column field="tipo" header="Tipo" sortable></Column>
-        </DataTable>
-      </div>
+
+
+<div v-if="prueba.categoria === 'Individual' && (prueba.combinada || prueba.criterio === 'Puntos')">
+  <DataTable
+    v-model:selection="selectedPrueba"
+    :value="pruebas"
+    paginator
+    showGridlines
+    :rows="5"
+    :rowsPerPageOptions="[5, 10, 20, 50]"
+    tableStyle="min-width: 40rem"
+  >
+    <Column selectionMode="multiple" headerStyle="width: 3rem;"></Column>
+    <Column field="nombre" header="Nombre" sortable></Column>
+    <Column field="tipo" header="Tipo" sortable></Column>
+  </DataTable>
+</div>
 
       <div class="centerElement">
         <div class="form-group">
@@ -69,10 +90,13 @@ export default {
         categoria: "",
         tipo: "",
         combinada: false,
-        descripcion: ""
+        descripcion: "",
+        criterio: "", // Nuevo atributo
+
       },
       tipos: ["Pista", "Campo"],
       categorias: ["Individual", "Colectiva"],
+      criterios: ["Tiempo", "Distancia", "Puntos"],
       loading: false,
       pruebas: [],
       selectedPrueba: [],
@@ -81,11 +105,13 @@ export default {
   methods: {
     async listarPruebas() {
       try {
-        const response = await obtenerPruebasFachada();
-        this.pruebas = response;
-      } catch (error) {
-        console.error("Error al listar las pruebas:", error);
-      }
+    const response = await obtenerPruebasFachada();
+    this.pruebas = response.filter((prueba) => {
+      return this.prueba.criterio !== 'Puntos' || prueba.esPuntual === true;
+    });
+  } catch (error) {
+    console.error("Error al listar las pruebas:", error);
+  }
     },
     async registrar() {
       this.prueba.pruebasCombinadas = this.prueba.combinada;
@@ -116,7 +142,8 @@ export default {
           categoria: "",
           tipo: "",
           combinada: false,
-          descripcion: ""
+          descripcion: "",
+          criterio: ""
         };
       } catch (e) {
         console.error(e);
@@ -191,6 +218,11 @@ h2 {
   box-sizing: border-box;
   background-color: #2c666e;
   color: #90ddf0;
+}
+
+.form-group input::placeholder {
+  color: #90ddf0;
+  text-align: center; /* Asegura que el placeholder también esté centrado */
 }
 
 .form-group button {

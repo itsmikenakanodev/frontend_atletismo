@@ -36,7 +36,7 @@ const consultarCampeonato = async () => {
 
 const consultarCampeonatoFiltro = async (anio, mes) => {
   try {
-    const url = getApiUrl("campeonatos/filtrar");
+    const url = getApiUrl("campeonatos/campeonatos-con-pruebas");
     const response = await axios.get(url+`?anio=${anio}&mes=${mes}`);
     return response.data;
   } catch (error) {

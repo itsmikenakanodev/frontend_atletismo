@@ -1,60 +1,71 @@
 <template>
-    <h2>Reporte {{ nombreCampeonato }}</h2>
-    <Dropdown v-model="selectedCampeonato" :options="campeonatos" filter optionLabel="nombre" placeholder="Seleccione"
-        class="w-full md:w-30rem"></Dropdown>
-    <Button v-if="selectedCampeonato !== null" @click="cargar" label="Cargar Reporte"></Button>
-    <span></span>
-    <DataTable :value="reporteCampeonato" showGridlines class="mt-3" tableStyle="min-width: 50rem">
-        <Column field="maleCompetitors" header="Masculino"></Column>
-        <Column field="femaleCompetitors" header="Femenino"></Column>
-    </DataTable>
-    <Button v-if="reporteCampeonato" @click="cargarCompetidores"
-        :label="showCompetidores == false ? 'Mostrar Competidores' : 'Ocultar Competidores'"></Button>
-    <span></span>
-    <div class="contenedorInicio">
+    <div class="container">
+        <Toast></Toast>
+        <h2 class="title">Reporte del campeonato: {{ nombreCampeonato }}</h2>
 
+        <section class="filtros">
+            <div class="filtro">
+                <span class="filtro-text">Año:</span>
+                <div class="filtro-opciones filtro-anos">
+                    <button v-for="year in availableYears" 
+                        :key="year"
+                        :class="['filtro-boton', { activo: year === selectedYear }]" 
+                        @click="filtrarCampeonatosPorAno(year)">
+                        {{ year }}
+                    </button>
+                </div>
+            </div>
 
-        <Accordion v-if="reportePruebas && reportePruebas.length > 0" :activeIndex="0">
-            <AccordionTab v-for="(item, index) in reportePruebas" :key="index">
-                <template #header>
-                    <span>
-                        <h3>Damas: {{ item.femaleCompetitors }}</h3>
-                        <h3>Varones: {{ item.maleCompetitors }}</h3>
-                    </span>
-                    <h2>{{ item.eventName }}</h2>
-                </template>
-                <DataTable v-if="showCompetidores" :value="competidores.filter(c => c.nombreEvento === item.eventName)"
-                    showGridlines tableStyle="min-width: 50rem">
-                    <Column field="provincia" header="Provincia"></Column>
-                    <Column field="apellidos" header="Apellido"></Column>
-                    <Column field="nombres" header="Nombre"></Column>
-                    <Column field="sexo" header="Genero"></Column>
-                    <Column field="esMiembro" header="Socio">
-                        <template #body="{ data }">
-                            <span v-if="data.esMiembro === true">
-                                Si
-                            </span>
-                            <span v-if="data.esMiembro === false">
-                                No
-                            </span>
+            <div class="filtro">
+                <span class="filtro-text">Mes:</span>
+                <div class="filtro-opciones filtro-meses">
+                    <button v-for="(mes, index) in meses" 
+                        :key="index"
+                        :class="['filtro-boton', { activo: index + 1 === selectedMonth }]"
+                        @click="filtrarCampeonatosPorMes(index + 1)">
+                        {{ mes }}
+                    </button>
+                </div>
+            </div>
+        </section>
 
-                        </template>
-                    </Column>
-
-                </DataTable>
-            </AccordionTab>
-
-
-        </Accordion>
-
+        <div class="dropdown-container">
+            <Dropdown 
+                v-model="selectedCampeonato" 
+                :options="campeonatosFiltrados" 
+                filter 
+                optionLabel="nombre" 
+                placeholder="Seleccione el campeonato que desea ver..."
+                class="dropdown"
+            ></Dropdown>
+            <Button 
+                v-if="selectedCampeonato !== null" 
+                @click="cargar" 
+                label="Cargar Reporte"
+                class="primary-button"
+            ></Button>
+        </div>
+        
+        <DetalleReporteCampeonato
+            v-if="reporteCampeonato && reportePruebas"
+            :reporteCampeonato="reporteCampeonato"
+            :reportePruebas="reportePruebas"
+            :competidores="competidores"
+        />
     </div>
-
 </template>
+
 <script>
+import DetalleReporteCampeonato from '../components/DetalleReporteCampeonato.vue'
 import { obtenerCampeonatosSinPruebasFachada } from "../helpers/ObtenerCampeonatosHelper.js"
 import { obtenerReporteCampeonatoFachada, obtenerReportePruebasCampeonatoFachada, obtenerReporteCompetidoresCampeonatoFachada } from "../helpers/ReportesHelper.js";
+
 export default {
+    components: {
+        DetalleReporteCampeonato
+    },
     data() {
+        const currentDate = new Date();
         return {
             provincias: [
                 "Azuay",
@@ -92,11 +103,18 @@ export default {
             competidores: [],
             reporteCampeonato: null,
             reportePruebas: null,
-            showCompetidores: false
+            showCompetidores: false,
+            activeIndex: null,
+            selectedYear: currentDate.getFullYear(),
+            selectedMonth: currentDate.getMonth() + 1,
+            meses: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+            availableYears: [],
+            campeonatosFiltrados: [],
         }
     },
     mounted() {
-        //this.consultarCampeonatosPruebas()
+        console.log("Valores iniciales - año:", this.selectedYear, "mes:", this.selectedMonth);
+        this.availableYears = this.getAvailableYears(2024);
         this.consultarCampeonatos();
     },
 
@@ -107,24 +125,89 @@ export default {
     },
 
     methods: {
-
         async consultarCampeonatos() {
-            this.campeonatos = await obtenerCampeonatosSinPruebasFachada();
+            try {
+                console.log("Consultando campeonatos con año:", this.selectedYear, "mes:", this.selectedMonth);
+                const response = await obtenerCampeonatosSinPruebasFachada(
+                    this.selectedYear,
+                    this.selectedMonth
+                );
+                this.campeonatosFiltrados = response || [];
+            } catch (error) {
+                console.error("Error al obtener campeonatos:", error);
+                this.$toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'No se pudieron cargar los campeonatos',
+                    life: 3000
+                });
+            }
         },
 
-        cargar() {
-            this.consultarPruebasDeCampeonato();
+        filtrarCampeonatosPorAno(year) {
+            this.selectedYear = year;
+            this.consultarCampeonatos();
+        },
+
+        filtrarCampeonatosPorMes(month) {
+            this.selectedMonth = month;
+            this.consultarCampeonatos();
+        },
+
+        getAvailableYears(startYear) {
+            const currentYear = new Date().getFullYear();
+            const years = [];
+            for (let year = startYear; year <= currentYear; year++) {
+                years.push(year);
+            }
+            return years;
+        },
+
+        async toggleTab(event) {
+            const index = event.index;
+            if (this.activeIndex === index) {
+                // Si el índice activo ya es el clicado, cerramos el acordeón
+                this.activeIndex = null;
+            } else {
+                // Actualizamos el índice activo y cargamos los competidores si es necesario
+                this.activeIndex = index;
+
+                if (!this.competidores.length) {
+                    const reporteCompetidores = await obtenerReporteCompetidoresCampeonatoFachada(this.selectedCampeonato.id);
+                    this.competidores = reporteCompetidores;
+                }
+            }
+        },
+
+        async cargar() {
+            try {
+                await this.consultarPruebasDeCampeonato();
+                if (this.reporteCampeonato.length === 0) {
+                    this.$toast.add({ 
+                        severity: 'info', 
+                        summary: 'Sin datos', 
+                        detail: 'No se encontraron datos para este campeonato', 
+                        life: 3000 
+                    });
+                }
+            } catch (error) {
+                if (error.response && error.response.status === 500) {
+                    this.$toast.add({ 
+                        severity: 'error', 
+                        summary: 'Error', 
+                        detail: 'El campeonato no tiene competidores inscritos', 
+                        life: 3000 
+                    });
+                }
+            }
         },
 
         async consultarPruebasDeCampeonato() {
             var conteoCampeonato = await obtenerReporteCampeonatoFachada(this.selectedCampeonato.id);
-            this.reporteCampeonato = [conteoCampeonato];
-            console.log("Campeonato", conteoCampeonato)
-
+            this.reporteCampeonato = conteoCampeonato ? [conteoCampeonato] : [];
+            
             var conteoPruebas = await obtenerReportePruebasCampeonatoFachada(this.selectedCampeonato.id);
             this.reportePruebas = conteoPruebas;
-            console.log("Pruebas", conteoPruebas)
-
         },
 
         async cargarCompetidores() {
@@ -136,7 +219,195 @@ export default {
 
             this.showCompetidores = !this.showCompetidores;
         },
+
+        async obtenerCampeonatos() {
+            try {
+                console.log("Solicitando campeonatos para:", this.selectedYear, this.selectedMonth); // Para depuración
+                const response = await obtenerCampeonatosSinPruebasFachada(
+                    this.selectedYear, 
+                    this.selectedMonth
+                );
+                if (response) {
+                    console.log("Campeonatos recibidos:", response); // Para depuración
+                    this.campeonatosFiltrados = response;
+                } else {
+                    console.log("No se recibieron datos");
+                }
+            } catch (error) {
+                console.error("Error al obtener campeonatos:", error);
+                this.$toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'No se pudieron cargar los campeonatos',
+                    life: 3000
+                });
+            }
+        },
     },
 }
 </script>
-<style></style>
+
+
+<style scoped>
+.container {
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+}
+.dropdown-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+.dropdown {
+    flex: 1;
+}
+.primary-button {
+    background-color: #2c666e;
+    color: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+.primary-button:hover {
+    background-color: #07393c;
+}
+.data-table {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.accordion {
+    border: none;
+}
+
+.competitor-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.categories {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Espacio entre las categorías */
+    
+}
+.category {
+    font-size: 16px;
+    font-weight: normal;
+}
+.female {
+    color: #d63384;
+}
+.male {
+    color: #0d6efd;
+}
+.event-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+/* Contenedor Principal */
+.contenedorInicio {
+    margin-top: 20px;
+}
+
+.accordion-header:hover {
+    background-color: #e9ecef;
+}
+.event-details {
+    display: flex;
+    flex-direction: column;
+}
+.event-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0;
+}
+.accordion-content {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    margin-bottom: 15px;
+}
+
+/* Tabla */
+.data-table {
+    margin-top: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Etiquetas para Sí/No */
+.badge {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 14px;
+    color: white;
+    text-align: center;
+}
+.badge-yes {
+    background-color: #28a745;
+}
+.badge-no {
+    background-color: #dc3545;
+}
+
+.filtros {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 30px;
+    align-items: center;
+}
+
+.filtro {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filtro-text {
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.filtro-opciones {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filtro-boton {
+    background-color: #2c666e;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.filtro-boton:hover {
+    background-color: #07393c;
+}
+
+.filtro-boton.activo {
+    background-color: #07393c;
+    font-weight: bold;
+}
+
+</style>

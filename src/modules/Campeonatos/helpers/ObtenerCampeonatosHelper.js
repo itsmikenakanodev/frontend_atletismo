@@ -20,9 +20,10 @@ export const obtenerCampeonatoFachada = async (id) => {
   }
 };
 
-export const obtenerCampeonatosSinPruebasFachada = async () => {
+export const obtenerCampeonatosSinPruebasFachada = async (anio, mes) => {
   try {
-    return await obtenerCampeonatosSinPruebas();
+    console.log("Fachada recibió parámetros - año:", anio, "mes:", mes); // Para depuración
+    return await obtenerCampeonatosSinPruebas(anio, mes);
   } catch (error) {
     console.error("Error obteniendo campeonatos sin pruebas:", error);
     throw error;
@@ -52,10 +53,18 @@ const obtenerCampeonato = async (id) => {
   }
 };
 
-const obtenerCampeonatosSinPruebas = async () => {
+const obtenerCampeonatosSinPruebas = async (anio, mes) => {
   try {
-    const url = getApiUrl(`campeonatos/dto/ligero`);
-    const response = await axios.get(url);
+    // Validar que los parámetros no sean undefined
+    if (!anio || !mes) {
+      console.error('Año o mes no definidos:', { anio, mes });
+      throw new Error('Año y mes son requeridos');
+    }
+
+    const url = getApiUrl(`campeonatos/campeonatos-sin-pruebas`);
+    console.log('URL de la petición:', url + `?anio=${anio}&mes=${mes}`);
+    
+    const response = await axios.get(url + `?anio=${anio}&mes=${mes}`);
     return response.data;
   } catch (error) {
     console.error("Error en la llamada API para obtener campeonatos sin pruebas:", error);

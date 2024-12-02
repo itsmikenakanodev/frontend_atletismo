@@ -1,20 +1,19 @@
 <template>
   <Menubar :model="filteredItems">
-    <template #start> </template>
-    <template #item="{ item, props, hasSubmenu, root }">
-      <a v-ripple class="flex align-items-center" v-bind="props.action">
-        <span :class="item.icon" />
-        <span class="ml-2">{{ item.label }}</span>
-        <Badge v-if="item.badge" :class="{ 'ml-auto': !root, 'ml-2': root }" :value="item.badge" />
-        <span v-if="item.shortcut" class="ml-auto border-1 surface-border border-round surface-100 text-xs p-1">{{ item.shortcut }}</span>
-        <i v-if="hasSubmenu" :class="[
-          'pi pi-angle-down',
-          { 'pi-angle-down ml-2': root, 'pi-angle-right ml-auto': !root },
-        ]"></i>
-      </a>
+    <template #start>
+      <!-- Mantener el espacio para otros elementos si es necesario -->
     </template>
+
     <template #end>
-      <div class="flex align-items-center gap-2"></div>
+      <div class="session-button-container">
+        <button 
+          class="session-button"
+          @click="handleSessionAction"
+        >
+          <i :class="sessionButtonIcon"></i>
+          <span>{{ sessionButtonLabel }}</span>
+        </button>
+      </div>
     </template>
   </Menubar>
 </template>
@@ -32,7 +31,7 @@ export default {
           command: () => {
             router.push("/");
           },
-          visible: true, // Siempre visible
+          visible: true,
         },
         {
           label: "Registrarse",
@@ -40,7 +39,7 @@ export default {
           command: () => {
             router.push("/registro");
           },
-          visible: true, // Visible solo si no hay un usuario
+          visible: true,
         },
         {
           label: "Socio",
@@ -48,7 +47,7 @@ export default {
           command: () => {
             router.push("/socio");
           },
-          visible: false, // Inicializado como falso
+          visible: false,
         },
         {
           label: "Atletas",
@@ -67,12 +66,20 @@ export default {
           visible: true,
         },
         {
+          label: "Reportes de Campeonatos",
+          icon: "pi pi-book",
+          command: () => {
+            router.push("/administracion/campeonatos/reportes");
+          },
+          visible: true,
+        },
+        {
           label: "Contáctanos",
           icon: "pi pi-envelope",
           command: () => {
             router.push("/contacto");
           },
-          visible: false, // Inicializado como falso
+          visible: false,
         },
         {
           label: "Adm",
@@ -119,14 +126,6 @@ export default {
               visible: true,
             },
             {
-              label: "Campeonatos Reportes",
-              icon: "pi pi-book",
-              command: () => {
-                router.push("/administracion/campeonatos/reportes");
-              },
-              visible: true,
-            },
-            {
               label: "Crear Campeonato",
               icon: "pi pi-pen-to-square",
               command: () => {
@@ -155,9 +154,9 @@ export default {
         },
       ],
       user: null,
-      admin: false, // Inicializado como falso
+      admin: false,
       adminN: false,
-      contac: false // Inicializado como falso
+      contac: false
     };
   },
   created() {
@@ -168,23 +167,21 @@ export default {
 
       if (this.user.rol.id === 1) {
         this.admin = this.user.rol.id === 1;
-        // Actualizar visibilidad de los ítems del menú
         this.items.forEach(item => {
           if (item.label === "Adm") {
             item.visible = this.admin;
           } else if (item.label === "Socio") {
-            item.visible = !this.admin; // Ejemplo de ajuste según el rol
+            item.visible = !this.admin;
           } else if (item.label === "Campeonatos Nacionales") {
             item.visible = true;
           } else if (item.label === "Registrarse") {
-            item.visible = false; // Ocultar el registro si el usuario está conectado
+            item.visible = false;
           } else if (item.label === "Cerrar sesión") {
-            item.visible = true; // Ocultar el registro si el usuario está conectado
+            item.visible = true;
           }
         });
       } else if (this.user.rol.id === 6) {
         this.adminN = this.user.rol.id === 6;
-        // Actualizar visibilidad de los ítems del menú
         this.items.forEach(item => {
           if (item.label === "Adm") {
             item.visible = this.adminN;
@@ -196,23 +193,22 @@ export default {
               }
             });
           } else if (item.label === "Socio") {
-            item.visible = !this.adminN; // Ejemplo de ajuste según el rol
+            item.visible = !this.adminN;
           } else if (item.label === "Campeonatos Nacionales") {
             item.visible = true;
           } else if (item.label === "Registrarse") {
-            item.visible = false; // Ocultar el registro si el usuario está conectado
+            item.visible = false;
           } else if (item.label === "Cerrar sesión") {
-            item.visible = true; // Ocultar el registro si el usuario está conectado
+            item.visible = true;
           }
         });
       } else if (this.user.rol.id === 5) {
         this.contac = true;
-        // Actualizar visibilidad de los ítems del menú
         this.items.forEach(item => {
         if (item.label === "Contáctanos") {
             item.visible = true;
         } else if (item.label === "Registrarse") {
-            item.visible = false; // Ocultar "Registrarse" si el usuario está conectado
+            item.visible = false;
         }
     });
       } else {
@@ -234,48 +230,89 @@ export default {
       this.adminN = this.user.rol.id === 6;
       console.log("user ls ", this.user);
       console.log("admin ls ", this.admin);
-
-      this.items.unshift({
-        label: "Cerrar sesión",
-        icon: "pi pi-sign-out",
-        command: () => {
-          localStorage.setItem("userdata", null);
-          router.push("/");
-          setTimeout(() => {
-            window.location.reload();
-          }, 0);
-        },
-      });
     } else {
-      this.contac = true; // Mostrar "Contáctanos" si no hay usuario
+      this.contac = true;
       this.items.forEach(item => {
         if (item.label === "Contáctanos") {
           item.visible = this.contac;
         }
         if (item.label === "Adm") {
           item.visible = false;
-        } else if (item.label === "Cerrar sesión") {
-          item.visible = false;
         }
-      });
-      this.items.unshift({
-        label: "Iniciar sesión",
-        icon: "pi pi-sign-in",
-        command: () => router.push("/login")
       });
     }
   },
   computed: {
     filteredItems() {
       return this.items.filter(item => item.visible !== false);
+    },
+    sessionButtonLabel() {
+      return this.user ? 'Cerrar sesión' : 'Iniciar sesión';
+    },
+    sessionButtonIcon() {
+      return this.user ? 'pi pi-sign-out' : 'pi pi-sign-in';
     }
   },
   methods: {
-    toggle() {
-      this.$refs.menu.toggle();
-    },
-  },
+    handleSessionAction() {
+      if (this.user) {
+        localStorage.setItem("userdata", null);
+        router.push("/");
+        setTimeout(() => {
+          window.location.reload();
+        }, 0);
+      } else {
+        router.push("/login");
+      }
+    }
+  }
 };
 </script>
 
-<style lang=""></style>
+<style scoped>
+.session-button-container {
+  margin-right: 1rem;
+}
+
+.session-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 2px solid #2c666e;
+  border-radius: 20px;
+  background-color: transparent;
+  color: #2c666e;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.session-button:hover {
+  background-color: #2c666e;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(44, 102, 110, 0.2);
+}
+
+.session-button i {
+  font-size: 1rem;
+}
+
+:deep(.p-menuitem-link) {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+:deep(.p-menuitem-icon) {
+  margin-right: 0.5rem;
+}
+
+:deep(.p-menuitem-text) {
+  font-weight: normal;
+}
+</style>

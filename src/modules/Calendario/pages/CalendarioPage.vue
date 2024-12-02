@@ -64,19 +64,45 @@
               <span>{{ expandedCampeonatos.includes(campeonato.id) ? ' Ocultar pruebas del campeonato' : ' Mostrar pruebas del campeonato' }}</span>
             </div>
 
-            <!-- Botón de inscripción solo para usuarios con rol 5 -->
-            <button class="inscribirse-boton" v-if="usuario && usuario.rol && usuario.rol.id === 5"
-              @click="mostrarInscripcionCampeonato(campeonato.id)">
-              Inscribirse
-            </button>
-            <!-- Botón de edicion solo para usuarios con rol 1 y 6 -->
-            <button class="editar-boton" v-if="usuario && usuario.rol && (usuario.rol.id === 1 || usuario.rol.id === 6)"
-              @click="mostrarEdicionCampeonato(campeonato.id)">
-              Editar
-            </button>
-            <!-- Agrega este botón justo antes del cierre de la sección -->
-            <button class="ver-documentos-boton" @click="verDocumentos(campeonato.id)">Ver Documentos</button>
+            <div class="botones-acciones">
+              <div class="espaciador"></div>
+              <!-- Botón de inscripción/reportes para rol 5 -->
+              <button 
+                  class="accion-boton" 
+                  v-if="usuario && usuario.rol && usuario.rol.id === 5"
+                  @click="campeonatoFinalizado(campeonato) ? verReportes() : mostrarInscripcionCampeonato(campeonato.id)"
+              >
+                  {{ campeonatoFinalizado(campeonato) ? 'Ver Reportes' : 'Inscribirse' }}
+              </button>
 
+              <!-- Botón de edición -->
+              <button 
+                  class="accion-boton" 
+                  v-if="usuario && usuario.rol && 
+                        (usuario.rol.id === 1 || usuario.rol.id === 6) && 
+                        !campeonatoFinalizado(campeonato)"
+                  @click="mostrarEdicionCampeonato(campeonato.id)"
+              >
+                  Editar
+              </button>
+
+              <!-- Nuevo botón de Ver Reportes para roles 1 y 6 -->
+              <button 
+                  class="accion-boton" 
+                  v-if="usuario && usuario.rol && (usuario.rol.id === 1 || usuario.rol.id === 6)"
+                  @click="verReportes()"
+              >
+                  Ver Reportes
+              </button>
+
+              <!-- Botón de ver documentos -->
+              <button 
+                  class="accion-boton" 
+                  @click="verDocumentos(campeonato.id)"
+              >
+                  Ver Documentos
+              </button>
+            </div>
           </div>
 
           <!-- Tabla de pruebas -->
@@ -286,7 +312,18 @@ export default {
             alert("Hubo un error al intentar eliminar la prueba.");
           });
       }
-    }
+    },
+    // Agregamos el método para verificar si el campeonato está finalizado
+    campeonatoFinalizado(campeonato) {
+      const today = new Date();
+      const fechaFin = new Date(campeonato.fechaFin);
+      return today > fechaFin;
+    },
+
+    // Agregamos el método para redireccionar a reportes
+    verReportes() {
+      this.$router.push('/administracion/campeonatos/reportes');
+    },
   }
 };
 </script>
@@ -325,19 +362,8 @@ export default {
   margin-bottom: 10px;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.inscribirse-boton {
-  background-color: #2c666e;
-  color: #ffffff;
-  border: none;
-  padding: 10px 20px;
-  font-size: 1rem;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  min-width: 120px; /* Aseguramos un ancho mínimo para ambos textos */
 }
 
 .inscribirse-boton:hover {
@@ -368,20 +394,66 @@ export default {
 /* Contenedor para acciones del campeonato */
 .campeonato-actions {
   display: flex;
-  gap: 10px;
-  /* Espacio entre los botones */
-  align-items: center;
-  justify-content: flex-start;
-  /* Alinea los botones a la izquierda */
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 15px;
+  width: 100%;
 }
 
-/* Estilo para detalles de la prueba */
-.prueba-detalle {
-  margin-top: 10px;
-  padding: 10px;
-  background-color: #07393c;
-  border: 1px solid #ddd;
+/* Contenedor para los botones de acción */
+.botones-acciones {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+/* Espaciador que empuja los botones hacia la derecha */
+.espaciador {
+  flex-grow: 1;
+}
+
+/* Estilo unificado para todos los botones de acción */
+.accion-boton {
+  background-color: #2c666e;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
   border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  height: 40px;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.accion-boton:hover {
+  background-color: #ffffff;
+  color: #07393c;
+  border: 1px solid #07393c;
+}
+
+/* Estilo para el botón de toggle pruebas */
+.toggle-pruebas-btn {
+  background-color: #2c666e;
+  color: #ffffff;
+  border: none;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.toggle-pruebas-btn:hover {
+  background-color: #4b8b92;
 }
 
 /* estilo para tag*/
@@ -390,11 +462,42 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin: 5px;
+  gap: 10px;
+  padding: 10px;
+  min-width: 120px; /* Asegura un ancho mínimo consistente */
 }
 
 .tag-icon {
-  margin: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+/* Estilo del calendario */
+.calendar-icon {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f1f1f1;
+  color: #2c666e;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  text-align: center;
+  padding: 5px;
+}
+
+.day {
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.month {
+  font-size: 1rem;
+  margin-top: 2px;
 }
 
 /* Estilo general */
@@ -513,7 +616,7 @@ p {
 
 .campeonato-card {
   display: flex;
-  align-items: center;
+  gap: 20px;
   background-color: #2c666e;
   border-radius: 10px;
   padding: 15px;
@@ -526,23 +629,10 @@ p {
   box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
 }
 
-.calendar-icon {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: #f1f1f1;
-  color: #2c666e;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  margin-right: 15px;
-  text-align: center;
-  font-size: 1.2rem;
-}
-
 .campeonato-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .campeonato-title {
@@ -616,4 +706,13 @@ p {
 .ver-documentos-boton:hover {
   background-color: #4b8b92;
 } 
+
+/* Asegurarse que el Tag de PrimeVue esté centrado */
+:deep(.p-tag) {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  white-space: nowrap;
+}
 </style>
