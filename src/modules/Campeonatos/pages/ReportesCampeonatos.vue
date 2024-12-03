@@ -40,12 +40,14 @@
             ></Dropdown>
             <Button 
                 v-if="selectedCampeonato !== null" 
-                @click="cargar" 
+                @click="cargarReporte" 
                 label="Cargar Reporte"
                 class="primary-button"
             ></Button>
         </div>
         
+        <LoadingSpinner v-if="loading" :mensaje="loadingMessage" />
+
         <DetalleReporteCampeonato
             v-if="reporteCampeonato && reportePruebas"
             :reporteCampeonato="reporteCampeonato"
@@ -59,10 +61,12 @@
 import DetalleReporteCampeonato from '../components/DetalleReporteCampeonato.vue'
 import { obtenerCampeonatosSinPruebasFachada } from "../helpers/ObtenerCampeonatosHelper.js"
 import { obtenerReporteCampeonatoFachada, obtenerReportePruebasCampeonatoFachada, obtenerReporteCompetidoresCampeonatoFachada } from "../helpers/ReportesHelper.js";
+import LoadingSpinner from '../../../components/LoadingSpinner.vue';
 
 export default {
     components: {
-        DetalleReporteCampeonato
+        DetalleReporteCampeonato,
+        LoadingSpinner
     },
     data() {
         const currentDate = new Date();
@@ -95,7 +99,6 @@ export default {
             ],
             campeonatos: [],
             selectedCampeonato: null,
-
             selectedPruebasCompetidores: null,
             pruebasCompetidores: null,
             selectedCampeonatoPrueba: null,
@@ -110,6 +113,8 @@ export default {
             meses: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
             availableYears: [],
             campeonatosFiltrados: [],
+            loading: false,
+            loadingMessage: "Cargando reporte, espere un momento...",
         }
     },
     mounted() {
@@ -146,12 +151,21 @@ export default {
 
         filtrarCampeonatosPorAno(year) {
             this.selectedYear = year;
+            this.resetReportData();
             this.consultarCampeonatos();
         },
 
         filtrarCampeonatosPorMes(month) {
             this.selectedMonth = month;
+            this.resetReportData();
             this.consultarCampeonatos();
+        },
+
+        resetReportData() {
+            this.reporteCampeonato = null;
+            this.reportePruebas = null;
+            this.competidores = [];
+            this.selectedCampeonato = null;
         },
 
         getAvailableYears(startYear) {
@@ -163,13 +177,34 @@ export default {
             return years;
         },
 
+        async cargarReporte() {
+            this.loading = true;
+            this.loadingMessage = "Cargando reporte, espere un momento...";
+
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            try {
+                this.reporteCampeonato = await obtenerReporteCampeonatoFachada(this.selectedCampeonato.id);
+                this.reportePruebas = await obtenerReportePruebasCampeonatoFachada(this.selectedCampeonato.id);
+                this.competidores = await obtenerReporteCompetidoresCampeonatoFachada(this.selectedCampeonato.id);
+            } catch (error) {
+                console.error("Error al cargar el reporte:", error);
+                this.$toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'El campeonato seleccionado no tiene competidores inscritos, seleccione otro campeonato.',
+                    life: 3000
+                });
+            } finally {
+                this.loading = false;
+            }
+        },
+
         async toggleTab(event) {
             const index = event.index;
             if (this.activeIndex === index) {
-                // Si el índice activo ya es el clicado, cerramos el acordeón
                 this.activeIndex = null;
             } else {
-                // Actualizamos el índice activo y cargamos los competidores si es necesario
                 this.activeIndex = index;
 
                 if (!this.competidores.length) {
@@ -177,37 +212,6 @@ export default {
                     this.competidores = reporteCompetidores;
                 }
             }
-        },
-
-        async cargar() {
-            try {
-                await this.consultarPruebasDeCampeonato();
-                if (this.reporteCampeonato.length === 0) {
-                    this.$toast.add({ 
-                        severity: 'info', 
-                        summary: 'Sin datos', 
-                        detail: 'No se encontraron datos para este campeonato', 
-                        life: 3000 
-                    });
-                }
-            } catch (error) {
-                if (error.response && error.response.status === 500) {
-                    this.$toast.add({ 
-                        severity: 'error', 
-                        summary: 'Error', 
-                        detail: 'El campeonato no tiene competidores inscritos', 
-                        life: 3000 
-                    });
-                }
-            }
-        },
-
-        async consultarPruebasDeCampeonato() {
-            var conteoCampeonato = await obtenerReporteCampeonatoFachada(this.selectedCampeonato.id);
-            this.reporteCampeonato = conteoCampeonato ? [conteoCampeonato] : [];
-            
-            var conteoPruebas = await obtenerReportePruebasCampeonatoFachada(this.selectedCampeonato.id);
-            this.reportePruebas = conteoPruebas;
         },
 
         async cargarCompetidores() {
@@ -243,7 +247,6 @@ export default {
     },
 }
 </script>
-
 
 <style scoped>
 .container {

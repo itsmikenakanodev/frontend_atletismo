@@ -58,7 +58,7 @@ export default {
           visible: true,
         },
         {
-          label: "Campeonatos",
+          label: "Calendario de campeonatos",
           icon: "pi pi-calendar",
           command: () => {
             router.push("/calendarios");

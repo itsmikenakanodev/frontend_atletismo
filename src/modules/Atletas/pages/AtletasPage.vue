@@ -5,14 +5,20 @@
       <div class="search-bar">
         <InputText v-model="searchQuery" placeholder="Buscar por cédula o apellido" />
         <Button 
-          :label="loading ? 'Cargando...' : 'Buscar'" 
+          :label="'Buscar'" 
           icon="pi pi-search" 
           @click="searchAtletas" 
-          :disabled="loading"
+          :disabled="!searchQuery"
         />
       </div>
-  
-      <DataTable :value="atletas" :paginator="true" :rows="10" class="atletas-table" v-if="atletas.length > 0">
+
+      <LoadingSpinner v-if="loading" mensaje="Cargando atletas..." />
+
+      <div v-if="searched && !loading && !atletas.length">
+        <p>No se encontraron atletas que cumplan con los criterios de búsqueda.</p>
+      </div>
+      
+      <DataTable v-if="!loading && searched && atletas.length" :value="atletas" :paginator="true" :rows="10" class="atletas-table">
         <Column field="nombres" header="Nombre" />
         <Column field="apellidos" header="Apellido" />
         <Column field="cedula" header="Cédula" />
@@ -23,60 +29,51 @@
           </template>
         </Column>
       </DataTable>
-  
-      <p v-else-if="searched && atletas.length === 0">
-        No se encontraron atletas que cumplan con los criterios de búsqueda.
-      </p>
-  
-      <!-- Componente de Perfil Atleta -->
-      <PerfilAtleta
-        :visible="perfilVisible"
-        :atleta="selectedAtleta"
-        @update:visible="perfilVisible = $event"
-      />
     </div>
-  </template>
+</template>
   
   <script>
   import { buscarAtletasFachada } from '../helpers/getAtletas';
   import PerfilAtleta from '../components/PerfilAtleta.vue';
+  import LoadingSpinner from '../../../components/LoadingSpinner.vue';
   
   export default {
     components: {
-      PerfilAtleta
+      PerfilAtleta,
+      LoadingSpinner
     },
     data() {
       return {
         searchQuery: '',
         atletas: [],
-        perfilVisible: false,
-        selectedAtleta: null,
-        searched: false,  // Bandera para controlar si se ha realizado una búsqueda
-        loading: false    // Bandera para controlar el estado de carga del botón
+        searched: false,
+        loading: false
       };
     },
     methods: {
       async searchAtletas() {
         this.searched = true;
-        this.loading = true;  // Marca que la búsqueda está en progreso
-  
+        this.loading = true;
+
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
         try {
           if (!this.searchQuery) {
             this.atletas = [];
             return;
           }
-  
+
           const searchParams = {
             cedula: this.searchQuery.match(/^\d+$/) ? this.searchQuery : undefined,
             apellidos: isNaN(this.searchQuery) ? this.searchQuery : undefined
           };
-  
+
           this.atletas = await buscarAtletasFachada(searchParams);
         } catch (error) {
           console.error("Error al buscar atletas:", error);
           this.atletas = [];
         } finally {
-          this.loading = false;  // Marca que la búsqueda ha terminado
+          this.loading = false;
         }
       },
       showPerfil(atleta) {

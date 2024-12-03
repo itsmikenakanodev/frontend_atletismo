@@ -18,12 +18,13 @@ import InscripcionCompetidores from '../modules/Campeonatos/pages/InscripcionCom
 import ReportesCampeonatos from '@/modules/Campeonatos/pages/ReportesCampeonatos.vue';
 import AdministracionInscripcion from '../modules/Administracion/pages/AdmInscripciones.vue';
 import CalendarioPage from '../modules/Calendario/pages/CalendarioPage.vue';
- import CentroAyudaPage from  '../modules/Ayuda/pages/CentroAyudaPage.vue';
- import ContactanosPage from  '../modules/Ayuda/pages/ContactanosPage.vue';
- import Documentos from  '../modules/Documentos/pages/Documentos.vue';
+import CentroAyudaPage from  '../modules/Ayuda/pages/CentroAyudaPage.vue';
+import ContactanosPage from  '../modules/Ayuda/pages/ContactanosPage.vue';
+import Documentos from  '../modules/Documentos/pages/Documentos.vue';
 // Importa el nuevo componente para Atletas
 import AtletasPage from '../modules/Atletas/pages/AtletasPage.vue';
 import EdicionCampeonatosPage from '@/modules/Campeonatos/pages/EdicionCampeonatosPage.vue';
+import ReporteCampeonatoEspecifico from '../modules/Campeonatos/pages/ReporteCampeonatoEspecifico.vue';
 
 const routes = [
   { path: '/administracion/usuarios', component: AdministrationView },
@@ -48,6 +49,7 @@ const routes = [
   { path: '/login', component: LoginPage },
   { path: '/atletas', component: AtletasPage },
   { path: '/calendarios', component: CalendarioPage },
+  { path: '/campeonatos/:id/reporte', name: 'ReporteCampeonatoEspecifico', component: ReporteCampeonatoEspecifico },
 ];
 
 const router = createRouter({

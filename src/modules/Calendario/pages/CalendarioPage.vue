@@ -1,138 +1,149 @@
 <template>
   <div class="campeonatos-container">
-    <header class="header">
-      <h1>Campeonatos Nacionales</h1>
-      <p>Explora los campeonatos disponibles por año y mes.</p>
-    </header>
-    <!-- Filtros por año y mes -->
-    <section  class="filtros">
-      <div class="filtro">
-        <span class="filtro-text">Año:</span>
-        <div class="filtro-opciones filtro-anos">
-          <button v-for="year in availableYears" :key="year"
-            :class="['filtro-boton', { activo: year === selectedYear }]" @click="filtrarCampeonatosPorAno(year)">
-            {{ year }}
-          </button>
-        </div>
-      </div>
-
-      <div class="filtro">
-        <span class="filtro-text">Mes:</span>
-        <div class="filtro-opciones filtro-meses">
-          <button v-for="(mes, index) in meses" :key="index"
-            :class="['filtro-boton', { activo: index + 1 === selectedMonth }]"
-            @click="filtrarCampeonatosPorMes(index + 1)">
-            {{ mes }}
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Mensaje de carga -->
-    <section v-if="loading" class="cargando">
+    <!-- Mensaje de carga inicial -->
+    <section v-if="!contentReady" class="cargando">
       <div class="spinner"></div>
       <p>Cargando campeonatos, espere un momento...</p>
     </section>
 
+    <!-- Contenido principal -->
+    <div v-else>
+      <header class="header">
+        <h1>Campeonatos Nacionales</h1>
+        <p>Explora los campeonatos disponibles por año y mes.</p>
+      </header>
 
-    <!-- Campeonatos filtrados -->
-    <section v-if="campeonatos.length > 0 && !loading" class="campeonatos-grid">
-      <div v-for="campeonato in campeonatos" :key="campeonato.id" class="campeonato-card">
-        <div class="info-tags">
-          <div class="calendar-icon">
-            <div class="day">{{ getDay(campeonato.fechaInicio) }}</div>
-            <div class="month">{{ getMonth(campeonato.fechaInicio) }}</div>
-          </div>
-          <div class="tag-icon">
-            <Tag :severity="getTagSeverity(campeonato)" :value="getTagValue(campeonato)"></Tag>
-          </div>
-        </div>
-        <div class="campeonato-info">
-          <h3 class="campeonato-title">{{ campeonato.nombre }}</h3>
-          <p class="campeonato-organizador">Organizado por: {{ campeonato.organizador }}</p>
-          <p class="campeonato-sede">Sede: {{ campeonato.sede }}</p>
-          <p class="campeonato-fechas">Plazo de inscripción: {{ formatDate(campeonato.inscripcionInicio) }} -
-            {{ formatDate(campeonato.inscripcionFin) }}</p>
-          <p class="campeonato-fechas">Fechas de inicio - fin del campeonato: {{ formatDate(campeonato.fechaInicio) }} -
-            {{ formatDate(campeonato.fechaFin) }}</p>
-
-          <div class="campeonato-actions">
-            <!-- Botón para mostrar/ocultar tabla de pruebas -->
-            <div @click="togglePruebas(campeonato.id)" class="toggle-pruebas-btn">
-              <i
-                :class="{ 'pi pi-chevron-down': !expandedCampeonatos.includes(campeonato.id), 'pi pi-chevron-up': expandedCampeonatos.includes(campeonato.id) }"></i>
-              <span>{{ expandedCampeonatos.includes(campeonato.id) ? ' Ocultar pruebas del campeonato' : ' Mostrar pruebas del campeonato' }}</span>
-            </div>
-
-            <div class="botones-acciones">
-              <div class="espaciador"></div>
-              <!-- Botón de inscripción/reportes para rol 5 -->
-              <button 
-                  class="accion-boton" 
-                  v-if="usuario && usuario.rol && usuario.rol.id === 5"
-                  @click="campeonatoFinalizado(campeonato) ? verReportes() : mostrarInscripcionCampeonato(campeonato.id)"
-              >
-                  {{ campeonatoFinalizado(campeonato) ? 'Ver Reportes' : 'Inscribirse' }}
-              </button>
-
-              <!-- Botón de edición -->
-              <button 
-                  class="accion-boton" 
-                  v-if="usuario && usuario.rol && 
-                        (usuario.rol.id === 1 || usuario.rol.id === 6) && 
-                        !campeonatoFinalizado(campeonato)"
-                  @click="mostrarEdicionCampeonato(campeonato.id)"
-              >
-                  Editar
-              </button>
-
-              <!-- Nuevo botón de Ver Reportes para roles 1 y 6 -->
-              <button 
-                  class="accion-boton" 
-                  v-if="usuario && usuario.rol && (usuario.rol.id === 1 || usuario.rol.id === 6)"
-                  @click="verReportes()"
-              >
-                  Ver Reportes
-              </button>
-
-              <!-- Botón de ver documentos -->
-              <button 
-                  class="accion-boton" 
-                  @click="verDocumentos(campeonato.id)"
-              >
-                  Ver Documentos
-              </button>
-            </div>
-          </div>
-
-          <!-- Tabla de pruebas -->
-          <div v-if="expandedCampeonatos.includes(campeonato.id)" class="pruebas-list">
-            <DataTable v-if="campeonato.pruebas.length > 0" :value="campeonato.pruebas" class="datatable">
-              <Column field="nombre" header="Nombre"></Column>
-              <Column field="descripcion" header="Descripción"></Column>
-              <Column field="tipo" header="Tipo"></Column>
-
-              <!-- Columna de eliminar visible solo para roles 1 o 6 -->
-              <Column v-if="usuario && (usuario.rol.id === 1 || usuario.rol.id === 6)" header="Eliminar">
-                <template #body="slotProps">
-                  <Button label="Eliminar" icon="pi pi-trash" class="p-button-danger"
-                    @click="eliminarPrueba(slotProps.data, campeonato.id)" />
-                </template>
-              </Column>
-            </DataTable>
-
-            <div v-if="campeonato.pruebas.length === 0" class="no-pruebas">
-              <p>Sin detalle de las pruebas que tendrá esta competencia.</p>
-            </div>
+      <!-- Filtros por año y mes -->
+      <section class="filtros">
+        <div class="filtro">
+          <span class="filtro-text">Año:</span>
+          <div class="filtro-opciones filtro-anos">
+            <button v-for="year in availableYears" :key="year"
+              :class="['filtro-boton', { activo: year === selectedYear }]" @click="filtrarCampeonatosPorAno(year)">
+              {{ year }}
+            </button>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- Mensaje si no hay campeonatos disponibles -->
-    <section v-else-if="!loading && campeonatos.length === 0" class="no-campeonatos">
-      <p>No hay campeonatos para el año {{ selectedYear }} y el mes seleccionado.</p>
-    </section>
+        <div class="filtro">
+          <span class="filtro-text">Mes:</span>
+          <div class="filtro-opciones filtro-meses">
+            <button v-for="(mes, index) in meses" :key="index"
+              :class="['filtro-boton', { activo: index + 1 === selectedMonth }]"
+              @click="filtrarCampeonatosPorMes(index + 1)">
+              {{ mes }}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Mensaje de carga al cambiar filtros -->
+      <section v-if="loading" class="cargando">
+        <div class="spinner"></div>
+        <p>Cargando campeonatos del año y mes seleccionado, espere un momento...</p>
+      </section>
+
+      <!-- Campeonatos filtrados -->
+      <template v-else>
+        <section v-if="campeonatos.length > 0" class="campeonatos-grid">
+          <div v-for="campeonato in campeonatos" :key="campeonato.id" class="campeonato-card">
+            <div class="info-tags">
+              <div class="calendar-icon">
+                <div class="day">{{ getDay(campeonato.fechaInicio) }}</div>
+                <div class="month">{{ getMonth(campeonato.fechaInicio) }}</div>
+              </div>
+              <div class="tag-icon">
+                <Tag :severity="getTagSeverity(campeonato)" :value="getTagValue(campeonato)"></Tag>
+              </div>
+            </div>
+            <div class="campeonato-info">
+              <h3 class="campeonato-title">{{ campeonato.nombre }}</h3>
+              <p class="campeonato-organizador">Organizado por: {{ campeonato.organizador }}</p>
+              <p class="campeonato-sede">Sede: {{ campeonato.sede }}</p>
+              <p class="campeonato-fechas">Plazo de inscripción: {{ formatDate(campeonato.inscripcionInicio) }} -
+                {{ formatDate(campeonato.inscripcionFin) }}</p>
+              <p class="campeonato-fechas">Fechas de inicio - fin del campeonato: {{ formatDate(campeonato.fechaInicio) }} -
+                {{ formatDate(campeonato.fechaFin) }}</p>
+
+              <div class="campeonato-actions">
+                <!-- Botón para mostrar/ocultar tabla de pruebas -->
+                <div @click="togglePruebas(campeonato.id)" class="toggle-pruebas-btn">
+                  <i
+                    :class="{ 'pi pi-chevron-down': !expandedCampeonatos.includes(campeonato.id), 'pi pi-chevron-up': expandedCampeonatos.includes(campeonato.id) }"></i>
+                  <span>{{ expandedCampeonatos.includes(campeonato.id) ? ' Ocultar pruebas del campeonato' : ' Mostrar pruebas del campeonato' }}</span>
+                </div>
+
+                <div class="botones-acciones">
+                  <div class="espaciador"></div>
+                  <!-- Botón de inscripción/reportes para rol 5 -->
+                  <button 
+                      class="accion-boton" 
+                      v-if="usuario && usuario.rol && usuario.rol.id === 5"
+                      @click="campeonatoFinalizado(campeonato) ? verReportes(campeonato) : mostrarInscripcionCampeonato(campeonato.id)"
+                  >
+                      {{ campeonatoFinalizado(campeonato) ? 'Ver Reportes' : 'Inscribirse' }}
+                  </button>
+
+                  <!-- Botón de edición -->
+                  <button 
+                      class="accion-boton" 
+                      v-if="usuario && usuario.rol && 
+                            (usuario.rol.id === 1 || usuario.rol.id === 6) && 
+                            !campeonatoFinalizado(campeonato)"
+                      @click="mostrarEdicionCampeonato(campeonato.id)"
+                  >
+                      Editar
+                  </button>
+
+                  <!-- Nuevo botón de Ver Reportes para roles 1 y 6 -->
+                  <button 
+                      class="accion-boton" 
+                      v-if="usuario && usuario.rol && (usuario.rol.id === 1 || usuario.rol.id === 6)"
+                      @click="verReportes(campeonato)"
+                  >
+                      Ver Reportes
+                  </button>
+
+                  <!-- Botón de ver documentos -->
+                  <button 
+                      class="accion-boton" 
+                      @click="verDocumentos(campeonato.id)"
+                  >
+                      Ver Documentos
+                  </button>
+                </div>
+              </div>
+
+              <!-- Tabla de pruebas -->
+              <div v-if="expandedCampeonatos.includes(campeonato.id)" class="pruebas-list">
+                <DataTable v-if="campeonato.pruebas.length > 0" :value="campeonato.pruebas" class="datatable">
+                  <Column field="nombre" header="Nombre"></Column>
+                  <Column field="descripcion" header="Descripción"></Column>
+                  <Column field="tipo" header="Tipo"></Column>
+
+                  <!-- Columna de eliminar visible solo para roles 1 o 6 -->
+                  <Column v-if="usuario && (usuario.rol.id === 1 || usuario.rol.id === 6)" header="Eliminar">
+                    <template #body="slotProps">
+                      <Button label="Eliminar" icon="pi pi-trash" class="p-button-danger"
+                        @click="eliminarPrueba(slotProps.data, campeonato.id)" />
+                    </template>
+                  </Column>
+                </DataTable>
+
+                <div v-if="campeonato.pruebas.length === 0" class="no-pruebas">
+                  <p>Sin detalle de las pruebas que tendrá esta competencia.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Mensaje si no hay campeonatos disponibles -->
+        <section v-else class="no-campeonatos">
+          <p>No hay campeonatos para el año {{ selectedYear }} y el mes seleccionado.</p>
+        </section>
+      </template>
+    </div>
   </div>
 </template>
 
@@ -150,29 +161,31 @@ export default {
       filteredCampeonatos: [],
       availableYears: [],
       meses: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
-      loading: true,
+      loading: false,
       expandedCampeonatos: [], // Estado para manejar campeonatos expandidos
       usuario: null,
+      contentReady: false,
     };
   },
   async mounted() {
     try {
       // Obtener usuario desde localStorage
-      this.loading = true; // Activa la animación de carga
       const storedUserData = localStorage.getItem('userdata');
       if (storedUserData) {
         this.usuario = JSON.parse(storedUserData);
       } else {
-        // Manejo de cuando no hay datos de usuario en localStorage
         this.usuario = { rol: { id: null } };
       }
 
-      this.obtenerCampeonatos();
+      await this.obtenerCampeonatos();
       this.availableYears = this.getAvailableYears(2024);
+
+      setTimeout(() => {
+        this.contentReady = true;
+      }, 500);
+
     } catch (error) {
       console.error("Error obteniendo campeonatos:", error);
-    } finally {
-      this.loading = false;
     }
   },
   beforeUnmount() {
@@ -183,9 +196,9 @@ export default {
   },
   methods: {
     async obtenerCampeonatos(anio=new Date().getFullYear(), mes=new Date().getMonth() + 1) {
-      this.loading = true;  // Inicia la carga
+      this.loading = true;  // Para cambios de mes/año
       this.campeonatos = await consultarCampeonatosFachadaFiltro(anio, mes);
-      this.loading = false;  // Inicia la carga
+      this.loading = false;
     },
     verDocumentos(campeonatoId) {
       this.$router.push({ name: 'documentos', params: { id: campeonatoId } });
@@ -296,7 +309,7 @@ export default {
     },
     eliminarPrueba(prueba, campeonatoId) {
       // Confirmación antes de eliminar
-      if (confirm(`¿Estás seguro de que quieres eliminar la prueba "${prueba.nombre}" del campeonato?`)) {
+      if (confirm(`¿Ests seguro de que quieres eliminar la prueba "${prueba.nombre}" del campeonato?`)) {
         // Lógica de eliminación usando el helper
         eliminarCampeonatoPruebaFachada2(prueba.id, campeonatoId)
           .then(() => {
@@ -321,8 +334,12 @@ export default {
     },
 
     // Agregamos el método para redireccionar a reportes
-    verReportes() {
-      this.$router.push('/administracion/campeonatos/reportes');
+    verReportes(campeonato) {
+      this.$router.push({ 
+        name: 'ReporteCampeonatoEspecifico',
+        params: { id: campeonato.id },
+        state: { campeonato: campeonato }
+      });
     },
   }
 };
