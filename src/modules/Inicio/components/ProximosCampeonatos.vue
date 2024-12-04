@@ -26,11 +26,13 @@
 
     <!-- Mostrar mensaje si no hay campeonatos y ya terminó la carga -->
     <p v-if="!cargando && campeonatos.length === 0" class="no-campeonatos">No hay campeonatos próximos.</p>
+
+    <button @click="verTodosCampeonatos" class="ver-todos-boton">Ver mas campeonatos</button>
   </div>
 </template>
 
 <script>
-import { consultarCampeonatosFachada } from "../../Campeonatos/helpers/CampeonatosNacionalHelper";
+import { consultarCampeonatosFuturosFachada } from "../../Campeonatos/helpers/CampeonatosNacionalHelper";
 
 export default {
   data() {
@@ -41,7 +43,7 @@ export default {
   },
   async mounted() {
     try {
-      const campeonatos = await consultarCampeonatosFachada();
+      const campeonatos = await consultarCampeonatosFuturosFachada();
       this.campeonatos = this.filtrarProximosCampeonatos(campeonatos);
     } catch (error) {
       console.error("Error obteniendo campeonatos:", error);
@@ -67,6 +69,10 @@ export default {
     getMonth(dateString) {
       const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
       return monthNames[new Date(dateString).getMonth()];
+    },
+    verTodosCampeonatos() {
+      // Redirigir al calendario de campeonatos
+      this.$router.push({ name: 'CalendarioPage' });
     }
   }
 };
@@ -188,5 +194,21 @@ h2 {
 .no-campeonatos {
   font-size: 1rem;
   color: #ff4d4f;
+}
+
+.ver-todos-boton {
+  background-color: #90ddf0;
+  color: #0A090C;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+}
+
+.ver-todos-boton:hover {
+  background-color: #4b8b92;
 }
 </style>

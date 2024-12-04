@@ -29,6 +29,8 @@
           </template>
         </Column>
       </DataTable>
+
+      <PerfilAtleta v-if="perfilVisible" :atleta="selectedAtleta" :rol="usuario.rol.id" @close="perfilVisible = false" />
     </div>
 </template>
   
@@ -47,7 +49,10 @@
         searchQuery: '',
         atletas: [],
         searched: false,
-        loading: false
+        loading: false,
+        perfilVisible: false,
+        selectedAtleta: null,
+        usuario: null,
       };
     },
     methods: {
@@ -79,6 +84,12 @@
       showPerfil(atleta) {
         this.selectedAtleta = atleta;
         this.perfilVisible = true;
+      }
+    },
+    mounted() {
+      const storedUserData = localStorage.getItem('userdata');
+      if (storedUserData) {
+        this.usuario = JSON.parse(storedUserData);
       }
     }
   };

@@ -48,7 +48,7 @@ const routes = [
   { path: '/inscripcionCompetidores/:id', name: 'InscripcionCompetidores', component: InscripcionCompetidores },
   { path: '/login', component: LoginPage },
   { path: '/atletas', component: AtletasPage },
-  { path: '/calendarios', component: CalendarioPage },
+  { path: '/calendarios', name: 'CalendarioPage', component: CalendarioPage },
   { path: '/campeonatos/:id/reporte', name: 'ReporteCampeonatoEspecifico', component: ReporteCampeonatoEspecifico },
 ];
 

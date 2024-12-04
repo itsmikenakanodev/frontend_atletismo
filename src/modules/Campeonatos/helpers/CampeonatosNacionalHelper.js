@@ -12,6 +12,8 @@ export const consultarCampeonatosFachada = async () => {
   }
 };
 
+
+
 export const consultarCampeonatosFachadaFiltro = async (anio, mes) => {
   try {
     const data = await consultarCampeonatoFiltro(anio, mes);
@@ -42,5 +44,28 @@ const consultarCampeonatoFiltro = async (anio, mes) => {
   } catch (error) {
     console.error("Error en la llamada API para consultar campeonatos por filtro:", error);
     throw error; // Re-lanzar el error para que pueda ser manejado en `consultarCampeonatosFachada`
+  }
+};
+
+// Fachada para consultar campeonatos futuros
+export const consultarCampeonatosFuturosFachada = async () => {
+  try {
+    const data = await consultarCampeonatosFuturos();
+    return data;
+  } catch (error) {
+    console.error("Error consultando campeonatos futuros:", error);
+    throw error; // Re-lanzar el error para que pueda ser manejado en el componente
+  }
+};
+
+// Consumir
+const consultarCampeonatosFuturos = async () => {
+  try {
+    const url = getApiUrl("campeonatos/futuros");
+    const response = await axios.get(url);
+    return response.data;
+  } catch (error) {
+    console.error("Error en la llamada API para consultar campeonatos futuros:", error);
+    throw error; // Re-lanzar el error para que pueda ser manejado en `consultarCampeonatosFuturosFachada`
   }
 };
