@@ -2,7 +2,7 @@
     <div class="register-container">
         <Toast />
         <h2>Crea nuevo campeonato</h2>
-        <form @submit.prevent="hasDoc ? registrar() : registrarCampeonato()">
+        <form @submit.prevent="registrarCampeonato()">
             <div class="form-row centerElement">
                 <div class="form-group">
                     <label for="name">Nombre</label>
@@ -42,23 +42,25 @@
             <div class="form-row">
                 <div class="form-group ">
                     <label for="startDate">Fecha Inicio</label>
-                    <input type="date" id="startDate" required v-model="campeonato.fechaInicio" :min="minFechaInicio" :max="campeonato.fechaFin" />
+                    <input type="date" id="startDate" required v-model="campeonato.fechaInicio" :min="minFechaInicio"
+                        :max="campeonato.fechaFin" />
                 </div>
                 <div class="form-group ">
                     <label for="finDate">Fecha Fin</label>
-                    <input type="date" id="finDate" required v-model="campeonato.fechaFin" :min="campeonato.fechaInicio" />
+                    <input type="date" id="finDate" required v-model="campeonato.fechaFin"
+                        :min="campeonato.fechaInicio" />
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group ">
                     <label for="regStartDate">Fecha Inicio Inscripción</label>
                     <input type="date" id="regStartDate" required v-model="campeonato.inscripcionInicio"
-                        :max="campeonato.fechaInicio" :min="minFechaInicio"/>
+                        :max="campeonato.fechaInicio" :min="minFechaInicio" />
                 </div>
                 <div class="form-group ">
                     <label for="regFinDate">Fecha Fin Inscripción</label>
                     <input type="date" id="regFinDate" required v-model="campeonato.inscripcionFin"
-                        :max="campeonato.fechaInicio" :min="campeonato.inscripcionInicio"/>
+                        :max="campeonato.fechaInicio" :min="campeonato.inscripcionInicio" />
                 </div>
             </div>
             <div class="form-row centerElement">
@@ -70,13 +72,14 @@
                         <label for="no">No</label>
                         <input type="radio" id="no" name="respuesta" v-model="hasDoc" :value="false">
                     </div>
-                    <CargarArchivo ref="cargarChampDoc" v-if="hasDoc" @uploaded="comprobarSubida"
-                        @champDoc="asignarDocumento"></CargarArchivo>
+                    <CargarArchivo2 ref="cargarArchivoCampeonato" v-if="hasDoc" :accept="accept"
+                        @uploaded="handleUpload" @file-upload-error="handleFileUploadError" />
                 </div>
             </div>
             <div class="centerElement">
                 <div class="form-group">
-                    <Button v-if="(hasDoc && docUploaded) || !hasDoc" type="submit" :loading="loading">Continuar</Button>
+                    <Button type="submit"
+                        :loading="loading">Guardar</Button>
                 </div>
             </div>
         </form>
@@ -85,11 +88,12 @@
 
 <script>
 import { registroCampeonatosFachada, consultarAdminsFachada } from "@/modules/Campeonatos/helpers/RegistroCampeonatos.js"
-import CargarArchivo from "@/modules/Registro/components/CargarArchivo.vue";
+import CargarArchivo2 from "@/modules/Registro/components/CargarArchivo2.vue";
+
 
 export default {
     components: {
-        CargarArchivo
+        CargarArchivo2
     },
     data() {
         return {
@@ -107,6 +111,12 @@ export default {
                 inscripcionInicio: '',
                 inscripcionFin: '',
                 documentos: [],
+            },
+            doc: {
+                nombre: "",
+                link: "",
+                extension: ".pdf",
+                tipo: "Informativo",
             },
             provincias: [
                 "Azuay",
@@ -136,7 +146,9 @@ export default {
             ],
             loading: false,
             admins: [],
-
+            uploadPath: "campeonatos", // Aquí se debe especificar la ruta donde se subirá el archivo
+            uploadedFileUrl: '',
+            accept: 'application/pdf,image/*'
         }
     },
     computed: {
@@ -147,36 +159,46 @@ export default {
         }
     },
     methods: {
-        async registrar() {
-            await this.$refs.cargarChampDoc.uploadCampeonatoEvent()
+        async triggerUpload() {
+            // Llama al método uploadFile del componente hijo
+            await this.$refs.cargarArchivoCampeonato.uploadFile(this.uploadPath);
+        },
+        handleUpload(uploadedData) {
+            console.log('Archivo subido:', uploadedData);
+            this.uploadedFileUrl = uploadedData.url;
+            this.doc.link = this.uploadedFileUrl;
+            this.doc.nombre = uploadedData.name;
+            this.doc.extension = uploadedData.extension;
+        },
+        handleFileUploadError() {
+            this.toast.add({ severity: 'error', summary: 'Error', detail: 'Por favor, selecciona un archivo antes de registrar el campeonato.', life: 3000 });
         },
         async registrarCampeonato() {
+            if (this.hasDoc) {
+                await this.triggerUpload();
+
+                // Validar que haya un archivo subido
+                if (!this.uploadedFileUrl) {
+                    this.showToast('warn', 'Advertencia', 'No se puede registrar el campeonato sin un archivo subido.');
+                    return;
+                }else{
+                    this.campeonato.documentos.push(this.doc);
+                }
+            }
+
             this.loading = true
             console.log(this.campeonato);
             await registroCampeonatosFachada(this.campeonato).then(r => {
                 this.loading = false
                 this.$toast.add({ severity: 'info', summary: 'Info', detail: 'Registro de campeonato completado', life: 3000 });
                 setTimeout(() => {
-                    this.$router.push("/");
-                }, 2000);
+                    this.$router.push("/calendarios");
+                }, 3000);
             }).catch(e => {
                 console.error(e)
                 this.loading = false
                 this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo completar el registro de campeonato', life: 3000 });
             })
-        },
-        async asignarDocumento(documento) {
-            console.log("Doc uploaded", documento);
-            if (documento) {
-                this.campeonato.documentos.push(documento);
-                this.registrarCampeonato();
-            } else {
-                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se subio el archivo correctamente', life: 3000 });
-            }
-
-        },
-        comprobarSubida(uploaded) {
-            this.docUploaded = uploaded;
         },
         async consultarAdmins() {
             this.admins = await consultarAdminsFachada();
