@@ -1,19 +1,19 @@
 <template>
   <div class="contenedor">
-    <div class="contenedorInicio">
+    <section class="contenedorInicio">
       <h1>ASOCIACIÓN NACIONAL DE ATLETISMO MÁSTER DEL ECUADOR</h1>
       <p id="bienvenidos">Bienvenidos al sistema de inscripción de atletas a los campeonatos de atletismo máster.</p>
       <img id="imgAtletismo" src="../assets/Atletismo.jpg" alt="" />
-    </div>
+    </section>
 
-    <div class="contenedorCampeonatos">
+    <section class="contenedorCampeonatos">
       <ProximosCampeonatos />
       <Campeonatos />
-    </div>
+    </section>
 
-    <div>
+    <section>
       <SobreNosotros />
-    </div>
+    </section>
   </div>
 </template>
 
@@ -26,7 +26,7 @@ export default {
   components: {
     Campeonatos,
     SobreNosotros,
-    ProximosCampeonatos 
+    ProximosCampeonatos
   }
 };
 </script>

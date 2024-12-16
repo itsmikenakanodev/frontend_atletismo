@@ -9,8 +9,7 @@ export const guardarUsuarioFachada = async (bodyUsuario) => {
   try {
     return await guardarUsuario(bodyUsuario);
   } catch (error) {
-    console.error("Error al guardar el usuario:", error);
-    throw error;
+    throw new Error('Error al guardar el usuario: ' + error.message);
   }
 };
 

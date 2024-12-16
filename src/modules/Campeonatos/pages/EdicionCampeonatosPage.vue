@@ -2,7 +2,7 @@
     <div class="register-container">
         <Toast />
         <h2>Editar campeonato</h2>
-        <form @submit.prevent="hasDoc===true ? registrar():actualizarCampeonato()">
+        <form @submit.prevent="actualizarCampeonato()">
             <div class="form-row centerElement">
                 <div class="form-group">
                     <label for="name">Nombre</label>
@@ -53,7 +53,8 @@
                         </Column>
                         <Column header="Acciones">
                             <template #body="slotProps">
-                                <button @click="eliminarDocCampeonato(slotProps.data.id)">Eliminar</button>
+                                <button type="button" class="btn-dt-eliminar"
+                                    @click="eliminarDocCampeonato(slotProps.data.id, slotProps.data.link)">Eliminar</button>
                             </template>
                         </Column>
                     </DataTable>
@@ -69,14 +70,13 @@
                         <label for="no">No</label>
                         <input type="radio" id="no" name="respuesta" v-model="hasDoc" :value="false">
                     </div>
-                    <CargarArchivo ref="cargarChampDoc" v-if="hasDoc === true" @uploaded="(val) => comprobarSubida(val)"
-                        @champDoc="(val) => asignarDocumento(val)"></CargarArchivo>
+                    <CargarArchivo2 ref="cargarArchivoEdicionCampeonato" v-if="hasDoc" :accept="accept"
+                        @uploaded="handleUpload" @file-upload-error="handleFileUploadError" />
                 </div>
             </div>
             <div class="centerElement">
                 <div class="form-group">
-                    <Button v-if="(hasDoc === true && docUploaded === true) || (hasDoc === false)" type="submit"
-                        :loading="loading">Actualizar</Button>
+                    <Button type="submit" :loading="loading">Actualizar</Button>
                 </div>
             </div>
         </form>
@@ -85,13 +85,14 @@
 
 <script>
 import { actualizarCampeonatosFachada } from "@/modules/Campeonatos/helpers/RegistroCampeonatos.js"
-import CargarArchivo from "@/modules/Registro/components/CargarArchivo.vue";
 import { obtenerCampeonatoFachada } from "../helpers/ObtenerCampeonatosHelper";
 import { guardarDocCampeonatosFachada, eliminarDocCampeonatosFachada } from "../helpers/DocumentoCampeonatoHelper";
+import { storage } from "@/modules/Registro/helpers/firebase";
+import CargarArchivo2 from "@/modules/Registro/components/CargarArchivo2.vue";
 
 export default {
     components: {
-        CargarArchivo
+        CargarArchivo2
     },
     data() {
         return {
@@ -136,34 +137,79 @@ export default {
                 "Tungurahua",
                 "Zamora Chinchipe"
             ],
+            doc: {
+                nombre: "",
+                link: "",
+                extension: "",
+                tipo: "Informativo",
+            },
             loading: false,
             admins: [],
+            campeonatoOriginal: null,
+            uploadPath: "campeonatos", // Aquí se debe especificar la ruta donde se subirá el archivo
+            uploadedFileUrl: '',
+            accept: 'application/pdf,image/*'
         }
     },
     methods: {
-        async registrar() {
-            await this.$refs.cargarChampDoc.uploadCampeonatoEvent()
+        async triggerUpload() {
+            // Llama al método uploadFile del componente hijo
+            await this.$refs.cargarArchivoEdicionCampeonato.uploadFile(this.uploadPath);
+        },
+        handleUpload(uploadedData) {
+            console.log('Archivo subido:', uploadedData);
+            this.uploadedFileUrl = uploadedData.url;
+            this.doc.link = this.uploadedFileUrl;
+            this.doc.nombre = uploadedData.name;
+            this.doc.extension = uploadedData.extension;
+            this.doc.idCampeonato = this.campeonato.id;
+        },
+        handleFileUploadError() {
+            this.toast.add({ severity: 'error', summary: 'Error', detail: 'Por favor, selecciona un archivo antes de registrar el campeonato.', life: 3000 });
         },
         async actualizarCampeonato() {
-            this.loading = true
-            console.log(this.campeonato);
-            await actualizarCampeonatosFachada(this.campeonato).then(r => {
-                this.loading = false
-                this.$toast.add({ severity: 'info', summary: 'Info', detail: 'Actualizacion de campeonato completado', life: 3000 });
-                setTimeout(() => {
-                    this.$router.push("/");
-                }, 2000);
+            if (this.hasDoc) {
+                try {
+                    await this.triggerUpload(); // Llama al método para subir el archivo
 
-                setTimeout(async () => {
-                    localStorage.removeItem('campeonatos');
-                    await this.obtenerCampeonatos();
-                    console.log('Método de fondo completado');
-                }, 10);
-            }).catch(e => {
-                console.error(e)
-                this.loading = false
-                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo completar el registro de campeonato', life: 3000 });
-            })
+                    // Validar que haya un archivo subido
+                    if (!this.uploadedFileUrl) {
+                        this.$toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'No se puede actualizar el campeonato sin un archivo subido.', life: 3000 });
+                        return; // Termina la ejecución si no hay archivo subido
+                    }
+
+                    // Intentar guardar el documento en el backend
+                    await this.guardarDocCampeonato(this.doc);
+                } catch (error) {
+                    this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se subió el archivo correctamente', life: 3000 });
+                    await this.deleteUploadedFile(this.uploadedFileUrl);
+                    return; // Termina la ejecución si hay un error al subir el documento
+                } finally {
+                    this.hasDoc = false;
+                    this.obtenerCampeonatos();
+                }
+            }
+
+            // Verificar si se han realizado modificaciones en el campeonato
+            const modificacionesRealizadas = this.verificarModificaciones(); // Implementa este método según tu lógica
+
+            if (modificacionesRealizadas) {
+                this.loading = true;
+                try {
+                    await actualizarCampeonatosFachada(this.campeonato);
+                    this.$toast.add({ severity: 'info', summary: 'Info', detail: 'Actualización de campeonato completada', life: 3000 });
+                    setTimeout(() => {
+                        this.$router.push("/calendarios");
+                    }, 3000);
+                } catch (e) {
+                    console.error(e);
+                    this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo completar el registro de campeonato', life: 3000 });
+                } finally {
+                    this.loading = false; // Asegúrate de que loading se establezca en false al final
+                }
+            } else {
+                this.$toast.add({ severity: 'info', summary: 'Info', detail: 'No se realizaron modificaciones en los datos del campeonato.', life: 3000 });
+            }
         },
         async guardarDocCampeonato(documento) {
             this.loading = true
@@ -176,41 +222,53 @@ export default {
                 this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo agregar el documento', life: 3000 });
             })
         },
-        async eliminarDocCampeonato(id) {
-            this.loading = true
-            console.log(id);
-            const documentos = this.campeonato.documentos.filter(doc => doc.id != id);
-            this.campeonato.documentos = documentos;
-            await eliminarDocCampeonatosFachada(id).then(r => {
-                this.loading = false
-                this.$toast.add({ severity: 'info', summary: 'Info', detail: 'Documento eliminado', life: 3000 });
-            }).catch(e => {
-                console.error(e)
-                this.loading = false
-                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar el documento', life: 3000 });
-            })
-        },
-        async asignarDocumento(documento) {
-            console.log("Doc uploaded", documento);
-            if (documento) {
-                console.log("id de campeonato", this.campeonato.id);
-                //this.campeonato.documentos.push(documento);
-                documento.idCampeonato = this.campeonato.id;
-                await this.guardarDocCampeonato(documento);
-                this.actualizarCampeonato();
-            } else {
-                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se subio el archivo correctamente', life: 3000 });
-            }
+        async eliminarDocCampeonato(id, link) {
+            this.loading = true;
+            console.log("doc link: ", link);
 
+            // Primero, intenta eliminar el archivo subido
+            try {
+                await this.deleteUploadedFile(link); // Llama al método para eliminar el archivo de Firebase
+
+                // Filtrar los documentos para eliminar el que coincide con el id
+                const documentos = this.campeonato.documentos.filter(doc => doc.id !== id);
+                this.campeonato.documentos = documentos;
+
+                // Luego, procede a eliminar el documento en el backend
+                await eliminarDocCampeonatosFachada(id);
+
+                this.$toast.add({ severity: 'info', summary: 'Info', detail: 'Documento eliminado', life: 3000 });
+            } catch (error) {
+                console.error(error);
+                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar el documento', life: 3000 });
+            } finally {
+                this.loading = false; // Asegúrate de que loading se establezca en false al final
+            }
         },
-        comprobarSubida(uploaded) {
-            this.docUploaded = uploaded;
+        async deleteUploadedFile(fileUrl) {
+            // Extraer el nombre del archivo de la URL
+            const fileName = decodeURIComponent(fileUrl.split('/').pop().split('?')[0]); // Obtener solo el nombre del archivo
+            console.log("Deleting", fileName)
+            const storageRef = storage.ref(`${fileName}`);
+            try {
+                await storageRef.delete(); // Eliminar el archivo de Firebase Storage
+                console.log('Archivo eliminado:', fileName);
+            } catch (err) {
+                console.error('Error al eliminar el archivo:', err.message);
+            }
         },
-    
+        verificarModificaciones() {
+            // Verificar si el nombre o las fechas han cambiado
+            const nombreModificado = this.campeonato.nombre !== this.campeonatoOriginal.nombre;
+            const fechaInicioModificada = this.campeonato.fechaInicio !== this.campeonatoOriginal.fechaInicio;
+            const fechaFinModificada = this.campeonato.fechaFin !== this.campeonatoOriginal.fechaFin;
+            const inscripcionInicioModificada = this.campeonato.inscripcionInicio !== this.campeonatoOriginal.inscripcionInicio;
+            const inscripcionFinModificada = this.campeonato.inscripcionFin !== this.campeonatoOriginal.inscripcionFin;
+            return nombreModificado || fechaFinModificada || fechaInicioModificada || inscripcionInicioModificada || inscripcionFinModificada;
+        },
         async obtenerCampeonatos() {
-                
-                this.campeonato = await obtenerCampeonatoFachada(this.$route.params.id);
-                console.log(this.campeonato);
+            this.campeonato = await obtenerCampeonatoFachada(this.$route.params.id);
+            this.campeonatoOriginal = { ...this.campeonato };
         }
     },
     async mounted() {
@@ -237,6 +295,21 @@ h2 {
     margin-bottom: 20px;
     text-align: center;
     font-size: 24px;
+}
+
+.btn-dt-eliminar {
+    background-color: #07393C;
+    color: #f0edee;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-dt-eliminar:hover {
+    background-color: #90DDF0;
+    color: #0A090C;
+    border: 1px solid #0A090C;
 }
 
 .h3Element {
