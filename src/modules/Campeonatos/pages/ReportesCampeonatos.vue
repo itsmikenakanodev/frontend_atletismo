@@ -49,7 +49,7 @@
         <LoadingSpinner v-if="loading" :mensaje="loadingMessage" />
 
         <DetalleReporteCampeonato
-            v-if="reporteCampeonato && reportePruebas"
+            v-if="reporteCampeonato && reportePruebas && (reporteCampeonato.maleCompetitors > 0 || reporteCampeonato.femaleCompetitors > 0)"
             :reporteCampeonato="reporteCampeonato"
             :reportePruebas="reportePruebas"
             :competidores="competidores"
@@ -185,14 +185,24 @@ export default {
 
             try {
                 this.reporteCampeonato = await obtenerReporteCampeonatoFachada(this.selectedCampeonato.id);
+                console.log("Reporte Campeonato:", this.reporteCampeonato);
                 this.reportePruebas = await obtenerReportePruebasCampeonatoFachada(this.selectedCampeonato.id);
                 this.competidores = await obtenerReporteCompetidoresCampeonatoFachada(this.selectedCampeonato.id);
+
+                if (this.reporteCampeonato.maleCompetitors === 0 && this.reporteCampeonato.femaleCompetitors === 0) {
+                    this.$toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'El campeonato seleccionado no tiene competidores inscritos, seleccione otro campeonato por favor.',
+                        life: 3000
+                    });
+                }
             } catch (error) {
                 console.error("Error al cargar el reporte:", error);
                 this.$toast.add({
                     severity: 'error',
                     summary: 'Error',
-                    detail: 'El campeonato seleccionado no tiene competidores inscritos, seleccione otro campeonato.',
+                    detail: 'El campeonato seleccionado no tiene competidores inscritos, seleccione otro campeonato por favor.',
                     life: 3000
                 });
             } finally {
@@ -408,6 +418,10 @@ export default {
 .filtro-boton.activo {
     background-color: #07393c;
     font-weight: bold;
+}
+
+.white-text {
+    color: white;
 }
 
 </style>

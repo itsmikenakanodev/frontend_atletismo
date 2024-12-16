@@ -4,6 +4,7 @@ import { getApiUrl } from "@/utils/apiUtil.js";
 // Fachada
 export const buscarAtletasFachada = async (searchParams) => {
     return await buscarAtletasApi(searchParams);
+    
 };
 
 // Consumir

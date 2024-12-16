@@ -25,24 +25,24 @@
         <Column field="email" header="Email" />
         <Column header="Perfil" class="perfil-column">
           <template #body="{ data }">
-            <Button label="Ver" icon="pi pi-eye" @click="showPerfil(data)" />
+            <Button 
+              label="Ver" 
+              icon="pi pi-eye" 
+              @click="verPerfil(data.cedula)" 
+            />
           </template>
         </Column>
       </DataTable>
-
-      <PerfilAtleta v-if="perfilVisible" :atleta="selectedAtleta" :rol="usuario.rol.id" @close="perfilVisible = false" />
     </div>
 </template>
   
   <script>
   import { buscarAtletasFachada } from '../helpers/getAtletas';
-  import PerfilAtleta from '../components/PerfilAtleta.vue';
   import LoadingSpinner from '../../../components/LoadingSpinner.vue';
   
   export default {
     components: {
-      PerfilAtleta,
-      LoadingSpinner
+      LoadingSpinner,
     },
     data() {
       return {
@@ -50,12 +50,12 @@
         atletas: [],
         searched: false,
         loading: false,
-        perfilVisible: false,
-        selectedAtleta: null,
-        usuario: null,
       };
     },
     methods: {
+      removeAccents(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      },
       async searchAtletas() {
         this.searched = true;
         this.loading = true;
@@ -73,7 +73,14 @@
             apellidos: isNaN(this.searchQuery) ? this.searchQuery : undefined
           };
 
+          const normalizedSearchQuery = this.removeAccents(this.searchQuery).toLowerCase();
+
           this.atletas = await buscarAtletasFachada(searchParams);
+          this.atletas = this.atletas.filter(atleta => {
+            const normalizedApellidos = this.removeAccents(atleta.apellidos).toLowerCase();
+            return normalizedApellidos.includes(normalizedSearchQuery) || atleta.apellidos.toLowerCase().includes(this.searchQuery.toLowerCase());
+          });
+
         } catch (error) {
           console.error("Error al buscar atletas:", error);
           this.atletas = [];
@@ -81,9 +88,8 @@
           this.loading = false;
         }
       },
-      showPerfil(atleta) {
-        this.selectedAtleta = atleta;
-        this.perfilVisible = true;
+      verPerfil(cedula) {
+        this.$router.push({ name: 'PerfilAtleta', params: { cedula } });
       }
     },
     mounted() {
@@ -117,4 +123,3 @@
     color: #666;
   }
   </style>
-  

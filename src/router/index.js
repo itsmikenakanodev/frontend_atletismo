@@ -25,6 +25,7 @@ import Documentos from  '../modules/Documentos/pages/Documentos.vue';
 import AtletasPage from '../modules/Atletas/pages/AtletasPage.vue';
 import EdicionCampeonatosPage from '@/modules/Campeonatos/pages/EdicionCampeonatosPage.vue';
 import ReporteCampeonatoEspecifico from '../modules/Campeonatos/pages/ReporteCampeonatoEspecifico.vue';
+import PerfilAtleta from '../modules/Atletas/pages/PerfilAtleta.vue';
 
 const routes = [
   { path: '/administracion/usuarios', component: AdministrationView },
@@ -47,9 +48,14 @@ const routes = [
   { path: '/registrarPruebas', component: RegistroPruebas },
   { path: '/inscripcionCompetidores/:id', name: 'InscripcionCompetidores', component: InscripcionCompetidores },
   { path: '/login', component: LoginPage },
-  { path: '/atletas', component: AtletasPage },
+  { path: '/atletas',  name: 'AtletasPage',component: AtletasPage },
   { path: '/calendarios', name: 'CalendarioPage', component: CalendarioPage },
   { path: '/campeonatos/:id/reporte', name: 'ReporteCampeonatoEspecifico', component: ReporteCampeonatoEspecifico },
+  {
+    path: '/perfil-atleta/:cedula',
+    name: 'PerfilAtleta',
+    component: PerfilAtleta,
+  },
 ];
 
 const router = createRouter({

@@ -14,7 +14,7 @@
                 <Button 
                     icon="pi pi-arrow-left" 
                     label="Volver" 
-                    class="p-button-secondary"
+                    class="p-button-secondary white-text"
                     @click="volver"
                 />
             </div>
@@ -105,7 +105,7 @@ export default {
                 this.$toast.add({
                     severity: 'error',
                     summary: 'Error',
-                    detail: 'No hay competidores inscritos en el campeonato',
+                    detail: 'El campeonato seleccionado no tiene competidores inscritos, regrese y seleccione otro.',
                     life: 0
                 });
             }
@@ -136,5 +136,9 @@ export default {
     font-weight: bold;
     color: #333;
     margin: 0;
+}
+
+.white-text {
+    color: white;
 }
 </style>

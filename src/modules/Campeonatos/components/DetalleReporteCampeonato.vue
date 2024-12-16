@@ -1,8 +1,8 @@
 <template>
     <div class="reporte-container">
         <DataTable 
-            v-if="reporteCampeonato && reporteCampeonato.length > 0"
-            :value="reporteCampeonato" 
+            v-if="hasCompetitors"
+            :value="formattedReporteCampeonato" 
             showGridlines 
             class="mt-3 data-table" 
             tableStyle="min-width: 50rem"
@@ -69,8 +69,8 @@ export default {
     name: 'DetalleReporteCampeonato',
     props: {
         reporteCampeonato: {
-            type: Array,
-            default: () => []
+            type: [Object, Array],
+            required: true
         },
         reportePruebas: {
             type: Array,
@@ -81,10 +81,22 @@ export default {
             default: () => []
         }
     },
+    computed: {
+        formattedReporteCampeonato() {
+            return Array.isArray(this.reporteCampeonato) ? this.reporteCampeonato : [this.reporteCampeonato];
+        },
+        hasCompetitors() {
+            const report = Array.isArray(this.reporteCampeonato) ? this.reporteCampeonato[0] : this.reporteCampeonato;
+            return report && (report.maleCompetitors > 0 || report.femaleCompetitors > 0);
+        }
+    },
     data() {
         return {
             activeIndex: null
         }
+    },
+    mounted() {
+        console.log("reporteCampeonato:", this.reporteCampeonato);
     },
     methods: {
         toggleTab(event) {
