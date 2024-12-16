@@ -15,6 +15,52 @@
           <p><strong>Estado:</strong> {{ atleta.estado ? 'Activo' : 'Inactivo' }}</p>
         </div>
       </div>
+
+      <!-- Sección de Mejores Tiempos -->
+      <div class="mejores-tiempos">
+        <h3>Mejores Tiempos</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Prueba</th>
+              <th>Mejor Tiempo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(prueba, index) in pruebas" :key="index">
+              <td>{{ prueba.nombre }}</td>
+              <td>{{ getMejorTiempo(prueba.historial) }} segundos</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Sección de Progreso -->
+      <div class="progreso">
+        <h3>Progreso</h3>
+        <table class="progreso-table">
+          <thead>
+            <tr>
+              <th>Prueba</th>
+              <th>Competencia</th>
+              <th>Tiempo</th>
+              <th>Posición</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(prueba, index) in pruebas" :key="index">
+              <td>{{ prueba.nombre }}</td>
+              <td v-for="(historial, hIndex) in prueba.historial" :key="hIndex">
+                <strong>Competencia:</strong> {{ historial.competencia }} <br />
+                <strong>Tiempo:</strong> {{ historial.tiempo }} segundos <br />
+                <strong>Posición:</strong> {{ historial.posicion }} <br />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Botón Regresar -->
       <button @click="regresar" class="btn-regresar">Regresar</button>
     </div>
     <div v-else>
@@ -32,6 +78,43 @@ export default {
     return {
       atleta: null,
       rol: null,
+      pruebas: [
+        {
+          nombre: '100 m Planos',
+          historial: [
+            { competencia: 'Campeonato Nacional', tiempo: 10.5, posicion: 1 },
+            { competencia: 'Juegos Olímpicos', tiempo: 10.8, posicion: 2 },
+          ],
+        },
+        {
+          nombre: '200 m Planos',
+          historial: [
+            { competencia: 'Campeonato Nacional', tiempo: 21.5, posicion: 1 },
+            { competencia: 'Juegos Olímpicos', tiempo: 22.0, posicion: 3 },
+          ],
+        },
+        {
+          nombre: '400 m',
+          historial: [
+            { competencia: 'Campeonato Nacional', tiempo: 47.5, posicion: 1 },
+            { competencia: 'Juegos Olímpicos', tiempo: 48.0, posicion: 2 },
+          ],
+        },
+        {
+          nombre: '800 m',
+          historial: [
+            { competencia: 'Campeonato Nacional', tiempo: 1.45, posicion: 1 },
+            { competencia: 'Juegos Olímpicos', tiempo: 1.46, posicion: 2 },
+          ],
+        },
+        {
+          nombre: '1500 m',
+          historial: [
+            { competencia: 'Campeonato Nacional', tiempo: 3.45, posicion: 1 },
+            { competencia: 'Juegos Olímpicos', tiempo: 3.50, posicion: 2 },
+          ],
+        },
+      ],
     };
   },
   async mounted() {
@@ -62,6 +145,10 @@ export default {
     },
     regresar() {
       this.$router.push({ name: 'AtletasPage' }); // Navegar a la página de Atletas
+    },
+    getMejorTiempo(historial) {
+      if (historial.length === 0) return 'N/A';
+      return Math.min(...historial.map(h => h.tiempo)); // Devuelve el mejor tiempo
     }
   },
 };
@@ -69,7 +156,7 @@ export default {
 
 <style scoped>
 .perfil-atleta-container {
-  max-width: 800px; /* Ancho máximo de la página */
+  max-width: 1000px; /* Aumentar el ancho máximo de la página */
   margin: 0 auto; /* Centrar la página */
   padding: 20px; /* Espaciado interno */
   background-color: #f9f9f9; /* Color de fondo */
@@ -111,6 +198,26 @@ h2 {
 
 .btn-regresar:hover {
   background-color: #4b8b92; /* Color de fondo al pasar el mouse */
+}
+
+.mejores-tiempos, .progreso {
+  margin-top: 20px; /* Espaciado superior */
+}
+
+table {
+  width: 100%; /* Ancho completo */
+  border-collapse: collapse; /* Colapsar bordes */
+  margin-bottom: 20px; /* Espaciado inferior */
+}
+
+th, td {
+  border: 1px solid #ddd; /* Borde de las celdas */
+  padding: 12px; /* Aumentar espaciado interno */
+  text-align: left; /* Alinear texto a la izquierda */
+}
+
+th {
+  background-color: #f2f2f2; /* Color de fondo para el encabezado */
 }
 </style>
   

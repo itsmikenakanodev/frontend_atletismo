@@ -9,14 +9,16 @@ export const buscarAtletasFachada = async (searchParams) => {
 
 // Consumir
 const buscarAtletasApi = async (searchParams) => {
-    const { cedula, apellidos } = searchParams;
+    const { cedula, apellidos,size,  page } = searchParams;
     const url = getApiUrl(`usuarios/buscar`);
     
     try {
         const response = await axios.get(url, {
             params: {
                 cedula: cedula || undefined,
-                apellidos: apellidos || undefined
+                apellido: apellidos || undefined,
+                size: size || undefined,
+                page: page || undefined
             }
         });
         return response.data;

@@ -1,125 +1,174 @@
 <template>
-    <div>
-      <h1>Atletas</h1>
-      
-      <div class="search-bar">
-        <InputText v-model="searchQuery" placeholder="Buscar por cédula o apellido" />
-        <Button 
-          :label="'Buscar'" 
-          icon="pi pi-search" 
-          @click="searchAtletas" 
-          :disabled="!searchQuery"
-        />
-      </div>
+  <div>
+    <h1>Atletas</h1>
 
-      <LoadingSpinner v-if="loading" mensaje="Cargando atletas..." />
-
-      <div v-if="searched && !loading && !atletas.length">
-        <p>No se encontraron atletas que cumplan con los criterios de búsqueda.</p>
-      </div>
-      
-      <DataTable v-if="!loading && searched && atletas.length" :value="atletas" :paginator="true" :rows="10" class="atletas-table">
-        <Column field="nombres" header="Nombre" />
-        <Column field="apellidos" header="Apellido" />
-        <Column field="cedula" header="Cédula" />
-        <Column field="email" header="Email" />
-        <Column header="Perfil" class="perfil-column">
-          <template #body="{ data }">
-            <Button 
-              label="Ver" 
-              icon="pi pi-eye" 
-              @click="verPerfil(data.cedula)" 
-            />
-          </template>
-        </Column>
-      </DataTable>
+    <div class="search-bar">
+      <InputText v-model="searchQuery" placeholder="Buscar por cédula o apellido" />
+      <Button :label="'Buscar'" icon="pi pi-search" @click="searchAtletas" :disabled="!searchQuery" />
     </div>
+
+    <LoadingSpinner v-if="loading" mensaje="Cargando atletas..." />
+
+    <div v-if="searched && !loading && !atletas.length">
+      <p>No se encontraron atletas que cumplan con los criterios de búsqueda.</p>
+    </div>
+
+    <DataTable v-if="!loading && searched && paginatedAtletas.length" :value="paginatedAtletas" :rows="10"
+      class="atletas-table" @page="onPageChange">
+      <Column field="nombres" header="Nombre" />
+      <Column field="apellidos" header="Apellido" />
+      <Column field="cedula" header="Cédula" />
+      <Column field="email" header="Email" />
+      <Column header="Perfil" class="perfil-column">
+        <template #body="{ data }">
+          <Button label="Ver" icon="pi pi-eye" @click="verPerfil(data.cedula)" />
+        </template>
+      </Column>
+    </DataTable>
+
+    <div class="pagination-buttons" v-if="atletas.length">
+      <Button label="Anterior" icon="pi pi-chevron-left" @click="previousPage" :disabled="currentPage === 0" />
+      <Button label="Siguiente" icon="pi pi-chevron-right" @click="nextPage" :disabled="isNextDisabled || paginatedAtletas.length<10" />
+    </div>
+    <Toast />
+  </div>
 </template>
-  
-  <script>
-  import { buscarAtletasFachada } from '../helpers/getAtletas';
-  import LoadingSpinner from '../../../components/LoadingSpinner.vue';
-  
-  export default {
-    components: {
-      LoadingSpinner,
-    },
-    data() {
-      return {
-        searchQuery: '',
-        atletas: [],
-        searched: false,
-        loading: false,
-      };
-    },
-    methods: {
-      removeAccents(str) {
-        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      },
-      async searchAtletas() {
-        this.searched = true;
-        this.loading = true;
 
-        await new Promise(resolve => setTimeout(resolve, 2000));
+<script>
+import { buscarAtletasFachada } from '../helpers/getAtletas';
+import LoadingSpinner from '../../../components/LoadingSpinner.vue';
 
-        try {
-          if (!this.searchQuery) {
-            this.atletas = [];
-            return;
-          }
-
-          const searchParams = {
-            cedula: this.searchQuery.match(/^\d+$/) ? this.searchQuery : undefined,
-            apellidos: isNaN(this.searchQuery) ? this.searchQuery : undefined
-          };
-
-          const normalizedSearchQuery = this.removeAccents(this.searchQuery).toLowerCase();
-
-          this.atletas = await buscarAtletasFachada(searchParams);
-          this.atletas = this.atletas.filter(atleta => {
-            const normalizedApellidos = this.removeAccents(atleta.apellidos).toLowerCase();
-            return normalizedApellidos.includes(normalizedSearchQuery) || atleta.apellidos.toLowerCase().includes(this.searchQuery.toLowerCase());
-          });
-
-        } catch (error) {
-          console.error("Error al buscar atletas:", error);
-          this.atletas = [];
-        } finally {
-          this.loading = false;
-        }
-      },
-      verPerfil(cedula) {
-        this.$router.push({ name: 'PerfilAtleta', params: { cedula } });
-      }
-    },
-    mounted() {
-      const storedUserData = localStorage.getItem('userdata');
-      if (storedUserData) {
-        this.usuario = JSON.parse(storedUserData);
-      }
+export default {
+  components: {
+    LoadingSpinner,
+  },
+  data() {
+    return {
+      searchQuery: '',
+      atletas: [],
+      searched: false,
+      loading: false,
+      currentPage: 0,
+      totalAtletas: 0,
+      isNextDisabled: false
+    };
+  },
+  computed: {
+    paginatedAtletas() {
+      const start = this.currentPage * 10;
+      return this.atletas.slice(start, start + 10);
     }
-  };
-  </script>
-  
-  <style scoped>
-  .search-bar {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
+  },
+  methods: {
+    async searchAtletas() {
+      this.searched = true;
+      this.loading = true;
+
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      try {
+        if (!this.searchQuery) {
+          this.atletas = [];
+          this.totalAtletas = 0;
+          this.isNextDisabled = false;
+          return;
+        }
+
+        const searchParams = {
+          cedula: this.searchQuery.match(/^\d+$/) ? this.searchQuery : undefined,
+          apellidos: isNaN(this.searchQuery) ? this.searchQuery : undefined,
+          size: 10,
+          page: this.currentPage
+        };
+
+        const lista = await buscarAtletasFachada(searchParams);
+        if (lista && lista.length > 0) {
+          this.atletas = [...this.atletas, ...lista];
+          this.totalAtletas = this.atletas.length;
+          this.isNextDisabled = false;
+        } else {
+          this.isNextDisabled = true;
+          this.$toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se encontraron más coincidencias.',
+            life: 2000
+          });
+        }
+
+      } catch (error) {
+        if (error.response.status === 404) {
+          this.$toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se encontraron más coincidencias.',
+            life: 2000
+          });
+          this.isNextDisabled = true;
+
+        } else {
+          this.$toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Error al buscar atletas',
+            life: 2000
+          });
+        }
+      } finally {
+        this.loading = false;
+      }
+    },
+    verPerfil(cedula) {
+      this.$router.push({ name: 'PerfilAtleta', params: { cedula } });
+    },
+    onPageChange(event) {
+      this.currentPage = event.page;
+    },
+    nextPage() {
+      this.currentPage++;
+      this.searchAtletas();
+    },
+    previousPage() {
+      if (this.currentPage > 0) {
+        this.currentPage--;
+        this.isNextDisabled = false;
+      }
+    },
+  },
+  mounted() {
+    const storedUserData = localStorage.getItem('userdata');
+    if (storedUserData) {
+      this.usuario = JSON.parse(storedUserData);
+    }
   }
-  
-  .atletas-table .p-datatable-thead > tr > th {
-    text-align: center;
-  }
-  
-  .perfil-column .p-button {
-    display: block;
-    margin: 0 auto;
-  }
-  
-  p {
-    text-align: center;
-    font-style: italic;
-    color: #666;
-  }
-  </style>
+};
+</script>
+
+<style scoped>
+.search-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.atletas-table .p-datatable-thead>tr>th {
+  text-align: center;
+}
+
+.perfil-column .p-button {
+  display: block;
+  margin: 0 auto;
+}
+
+p {
+  text-align: center;
+  font-style: italic;
+  color: #666;
+}
+
+.pagination-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+</style>
