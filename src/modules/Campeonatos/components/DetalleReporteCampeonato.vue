@@ -35,7 +35,7 @@
                     </template>
                     <DataTable 
                         v-if="activeIndex === index && (item.maleCompetitors > 0 || item.femaleCompetitors > 0)" 
-                        :value="competidores.filter(c => c.nombreEvento === item.eventName)"
+                        :value="competidoresFormateados.filter(c => c.nombreEvento === item.eventName)"
                         showGridlines 
                         class="data-table"
                         tableStyle="min-width: 50rem"
@@ -43,11 +43,21 @@
                         <Column field="provincia" header="Provincia"></Column>
                         <Column field="apellidos" header="Apellido"></Column>
                         <Column field="nombres" header="Nombre"></Column>
-                        <Column field="sexo" header="Genero"></Column>
-                        <Column field="esMiembro" header="Socio">
+                        <Column field="sexo" header="Género"></Column>
+                        <Column field="numeroCompetidor" header="Número de competidor"></Column>
+                        <Column field="categoria" header="Categoría"></Column>
+                        <Column field="posicion" header="Posición"></Column>
+                        <Column field="criterio" header="Marca">
                             <template #body="{ data }">
-                                <span v-if="data.esMiembro === true">Sí</span>
-                                <span v-if="data.esMiembro === false">No</span>
+                                <span v-if="data.criterio === 'Tiempo'">{{ data.marca + " segundos"}}</span>
+                                <span v-else-if="data.criterio === 'Distancia'">{{ data.distancia + " metros" }}</span>
+                                <span v-else>{{ data.puntaje + " puntos"}}</span>
+                            </template>
+                        </Column>
+                        <Column field="criterio" header="Viento (m/s)">
+                            <template #body="{ data }">
+                                <span v-if="data.criterio === 'Tiempo' || data.criterio === 'Distancia' ">{{ data.viento || 0.00}}</span>
+                                <span v-else> No aplica </span>
                             </template>
                         </Column>
                     </DataTable>
@@ -65,6 +75,8 @@
 </template>
 
 <script>
+import { convertirTiemposAsegundos } from '@/modules/Atletas/helpers/getResultados';
+
 export default {
     name: 'DetalleReporteCampeonato',
     props: {
@@ -92,11 +104,14 @@ export default {
     },
     data() {
         return {
-            activeIndex: null
+            activeIndex: null,
+            competidoresFormateados: []
         }
     },
     mounted() {
-        console.log("reporteCampeonato:", this.reporteCampeonato);
+        if(this.competidores){
+            this.competidoresFormateados = convertirTiemposAsegundos(this.competidores);
+        }
     },
     methods: {
         toggleTab(event) {
