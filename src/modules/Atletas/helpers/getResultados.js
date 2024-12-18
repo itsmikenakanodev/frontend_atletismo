@@ -21,7 +21,7 @@ const buscarResultadosApi = async (cedula) => {
 };
 
 // Función para convertir los tiempos a segundos
-const convertirTiemposAsegundos = (resultados) => {
+export const convertirTiemposAsegundos = (resultados) => {
     return resultados.map(resultado => {
         return {
             ...resultado,

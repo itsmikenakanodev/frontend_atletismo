@@ -19,7 +19,10 @@
       <!-- Sección de selección de vista -->
       <div class="toggle-buttons">
         <div class="dropdown">
-          <span class="dropbtn">Ver estadísticas del competidor</span>
+          <span class="dropbtn">
+            <i class="pi pi-filter"></i>
+            Ver estadísticas del competidor
+          </span>
           <div class="dropdown-content">
             <button @click="mostrarMejoresMarcas" :class="{ active: mostrarMarcas }">
               <i class="pi pi-trophy"></i> Mejores Marcas
@@ -31,7 +34,7 @@
         </div>
       </div>
 
-      <div v-if="mostrarMarcas">
+      <div v-if="mostrarMarcas && resultados.length">
         <div class="mejores-tiempos">
           <h3>Mejores Marcas</h3>
           <table>
@@ -73,7 +76,12 @@
                   <tbody>
                     <tr v-for="resultado in resultados.filter(r => r.nombrePrueba === prueba)" :key="resultado.id">
                       <td>{{ resultado.nombreCampeonato }}</td>
-                      <td>{{ getMejorTiempo(resultados.filter(r => r.nombrePrueba === prueba)) }}</td>
+                      <td>
+                        <span v-if="resultado.criterioPrueba === 'Tiempo'">{{ resultado.marca.toFixed(2) }} segundos</span>
+                        <span v-else-if="resultado.criterioPrueba === 'Distancia'">{{ resultado.distancia }} metros</span>
+                        <span v-else-if="resultado.criterioPrueba === 'Puntos'">{{ resultado.puntaje }} puntos</span>
+                        <span v-else>N/A</span>
+                      </td>
                       <td>{{ resultado.posicion }}</td>
                       <td>{{ resultado.viento }}</td>
                     </tr>
@@ -85,14 +93,17 @@
         </div>
         <div v-else>
           <p>No se encontraron resultados para este atleta.</p>
+          {{ showToast() }}
         </div>
       </div>
 
       <!-- Botón Regresar -->
-      <button @click="regresar" class="btn-regresar">Regresar</button>
+      <button @click="regresar" class="btn-regresar">
+        <i class="pi pi-arrow-left"></i> Regresar
+      </button>
     </div>
     <div v-else>
-      <p>Cargando información del atleta...</p>
+      <LoadingSpinner mensaje="Cargando información del atleta..." class="spinner-blanco" />
     </div>
   </div>
 </template>
@@ -100,9 +111,13 @@
 <script>
 import { buscarAtletasFachada } from '../helpers/getAtletas';
 import { buscarResultadosFachada } from '../helpers/getResultados';
+import LoadingSpinner from '../../../components/LoadingSpinner.vue';
 
 export default {
   name: 'PerfilAtleta',
+  components: {
+    LoadingSpinner,
+  },
   data() {
     return {
       atleta: null,
@@ -134,6 +149,9 @@ export default {
 
         // Obtener resultados del atleta
         this.resultados = await buscarResultadosFachada(cedula); // Llama a la función para obtener resultados
+        
+        // Imprimir los resultados obtenidos
+        console.log("Resultados del atleta:", this.resultados); // Agregado para imprimir resultados
 
         // Extraer pruebas de los resultados
         this.pruebas = [...new Set(this.resultados.map(r => r.nombrePrueba))]; // Obtener nombres de pruebas únicas
@@ -166,13 +184,18 @@ export default {
         if (criterio === 'Tiempo') {
             const tiemposEnSegundos = historial.map(h => h.marca); // Ya está en segundos
             const mejorTiempo = Math.min(...tiemposEnSegundos);
-            return mejorTiempo.toFixed(2) + ' segundos'; // Devuelve el mejor tiempo en segundos
+            const mejoresSinViento = historial.filter(h => h.viento === 0 && h.marca === mejorTiempo);
+            return mejoresSinViento.length > 0 ? mejoresSinViento[0].marca.toFixed(2) + ' segundos' : mejorTiempo.toFixed(2) + ' segundos'; // Devuelve el mejor tiempo en segundos
         } else if (criterio === 'Distancia') {
-            const mejorDistancia = Math.max(...historial.map(h => h.distancia));
-            return mejorDistancia.toFixed(2) + ' metros'; // Devuelve la mejor distancia
+            const distancias = historial.map(h => h.distancia);
+            const mejorDistancia = Math.max(...distancias);
+            const mejoresSinViento = historial.filter(h => h.viento === 0 && h.distancia === mejorDistancia);
+            return mejoresSinViento.length > 0 ? mejoresSinViento[0].distancia.toFixed(2) + ' metros' : mejorDistancia.toFixed(2) + ' metros';
         } else if (criterio === 'Puntos') {
-            const mejorPuntos = Math.max(...historial.map(h => h.puntos));
-            return mejorPuntos.toFixed(2) + ' puntos'; // Devuelve la mejor puntuación
+            const puntajes = historial.map(h => h.puntaje);
+            const mejorPuntos = Math.max(...puntajes);
+            const mejoresSinViento = historial.filter(h => h.viento === 0 && h.puntaje === mejorPuntos);
+            return mejoresSinViento.length > 0 ? mejoresSinViento[0].puntaje.toFixed(2) + ' puntos' : mejorPuntos.toFixed(2) + ' puntos';
         }
         
         return 'N/A'; // En caso de que no coincida con ningún criterio
@@ -186,9 +209,22 @@ export default {
     },
     mostrarMejoresMarcas() {
       this.mostrarMarcas = true; // Mostrar Mejores Marcas
+      this.resultados.forEach(resultado => {
+          // Asegúrate de que se llame a getMejorTiempo con el historial correcto
+          const mejorTiempo = this.getMejorTiempo(this.resultados.filter(r => r.nombrePrueba === resultado.nombrePrueba));
+          console.log(`Mejor tiempo para ${resultado.nombrePrueba}: ${mejorTiempo}`);
+      });
     },
     mostrarProgreso() {
       this.mostrarMarcas = false; // Mostrar Progreso
+    },
+    showToast() {
+      this.$toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'No se encontraron resultados para este atleta.',
+        life: 3000
+      });
     },
   },
 };
@@ -227,7 +263,7 @@ h2 {
 
 .btn-regresar {
   display: block; /* Hacer que el botón ocupe todo el ancho */
-  width: 100%; /* Ancho completo */
+   /* Ancho completo */
   padding: 10px; /* Espaciado interno */
   background-color: #2c666e; /* Color de fondo */
   color: white; /* Color del texto */
@@ -367,6 +403,10 @@ td {
 
 .dropdown-content button i {
   margin-right: 10px; /* Espaciado entre icono y texto */
+}
+
+.spinner-blanco {
+  color: white; /* Cambiar el color del texto a blanco */
 }
 </style>
   
