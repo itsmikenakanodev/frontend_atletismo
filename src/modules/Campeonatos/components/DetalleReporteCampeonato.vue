@@ -35,7 +35,7 @@
                     </template>
                     <DataTable 
                         v-if="activeIndex === index && (item.maleCompetitors > 0 || item.femaleCompetitors > 0)" 
-                        :value="competidores.filter(c => c.nombreEvento === item.eventName)"
+                        :value="competidoresFormateados.filter(c => c.nombreEvento === item.eventName)"
                         showGridlines 
                         class="data-table"
                         tableStyle="min-width: 50rem"
@@ -49,9 +49,9 @@
                         <Column field="posicion" header="Posición"></Column>
                         <Column field="criterio" header="Marca">
                             <template #body="{ data }">
-                                <span v-if="data.criterio === 'Tiempo'">{{ data.marca }}</span>
-                                <span v-else-if="data.criterio === 'Distancia'">{{ data.distancia }}</span>
-                                <span v-else>{{ data.puntaje }}</span>
+                                <span v-if="data.criterio === 'Tiempo'">{{ data.marca + " segundos"}}</span>
+                                <span v-else-if="data.criterio === 'Distancia'">{{ data.distancia + " metros" }}</span>
+                                <span v-else>{{ data.puntaje + " puntos"}}</span>
                             </template>
                         </Column>
                         <Column field="criterio" header="Viento (m/s)">
@@ -75,6 +75,8 @@
 </template>
 
 <script>
+import { convertirTiemposAsegundos } from '@/modules/Atletas/helpers/getResultados';
+
 export default {
     name: 'DetalleReporteCampeonato',
     props: {
@@ -102,11 +104,14 @@ export default {
     },
     data() {
         return {
-            activeIndex: null
+            activeIndex: null,
+            competidoresFormateados: []
         }
     },
     mounted() {
-        console.log("reporteCampeonato:", this.reporteCampeonato);
+        if(this.competidores){
+            this.competidoresFormateados = convertirTiemposAsegundos(this.competidores);
+        }
     },
     methods: {
         toggleTab(event) {
