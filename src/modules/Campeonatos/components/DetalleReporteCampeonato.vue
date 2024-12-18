@@ -43,11 +43,21 @@
                         <Column field="provincia" header="Provincia"></Column>
                         <Column field="apellidos" header="Apellido"></Column>
                         <Column field="nombres" header="Nombre"></Column>
-                        <Column field="sexo" header="Genero"></Column>
-                        <Column field="esMiembro" header="Socio">
+                        <Column field="sexo" header="Género"></Column>
+                        <Column field="numeroCompetidor" header="Número de competidor"></Column>
+                        <Column field="categoria" header="Categoría"></Column>
+                        <Column field="posicion" header="Posición"></Column>
+                        <Column field="criterio" header="Marca">
                             <template #body="{ data }">
-                                <span v-if="data.esMiembro === true">Sí</span>
-                                <span v-if="data.esMiembro === false">No</span>
+                                <span v-if="data.criterio === 'Tiempo'">{{ data.marca }}</span>
+                                <span v-else-if="data.criterio === 'Distancia'">{{ data.distancia }}</span>
+                                <span v-else>{{ data.puntaje }}</span>
+                            </template>
+                        </Column>
+                        <Column field="criterio" header="Viento (m/s)">
+                            <template #body="{ data }">
+                                <span v-if="data.criterio === 'Tiempo' || data.criterio === 'Distancia' ">{{ data.viento || 0.00}}</span>
+                                <span v-else> No aplica </span>
                             </template>
                         </Column>
                     </DataTable>
