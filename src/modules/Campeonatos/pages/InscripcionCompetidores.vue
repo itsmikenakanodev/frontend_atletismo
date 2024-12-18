@@ -317,7 +317,8 @@ export default {
           },
           campeonato: {
             id: this.campeonato.id
-          }
+          },
+          registrado: false
         };
         try {
           await registroPruebasCompetidorFachada(cuerpoCPC);
