@@ -83,7 +83,10 @@
                         <span v-else>N/A</span>
                       </td>
                       <td>{{ resultado.posicion }}</td>
-                      <td>{{ resultado.viento }}</td>
+                      <td>
+                        <span v-if="resultado.criterioPrueba === 'Tiempo'">{{ resultado.viento }}</span>
+                        <span v-else>No aplica</span>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
