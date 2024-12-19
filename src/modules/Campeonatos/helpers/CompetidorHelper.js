@@ -11,6 +11,15 @@ export const registroCompetidorFachada = async (cuerpoCompetidor) => {
   }
 };
 
+export const verificarCompetidorFachada = async (searchParams) => {
+  try {
+    return await verificarCompetidor(searchParams);
+  } catch (error) {
+    console.error("Error verificando competidor:", error);
+    throw error;
+  }
+};
+
 // Consumir
 const registroCompetidor = async (cuerpoCompetidor) => {
   try {
@@ -22,3 +31,20 @@ const registroCompetidor = async (cuerpoCompetidor) => {
     throw error;
   }
 };
+
+const verificarCompetidor = async (searchParams) => {
+  try {
+    const url = getApiUrl('competidores/existe'); // Ajusta la ruta si es necesario
+    const response = await axios.get(url, {
+      params: {
+        campeonatoId: searchParams.idCampeonato,
+        usuarioId: searchParams.idUsuario
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error en la llamada API para verificar competidor:", error);
+    throw error;
+  }
+};
+

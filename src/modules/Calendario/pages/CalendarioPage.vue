@@ -1,5 +1,6 @@
 <template>
   <div class="campeonatos-container">
+    <Toast/>
     <!-- Mensaje de carga inicial -->
     <section v-if="!contentReady" class="cargando">
       <div class="spinner"></div>
@@ -62,7 +63,8 @@
               <p class="campeonato-sede">Sede: {{ campeonato.sede }}</p>
               <p class="campeonato-fechas">Plazo de inscripción: {{ formatDate(campeonato.inscripcionInicio) }} -
                 {{ formatDate(campeonato.inscripcionFin) }}</p>
-              <p class="campeonato-fechas">Fechas de inicio - fin del campeonato: {{ formatDate(campeonato.fechaInicio) }} -
+              <p class="campeonato-fechas">Fechas de inicio - fin del campeonato: {{ formatDate(campeonato.fechaInicio)
+                }} -
                 {{ formatDate(campeonato.fechaFin) }}</p>
 
               <div class="campeonato-actions">
@@ -76,40 +78,28 @@
                 <div class="botones-acciones">
                   <div class="espaciador"></div>
                   <!-- Botón de inscripción/reportes para rol 5 -->
-                  <button 
-                      class="accion-boton" 
-                      v-if="usuario && usuario.rol && usuario.rol.id === 5"
-                      @click="campeonatoFinalizado(campeonato) ? verReportes(campeonato) : mostrarInscripcionCampeonato(campeonato.id)"
-                  >
-                      {{ campeonatoFinalizado(campeonato) ? 'Ver Reportes' : 'Inscribirse' }}
+                  <button class="accion-boton" v-if="usuario && usuario.rol && usuario.rol.id === 5 && getTagValue(campeonato) === 'Inscripciones abiertas'"
+                    @click="campeonatoFinalizado(campeonato) ? verReportes(campeonato) : mostrarInscripcionCampeonato(campeonato.id)">
+                    {{ campeonatoFinalizado(campeonato) ? 'Ver Reportes' : 'Inscribirse' }}
                   </button>
 
                   <!-- Botón de edición -->
-                  <button 
-                      class="accion-boton" 
-                      v-if="usuario && usuario.rol && 
-                            (usuario.rol.id === 1 || usuario.rol.id === 6) && 
-                            !campeonatoFinalizado(campeonato)"
-                      @click="mostrarEdicionCampeonato(campeonato.id)"
-                  >
-                      Editar
+                  <button class="accion-boton" v-if="usuario && usuario.rol &&
+                    (usuario.rol.id === 1 || usuario.rol.id === 6) &&
+                    !campeonatoFinalizado(campeonato)" @click="mostrarEdicionCampeonato(campeonato.id)">
+                    Editar
                   </button>
 
                   <!-- Nuevo botón de Ver Reportes para roles 1 y 6 -->
-                  <button 
-                      class="accion-boton" 
-                      v-if="usuario && usuario.rol && (usuario.rol.id === 1 || usuario.rol.id === 6)"
-                      @click="verReportes(campeonato)"
-                  >
-                      Ver Reportes
+                  <button class="accion-boton"
+                    v-if="usuario && usuario.rol && (usuario.rol.id === 1 || usuario.rol.id === 6)"
+                    @click="verReportes(campeonato)">
+                    Ver Reportes
                   </button>
 
                   <!-- Botón de ver documentos -->
-                  <button 
-                      class="accion-boton" 
-                      @click="verDocumentos(campeonato.id)"
-                  >
-                      Ver Documentos
+                  <button class="accion-boton" @click="verDocumentos(campeonato.id)">
+                    Ver Documentos
                   </button>
                 </div>
               </div>
@@ -151,6 +141,7 @@
 <script>
 import { consultarCampeonatosFachadaFiltro } from "../../Campeonatos/helpers/CampeonatosNacionalHelper";
 import { eliminarCampeonatoPruebaFachada2 } from "../../Campeonatos/helpers/CampeonatoPruebaHelper";
+import { verificarCompetidorFachada } from "@/modules/Campeonatos/helpers/CompetidorHelper";
 
 export default {
   data() {
@@ -195,7 +186,7 @@ export default {
     });
   },
   methods: {
-    async obtenerCampeonatos(anio=new Date().getFullYear(), mes=new Date().getMonth() + 1) {
+    async obtenerCampeonatos(anio = new Date().getFullYear(), mes = new Date().getMonth() + 1) {
       this.loading = true;  // Para cambios de mes/año
       this.campeonatos = await consultarCampeonatosFachadaFiltro(anio, mes);
       this.loading = false;
@@ -204,7 +195,21 @@ export default {
       this.$router.push({ name: 'documentos', params: { id: campeonatoId } });
     },
     // Método para redirigir a la página de inscripción de competidores
-    mostrarInscripcionCampeonato(campeonatoId) {
+    async mostrarInscripcionCampeonato(campeonatoId) {
+      const queryParams = {
+        idCampeonato: campeonatoId,
+        idUsuario: this.usuario.id
+      }
+      const verificado = await verificarCompetidorFachada(queryParams)
+      if(verificado){
+        this.$toast.add({
+                    severity: 'info',
+                    summary: 'Info',   
+                    detail: 'Ya estás inscrito en este campeonato!',
+                    life: 3000
+                });
+        return;
+      }
       this.$router.push({ name: 'InscripcionCompetidores', params: { id: campeonatoId } });
     },
     // Método para redirigir a la página de edicion de campeonato
@@ -212,16 +217,16 @@ export default {
       this.$router.push({ name: 'EdicionCampeonatos', params: { id: campeonatoId } });
     },
     filtrarCampeonatosPorAno(year) {
-    this.selectedYear = year;
-    this.loading = true;  // Inicia la carga
-    this.obtenerCampeonatos(this.selectedYear, this.selectedMonth);  // Llama a la función para obtener los campeonatos
-  },
+      this.selectedYear = year;
+      this.loading = true;  // Inicia la carga
+      this.obtenerCampeonatos(this.selectedYear, this.selectedMonth);  // Llama a la función para obtener los campeonatos
+    },
 
-  filtrarCampeonatosPorMes(month) {
-    this.selectedMonth = month;
-    this.loading = true;  // Inicia la carga
-    this.obtenerCampeonatos(this.selectedYear, this.selectedMonth);  // Llama a la función para obtener los campeonatos
-  },
+    filtrarCampeonatosPorMes(month) {
+      this.selectedMonth = month;
+      this.loading = true;  // Inicia la carga
+      this.obtenerCampeonatos(this.selectedYear, this.selectedMonth);  // Llama a la función para obtener los campeonatos
+    },
     /*filtrarCampeonatos() {
       this.filteredCampeonatos = this.campeonatos.filter(campeonato => {
         const campeonatoFecha = new Date(campeonato.fechaInicio);
@@ -335,7 +340,7 @@ export default {
 
     // Agregamos el método para redireccionar a reportes
     verReportes(campeonato) {
-      this.$router.push({ 
+      this.$router.push({
         name: 'ReporteCampeonatoEspecifico',
         params: { id: campeonato.id },
         state: { campeonato: campeonato }
@@ -380,7 +385,8 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 120px; /* Aseguramos un ancho mínimo para ambos textos */
+  min-width: 120px;
+  /* Aseguramos un ancho mínimo para ambos textos */
 }
 
 .inscribirse-boton:hover {
@@ -481,7 +487,8 @@ export default {
   align-items: center;
   gap: 10px;
   padding: 10px;
-  min-width: 120px; /* Asegura un ancho mínimo consistente */
+  min-width: 120px;
+  /* Asegura un ancho mínimo consistente */
 }
 
 .tag-icon {
@@ -722,7 +729,7 @@ p {
 
 .ver-documentos-boton:hover {
   background-color: #4b8b92;
-} 
+}
 
 /* Asegurarse que el Tag de PrimeVue esté centrado */
 :deep(.p-tag) {
