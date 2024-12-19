@@ -49,14 +49,15 @@
                         <Column field="posicion" header="Posición"></Column>
                         <Column field="criterio" header="Marca">
                             <template #body="{ data }">
-                                <span v-if="data.criterio === 'Tiempo'">{{ data.marca + " segundos"}}</span>
-                                <span v-else-if="data.criterio === 'Distancia'">{{ data.distancia + " metros" }}</span>
-                                <span v-else>{{ data.puntaje + " puntos"}}</span>
+                                <span v-if="data.criterio === 'Tiempo'">{{ data.marca > 0 ? data.marca + " segundos" : 'No registrado' }}</span>
+                                <span v-else-if="data.criterio === 'Distancia'">{{ data.distancia > 0 ? data.distancia + " metros" : 'No registrado' }}</span>
+                                <span v-else-if="data.criterio === 'Puntos'">{{ data.puntaje > 0 ? data.puntaje + " puntos" : 'No registrado' }}</span>
+                                <span v-else>N/A</span>
                             </template>
                         </Column>
                         <Column field="criterio" header="Viento (m/s)">
                             <template #body="{ data }">
-                                <span v-if="data.criterio === 'Tiempo' || data.criterio === 'Distancia' ">{{ data.viento || 0.00}}</span>
+                                <span v-if="data.criterio === 'Tiempo' || data.criterio === 'Distancia'">{{ data.viento  }}</span>
                                 <span v-else> No aplica </span>
                             </template>
                         </Column>

@@ -163,7 +163,7 @@ export default {
 
         resetReportData() {
             this.reporteCampeonato = null;
-            this.reportePruebas = null;
+            this.reportePruebas = [];
             this.competidores = [];
             this.selectedCampeonato = null;
         },
@@ -181,13 +181,26 @@ export default {
             this.loading = true;
             this.loadingMessage = "Cargando reporte, espere un momento...";
 
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Restablecer los datos del reporte antes de cargar uno nuevo
+            this.reporteCampeonato = null; // Ocultar el detalle del reporte
+            this.reportePruebas = []; // Limpiar las pruebas
+            this.competidores = []; // Limpiar los competidores
 
             try {
-                this.reporteCampeonato = await obtenerReporteCampeonatoFachada(this.selectedCampeonato.id);
+                const [reporteCampeonato, reportePruebas, competidores] = await Promise.all([
+                    obtenerReporteCampeonatoFachada(this.selectedCampeonato.id),
+                    obtenerReportePruebasCampeonatoFachada(this.selectedCampeonato.id),
+                    obtenerReporteCompetidoresCampeonatoFachada(this.selectedCampeonato.id)
+                ]);
+
+                this.reporteCampeonato = reporteCampeonato || {};
+                this.reportePruebas = reportePruebas || [];
+                this.competidores = competidores || [];
+
+                // Verifica que los datos se estén cargando correctamente
                 console.log("Reporte Campeonato:", this.reporteCampeonato);
-                this.reportePruebas = await obtenerReportePruebasCampeonatoFachada(this.selectedCampeonato.id);
-                this.competidores = await obtenerReporteCompetidoresCampeonatoFachada(this.selectedCampeonato.id);
+                console.log("Reporte Pruebas:", this.reportePruebas);
+                console.log("Competidores:", this.competidores);
 
                 if (this.reporteCampeonato.maleCompetitors === 0 && this.reporteCampeonato.femaleCompetitors === 0) {
                     this.$toast.add({
@@ -254,6 +267,12 @@ export default {
                 });
             }
         },
+
+        async seleccionarCampeonato(campeonato) {
+            this.selectedCampeonato = campeonato;
+            this.resetReportData(); // Restablecer datos del reporte
+            await this.cargarReporte(); // Cargar el nuevo reporte
+        }
     },
 }
 </script>
