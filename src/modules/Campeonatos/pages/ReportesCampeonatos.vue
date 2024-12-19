@@ -37,6 +37,7 @@
                 optionLabel="nombre" 
                 placeholder="Seleccione el campeonato que desea ver..."
                 class="dropdown"
+                emptyFilterMessage="No hay campeonatos para la fecha seleccionada"
             ></Dropdown>
             <Button 
                 v-if="selectedCampeonato !== null" 
