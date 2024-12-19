@@ -21,21 +21,19 @@ export default {};
 </script>
 
 <style scoped>
-p {
-  margin-block: 40px;
-  font-size: 20px;
-}
-
 .contenedorInicio {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
 }
 
 .contenedorTexto {
   display: block;
-  width: 65%;
+  width: 60%;
   text-align: justify;
-  padding-right: 70px;
+  padding-right: 50px;
 }
 
 .contenedorImagen {
@@ -46,24 +44,16 @@ p {
 }
 
 #imagenCarousel {
-  padding: 10px 10px;
-  width: 50%;
+  padding: 10px;
+  width: 100%;
   height: auto;
-  position: relative;
-  margin: 70px;
+  max-width: 300px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-#botonCompetir {
-  padding: 10px 20px;
-  background-color: rgb(59, 59, 251);
-  border: none;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 20px;
-}
-
-#botonCompetir:hover {
-  background-color: rgb(70, 70, 200);
+p {
+  margin-block: 20px;
+  font-size: 18px;
 }
 </style>

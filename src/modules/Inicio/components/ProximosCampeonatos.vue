@@ -81,27 +81,23 @@ export default {
 <style scoped>
 .campeonatos-container {
   text-align: center;
-  padding: 1rem;
-  border-radius: 10px;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  margin: 0 auto;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+  margin: 2rem auto;
+  background-color: #ffffff;
 }
 
 h2 {
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
-  color: #f1f1f1;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #2C666E;
 }
 
 /* Mensaje de carga con animación */
 .cargando {
-  font-size: 1rem;
-  color: #f1f1f1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 200px; /* Ajusta la altura según sea necesario */
+  font-size: 1.2rem;
+  color: #2C666E;
 }
 
 .spinner {
@@ -131,16 +127,16 @@ h2 {
 .campeonato-card {
   display: flex;
   align-items: center;
-  background-color: #f1f1f1;
-  border-radius: 8px;
-  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  padding: 1.5rem;
   width: 100%;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease-in-out;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease-in-out;
 }
 
 .campeonato-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px);
 }
 
 /* Icono del calendario */
@@ -197,18 +193,19 @@ h2 {
 }
 
 .ver-todos-boton {
-  background-color: #90ddf0;
-  color: #0A090C;
+  background-color: #4b8b92;
+  color: #ffffff;
   border: none;
-  padding: 10px 20px;
-  font-size: 1rem;
-  border-radius: 5px;
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: 10px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-top: 15px;
 }
 
 .ver-todos-boton:hover {
-  background-color: #4b8b92;
+  background-color: #90ddf0;
+  transform: scale(1.05);
 }
 </style>

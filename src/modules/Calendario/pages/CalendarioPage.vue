@@ -189,6 +189,19 @@ export default {
     async obtenerCampeonatos(anio = new Date().getFullYear(), mes = new Date().getMonth() + 1) {
       this.loading = true;  // Para cambios de mes/año
       this.campeonatos = await consultarCampeonatosFachadaFiltro(anio, mes);
+      
+      // Ordenar campeonatos
+      const hoy = new Date();
+      this.campeonatos.sort((a, b) => {
+        const fechaA = new Date(a.fechaInicio);
+        const fechaB = new Date(b.fechaInicio);
+        // Primero los que ya han comenzado
+        if (fechaA <= hoy && fechaB > hoy) return -1; // A está en progreso, B no
+        if (fechaA > hoy && fechaB <= hoy) return 1; // B está en progreso, A no
+        // Si ambos están en progreso o ambos no, ordenar por fecha
+        return fechaA - fechaB; 
+      });
+
       this.loading = false;
     },
     verDocumentos(campeonatoId) {

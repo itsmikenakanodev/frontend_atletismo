@@ -54,55 +54,72 @@ export default {
 .contenedorInicio {
   display: flex;
   flex-direction: row;
-  align-items: center; /* Alinea verticalmente los elementos */
-  justify-content: space-between; /* Espacia los elementos de forma equitativa */
-  padding: 2rem; /* Padding general alrededor del contenedor */
-  gap: 2rem; /* Espacio entre el texto y la imagen */
+  align-items: center;
+  justify-content: space-between;
+  padding: 2rem;
+  gap: 2rem;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .contenedorTexto {
   flex: 1;
-  max-width: 500px; /* Limita el ancho máximo del texto */
-  padding-right: 1rem; /* Espacio entre el texto y la imagen */
+  max-width: 500px;
+  padding-right: 1rem;
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .contenedorImagen {
   flex: 1;
-  max-width: 600px; /* Limita el ancho máximo de la imagen */
+  max-width: 600px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .image-item {
   width: 100%;
-  border-radius: 10px; /* Bordes redondeados en la imagen */
-  overflow: hidden; /* Asegura que la imagen no sobresalga del contenedor */
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.3s;
+}
+
+.image-item:hover {
+  transform: scale(1.05);
 }
 
 #imagenCarousel {
   width: 100%;
-  height: auto; /* Mantiene la proporción de la imagen */
+  height: auto;
+  border-radius: 10px;
 }
 
 p {
-  margin: 0 0 1rem 0; /* Margen ajustado para el párrafo */
-  font-size: 1rem; /* Tamaño de fuente ajustado */
-  line-height: 1.5; /* Mejora la legibilidad del texto */
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #333;
 }
 
 #botonCompetir {
-  padding: 0.75rem 1.5rem; /* Padding ajustado */
+  padding: 0.75rem 1.5rem;
   background-color: #2C666E;
   border: none;
   color: white;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 1rem; /* Tamaño de fuente ajustado */
-  transition: background-color 0.3s; /* Transición suave para el hover */
+  font-size: 1rem;
+  transition: background-color 0.3s, transform 0.3s;
 }
 
 #botonCompetir:hover {
   background-color: #07393C;
+  transform: scale(1.05);
 }
 </style>

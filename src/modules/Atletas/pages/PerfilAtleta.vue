@@ -18,7 +18,7 @@
 
       <!-- Sección de selección de vista -->
       <div class="toggle-buttons">
-        <div class="dropdown">
+        <div class="dropdown" v-if="resultados.length > 0">
           <span class="dropbtn">
             <i class="pi pi-filter"></i>
             Ver estadísticas del competidor
@@ -33,6 +33,7 @@
           </div>
         </div>
       </div>
+
 
       <div v-if="mostrarMarcas && resultados.length">
         <div class="mejores-tiempos">
@@ -136,9 +137,8 @@ export default {
     const storedUserData = localStorage.getItem('userdata');
     if (storedUserData) {
       this.usuario = JSON.parse(storedUserData);
-      this.rol = this.usuario.rol.id; // Asignar el rol del usuario
     } else {
-      this.usuario = { rol: { id: null } };
+      this.usuario = {}; // Asegurarse de que usuario sea un objeto vacío si no hay datos
     }
 
     const cedula = this.$route.params.cedula; // Obtener la cédula del atleta de los parámetros de la ruta
@@ -148,8 +148,6 @@ export default {
       console.log("Atleta encontrado:", atletas); // Verifica la respuesta de la API
       if (atletas.length > 0) {
         this.atleta = atletas[0]; // Asigna el primer atleta del array
-        this.rol = this.atleta.rol; // Asegúrate de que el objeto atleta tenga la propiedad rol
-
         // Obtener resultados del atleta
         this.resultados = await buscarResultadosFachada(cedula); // Llama a la función para obtener resultados
         
@@ -198,7 +196,7 @@ export default {
             const puntajes = historial.map(h => h.puntaje);
             const mejorPuntos = Math.max(...puntajes);
             const mejoresSinViento = historial.filter(h => h.viento === 0 && h.puntaje === mejorPuntos);
-            return mejoresSinViento.length > 0 ? mejoresSinViento[0].puntaje.toFixed(2) + ' puntos' : mejorPuntos.toFixed(2) + ' puntos';
+            return mejoresSinViento.length > 0 ? mejoresSinViento[0].puntaje.toFixed(2) + ' puntos' : mejorPuntos + ' puntos';
         }
         
         return 'N/A'; // En caso de que no coincida con ningún criterio

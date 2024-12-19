@@ -2,10 +2,9 @@
     <footer class="footer mt-4">
         <div class="container">
             <div class="row">
-                <div class="footer-col ">
-                     <div class="aname">
-                        <a href="#"><img id="anameAtleta" src="../modules/Inicio/assets/aname-footer.png" alt="" /></a>               
-                        
+                <div class="footer-col">
+                    <div class="aname">
+                        <a href="#"><img id="anameAtleta" src="../modules/Inicio/assets/aname-footer.png" alt="" /></a>
                         <p>Asociación Nacional De Atletismo Máster Del Ecuador</p>
                         <div class="social-links">
                             <a href="https://www.facebook.com/p/ANAME-Asociaci%C3%B3n-Nacional-de-Atletismo-Master-del-Ecuador-100064841912450/"><i class="pi pi-facebook"></i></a>
@@ -13,18 +12,17 @@
                      </div>
                 </div>
                 <div class="footer-col">
-                    <h4>Campeonatos</h4>
+                    <h4>Calendario de Campeonatos</h4>
                     <ul>
-                        <li><a @click.prevent="$router.push('/campeonatos-n')" href="">Nacionales</a></li>
+                        <li><a @click.prevent="$router.push('/calendarios')" href="">Calendario</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
-                    <h4>Suscripción</h4>
+                    <h4>Ponte en contacto con nosotros</h4>
                     <ul>
-                        <li><a @click.prevent="$router.push('/socio')" href="">Ser socio</a></li>
+                        <li><a @click.prevent="$router.push('/contacto')" href="">Contáctanos</a></li>
                     </ul>
                 </div>
-
                 <div class="footer-col">
                     <h4>Campeonatos internacionales</h4>
                     <ul>
@@ -32,7 +30,7 @@
                     </ul>
                 </div>
             </div>
-            <div class="anio ">
+            <div class="anio">
                 {{ new Date().getFullYear() }} — <strong>ANAME</strong>
             </div>
         </div>

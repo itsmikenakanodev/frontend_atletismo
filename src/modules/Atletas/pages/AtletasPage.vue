@@ -4,7 +4,7 @@
 
     <div class="search-bar">
       <InputText v-model="searchQuery" placeholder="Buscar por cédula o apellido" />
-      <Button :label="'Buscar'" icon="pi pi-search" @click="searchAtletas" :disabled="!searchQuery" />
+      <Button :label="'Buscar'" icon="pi pi-search" @click="searchAtletas" :disabled="!searchQuery || (searchQuery === searchedQuery) " />
     </div>
 
     <LoadingSpinner v-if="loading" mensaje="Cargando atletas..." />
@@ -28,7 +28,8 @@
 
     <div class="pagination-buttons" v-if="atletas.length">
       <Button label="Anterior" icon="pi pi-chevron-left" @click="previousPage" :disabled="currentPage === 0" />
-      <Button label="Siguiente" icon="pi pi-chevron-right" @click="nextPage" :disabled="isNextDisabled || paginatedAtletas.length<10" />
+      <Button label="Siguiente" icon="pi pi-chevron-right" @click="nextPage"
+        :disabled="isNextDisabled || paginatedAtletas.length <10" />
     </div>
     <Toast />
   </div>
@@ -50,7 +51,9 @@ export default {
       loading: false,
       currentPage: 0,
       totalAtletas: 0,
-      isNextDisabled: false
+      isNextDisabled: false,
+      hasCheckedNextDisabled: false,
+      searchedQuery: '',
     };
   },
   computed: {
@@ -61,6 +64,7 @@ export default {
   },
   methods: {
     async searchAtletas() {
+      console.log("Search atletas ",this.hasCheckedNextDisabled)
       this.searched = true;
       this.loading = true;
 
@@ -71,6 +75,15 @@ export default {
           this.atletas = [];
           this.totalAtletas = 0;
           this.isNextDisabled = false;
+          this.hasCheckedNextDisabled = false;
+          return;
+        } else if (this.searchQuery !== this.searchedQuery) {
+          this.atletas = [];
+          this.totalAtletas = 0;
+          this.isNextDisabled = false;
+          this.hasCheckedNextDisabled = false;
+          this.searchedQuery = this.searchQuery
+        }else if (this.searchedQuery === this.searchQuery && this.hasCheckedNextDisabled ===true){
           return;
         }
 
@@ -82,18 +95,29 @@ export default {
         };
 
         const lista = await buscarAtletasFachada(searchParams);
+
+
         if (lista && lista.length > 0) {
           this.atletas = [...this.atletas, ...lista];
           this.totalAtletas = this.atletas.length;
           this.isNextDisabled = false;
+          if(lista.length <10) {
+            this.isNextDisabled = true;
+            this.hasCheckedNextDisabled = true;
+          }
         } else {
           this.isNextDisabled = true;
-          this.$toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'No se encontraron más coincidencias.',
-            life: 2000
-          });
+          this.hasCheckedNextDisabled = true;
+
+          if (!this.hasCheckedNextDisabled) {
+            this.$toast.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'No se encontraron más coincidencias.',
+              life: 2000
+            });
+          }
+
         }
 
       } catch (error) {
@@ -105,6 +129,7 @@ export default {
             life: 2000
           });
           this.isNextDisabled = true;
+          this.hasCheckedNextDisabled = true;
 
         } else {
           this.$toast.add({
@@ -126,7 +151,9 @@ export default {
     },
     nextPage() {
       this.currentPage++;
-      this.searchAtletas();
+      if(!this.hasCheckedNextDisabled){
+        this.searchAtletas();
+      }
     },
     previousPage() {
       if (this.currentPage > 0) {
