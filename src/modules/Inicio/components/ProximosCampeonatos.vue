@@ -193,7 +193,7 @@ h2 {
 }
 
 .ver-todos-boton {
-  background-color: #4b8b92;
+  background-color: #2C666E;
   color: #ffffff;
   border: none;
   padding: 12px 24px;
@@ -205,7 +205,7 @@ h2 {
 }
 
 .ver-todos-boton:hover {
-  background-color: #90ddf0;
+  background-color: #07393C;
   transform: scale(1.05);
 }
 </style>

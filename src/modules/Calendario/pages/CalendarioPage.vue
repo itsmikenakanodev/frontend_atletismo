@@ -188,8 +188,9 @@ export default {
   methods: {
     async obtenerCampeonatos(anio = new Date().getFullYear(), mes = new Date().getMonth() + 1) {
       this.loading = true;  // Para cambios de mes/año
-      this.campeonatos = await consultarCampeonatosFachadaFiltro(anio, mes);
       
+      this.campeonatos = await consultarCampeonatosFachadaFiltro(anio, mes);
+      console.log(this.campeonatos)
       // Ordenar campeonatos
       const hoy = new Date();
       this.campeonatos.sort((a, b) => {
@@ -265,15 +266,24 @@ export default {
       return years;
     },
     formatDate(dateString) {
+      const date = new Date(dateString);
+      // Ajustar la fecha a UTC si es necesario
+      const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
       const options = { year: "numeric", month: "long", day: "numeric" };
-      return new Date(dateString).toLocaleDateString(undefined, options);
+      return utcDate.toLocaleDateString(undefined, options);
     },
     getDay(dateString) {
-      return new Date(dateString).getDate();
+      const date = new Date(dateString);
+      // Ajustar la fecha a UTC si es necesario
+      const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+      return utcDate.getDate();
     },
     getMonth(dateString) {
+      const date = new Date(dateString);
+      // Ajustar la fecha a UTC si es necesario
+      const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
       const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-      return monthNames[new Date(dateString).getMonth()];
+      return monthNames[utcDate.getMonth()];
     },
     togglePruebas(campeonatoId) {
       if (this.expandedCampeonatos.includes(campeonatoId)) {

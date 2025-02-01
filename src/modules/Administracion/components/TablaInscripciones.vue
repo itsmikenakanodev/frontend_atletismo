@@ -156,9 +156,9 @@ export default {
       };
       await consultarInscripcionFachada(tipoSus).then((response) => this.usuarios = response);
     },
-    getValue(slotProps) {
+    getValue(slotProps) { 
       if (slotProps.data.estadoRegistro === true) {
-        return 'Aprobado';
+        return 'Confirmado';
       } else {
         return 'En Proceso';
       }
