@@ -2,6 +2,15 @@ import axios from "axios";
 import { getApiUrl } from "@/utils/apiUtil.js";
 
 // Fachada
+export const obtenerCampeonatosAsignablesFachada = async (ciudad) => {
+  try {
+    return await obtenerCampeonatosAsignablesApi(ciudad);
+  } catch (error) {
+    console.error("Error obteniendo campeonatos:", error);
+    throw error;
+  }
+};
+
 export const obtenerCampeonatosFachada = async (ciudad) => {
   try {
     return await obtenerCampeonatosApi(ciudad);
@@ -31,6 +40,17 @@ export const obtenerCampeonatosSinPruebasFachada = async (anio, mes) => {
 };
 
 // Consumir
+const obtenerCampeonatosAsignablesApi = async (ciudad) => {
+  try {
+    const url = getApiUrl(`campeonatos/campeonatos-para-asignar-pruebas/${ciudad}`);
+    const response = await axios.get(url);
+    return response.data;
+  } catch (error) {
+    console.error("Error en la llamada API para obtener campeonatos:", error);
+    throw error;
+  }
+};
+
 const obtenerCampeonatosApi = async (ciudad) => {
   try {
     const url = getApiUrl(`campeonatos/dto/${ciudad}`);
