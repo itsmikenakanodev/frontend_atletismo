@@ -84,9 +84,9 @@
                   </button>
 
                   <!-- Botón de edición -->
-                  <button class="accion-boton" v-if="usuario && usuario.rol &&
+                  <button class="accion-boton" v-if="usuario && usuario.rol && usuario.ciudad === campeonato.ciudad && new Date(campeonato.inscripcionInicio) > new Date() &&
                     (usuario.rol.id === 1 || usuario.rol.id === 6) &&
-                    !campeonatoFinalizado(campeonato)" @click="mostrarEdicionCampeonato(campeonato.id)">
+                    !campeonatoFinalizado(campeonato)" @click="mostrarEdicionCampeonato(campeonato.id) ">
                     Editar
                   </button>
 
@@ -101,6 +101,13 @@
                   <button class="accion-boton" @click="verDocumentos(campeonato.id)">
                     Ver Documentos
                   </button>
+
+                  <!-- Botón de eliminar campeonato para roles 1 y 6 -->
+                  <button class="accion-boton boton-eliminar" 
+                    v-if="usuario && usuario.rol && usuario.provincia === campeonato.provincia && (usuario.rol.id === 1 || usuario.rol.id === 6) && new Date(campeonato.inscripcionInicio) > new Date()"
+                    @click="eliminarCampeonato(campeonato.id)">
+                    Eliminar Campeonato
+                  </button>
                 </div>
               </div>
 
@@ -112,10 +119,9 @@
                   <Column field="tipo" header="Tipo"></Column>
 
                   <!-- Columna de eliminar visible solo para roles 1 o 6 -->
-                  <Column v-if="usuario && (usuario.rol.id === 1 || usuario.rol.id === 6)" header="Eliminar">
+                  <Column v-if="usuario && (usuario.rol.id === 1 || usuario.rol.id === 6) && new Date(campeonato.inscripcionInicio) > new Date() && usuario.ciudad === campeonato.ciudad" header="Eliminar">
                     <template #body="slotProps">
-                      <Button label="Eliminar" icon="pi pi-trash" class="p-button-danger"
-                        @click="eliminarPrueba(slotProps.data, campeonato.id)" />
+                      <Button label="Eliminar" icon="pi pi-trash" class="p-button-danger" @click="confirmarEliminacion(slotProps.data, campeonato.id)" />
                     </template>
                   </Column>
                 </DataTable>
@@ -134,6 +140,15 @@
         </section>
       </template>
     </div>
+
+    <!-- Diálogo de confirmación -->
+    <Dialog header="Confirmar Eliminación" v-model:visible="dialogVisible" :modal="true" :style="{ width: '30vw' }">
+      <p class="confirm-text">¿Estás seguro de que deseas eliminar la prueba "{{ pruebaAEliminar.nombre }}"?</p>
+      <template #footer>
+        <Button label="Cancelar" icon="pi pi-times" @click="dialogVisible = false" />
+        <Button label="Eliminar" icon="pi pi-check" @click="eliminarPruebaConfirmada" />
+      </template>
+    </Dialog>
   </div>
 </template>
 
@@ -142,8 +157,11 @@
 import { consultarCampeonatosFachadaFiltro } from "../../Campeonatos/helpers/CampeonatosNacionalHelper";
 import { eliminarCampeonatoPruebaFachada2 } from "../../Campeonatos/helpers/CampeonatoPruebaHelper";
 import { verificarCompetidorFachada } from "@/modules/Campeonatos/helpers/CompetidorHelper";
+import { eliminarCampeonatoFachada } from "@/modules/Campeonatos/helpers/EliminarCampeonatoHelper";
+import { storage } from "@/modules/Registro/helpers/firebase";
 
 export default {
+  
   data() {
     return {
       campeonatos: [],
@@ -156,6 +174,9 @@ export default {
       expandedCampeonatos: [], // Estado para manejar campeonatos expandidos
       usuario: null,
       contentReady: false,
+      dialogVisible: false,
+      pruebaAEliminar: null,
+      campeonatoIdEliminar: null,
     };
   },
   async mounted() {
@@ -335,39 +356,62 @@ export default {
         return "Finalizado";
       }
     },
-    eliminarPrueba(prueba, campeonatoId) {
-      // Confirmación antes de eliminar
-      if (confirm(`¿Ests seguro de que quieres eliminar la prueba "${prueba.nombre}" del campeonato?`)) {
-        // Lógica de eliminación usando el helper
-        eliminarCampeonatoPruebaFachada2(prueba.id, campeonatoId)
-          .then(() => {
-            // Aquí puedes realizar la actualización de la lista de pruebas del campeonato después de la eliminación
-            const campeonato = this.filteredCampeonatos.find(c => c.id === campeonatoId);
-            if (campeonato) {
-              campeonato.pruebas = campeonato.pruebas.filter(p => p.id !== prueba.id);
-            }
-            alert("Prueba eliminada con éxito.");
-          })
-          .catch(error => {
-            console.error("Error eliminando prueba:", error);
-            alert("Hubo un error al intentar eliminar la prueba.");
-          });
+    confirmarEliminacion(prueba, campeonatoId) {
+      this.pruebaAEliminar = prueba;
+      this.campeonatoIdEliminar = campeonatoId;
+      this.dialogVisible = true;
+    },
+    async eliminarPruebaConfirmada() {
+      try {
+        await eliminarCampeonatoPruebaFachada2(this.pruebaAEliminar.id, this.campeonatoIdEliminar);
+        this.$toast.add({ severity: 'success', summary: 'Éxito', detail: 'Prueba eliminada con éxito', life: 3000 });
+        this.dialogVisible = false;
+        await this.obtenerCampeonatos();
+      } catch (error) {
+        console.error("Error eliminando prueba:", error);
+        this.$toast.add({ severity: 'error', summary: 'Error', detail: 'Hubo un error al intentar eliminar la prueba', life: 3000 });
       }
     },
-    // Agregamos el método para verificar si el campeonato está finalizado
     campeonatoFinalizado(campeonato) {
       const today = new Date();
       const fechaFin = new Date(campeonato.fechaFin);
       return today > fechaFin;
     },
-
-    // Agregamos el método para redireccionar a reportes
     verReportes(campeonato) {
       this.$router.push({
         name: 'ReporteCampeonatoEspecifico',
         params: { id: campeonato.id },
         state: { campeonato: campeonato }
       });
+    },
+    async deleteUploadedFile(fileUrl) {
+            // Extraer el nombre del archivo de la URL
+            const fileName = decodeURIComponent(fileUrl.split('/').pop().split('?')[0]); // Obtener solo el nombre del archivo
+            console.log("Deleting", fileName)
+            const storageRef = storage.ref(`${fileName}`);
+            try {
+                await storageRef.delete(); // Eliminar el archivo de Firebase Storage
+                console.log('Archivo eliminado:', fileName);
+            } catch (err) {
+                console.error('Error al eliminar el archivo:', err.message);
+            }
+        },
+    async eliminarCampeonato(campeonatoId) {
+      try {
+        const {documentos} = this.campeonatos.find(c => c.id === campeonatoId ); 
+        if(documentos.length > 0 ){
+          documentos.forEach(element => {
+          this.deleteUploadedFile(element.link);
+        });
+        }
+        
+        await eliminarCampeonatoFachada(campeonatoId);
+        this.$toast.add({ severity: 'success', summary: 'Éxito', detail: 'Campeonato eliminado con éxito', life: 3000 });
+        await this.obtenerCampeonatos(); // Actualizar la lista de campeonatos
+      } catch (error) {
+        console.error("Error eliminando campeonato:", error);
+        this.$toast.add({ severity: 'error', summary: 'Error', detail: 'Hubo un error al intentar eliminar el campeonato', life: 3000 });
+      }
     },
   }
 };
@@ -761,5 +805,25 @@ p {
   align-items: center;
   text-align: center;
   white-space: nowrap;
+}
+
+.confirm-text {
+  color: black;
+}
+
+/* Agrega esto en la sección de estilos */
+.boton-eliminar {
+  background-color: #d9534f; /* Color rojo */
+  color: #ffffff; /* Texto blanco */
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.boton-eliminar:hover {
+  background-color: #c9302c; /* Color rojo más oscuro al pasar el mouse */
 }
 </style>

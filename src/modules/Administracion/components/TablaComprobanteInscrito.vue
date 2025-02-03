@@ -127,16 +127,17 @@ export default {
         rejectLabel: 'Denegar',
         acceptLabel: 'Aprobar',
         accept: () => {
-          this.enviarCorreo(true).then(() => { this.$emit('cambioEstado', true) });
+          this.$emit('mostrarEspera');
+          this.enviarCorreo(true).then(() => { 
+            this.$emit('cambioEstado', true);
+          });
         },
         reject: async () => {
+          this.$emit('mostrarEspera');
           await eliminarDocumentoSocioFachada(this.documentosUsuarios[0].id);
           this.enviarCorreo(false).then(() => { 
             this.$emit('cambioEstado', false);
-            this.$emit('competidor', this.documentosUsuarios[0].id);
-           });
-          
-          //falta eliminar el documento de pago del firebase
+          });
         }
       });
     },

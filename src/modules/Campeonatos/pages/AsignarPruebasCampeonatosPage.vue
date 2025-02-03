@@ -18,7 +18,7 @@
     </DataTable>
 
     <div class="centerElement mt-3">
-      <Button @click="asignarPruebas">Finalizar registro</Button>
+      <Button :disabled="isButtonDisabled" @click="asignarPruebas">Finalizar registro</Button>
     </div>
   </div>
 </template>
@@ -52,8 +52,10 @@ export default {
       }
     },
     async asignarPruebas() {
+      this.isButtonDisabled = true;
       if (!this.selectedCampeonato || !this.selectedPrueba.length) {
         this.$toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'Debe seleccionar un campeonato y al menos una prueba', life: 3000 });
+        this.isButtonDisabled = false;
         return;
       }
       console.log('id campeonato: ', this.selectedCampeonato.id);
@@ -70,9 +72,16 @@ export default {
         }
 
         this.$toast.add({ severity: 'info', summary: 'Info', detail: 'Pruebas asignadas al campeonato', life: 3000 });
+        
+        setTimeout(() => {
+          this.$toast.add({ severity: 'success', summary: 'Éxito', detail: 'Las pruebas han sido asignadas correctamente', life: 3000 });
+          this.$router.push('/calendarios');
+        }, 3000);
+
       } catch (error) {
         console.error('Error al registrar las pruebas:', error);
         this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo asignar las pruebas al campeonato', life: 3000 });
+        this.isButtonDisabled = false;
       }
     },
     async obtenerPruebasIngresadas() {
@@ -121,6 +130,7 @@ export default {
       selectedPrueba: [],
       campeonatos: [],
       selectedCampeonato: null,
+      isButtonDisabled: false,
     };
   },
 };

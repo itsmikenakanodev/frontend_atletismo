@@ -4,8 +4,14 @@
     <Toast></Toast>
     <Dialog v-model:visible="documentosVisible" :modal="true" :style="{ width: '75vw' }">
       <TablaComprobanteInscrito :docs="documentosUsuarios" :correo="usuarioCorreo" :id="usuarioId"
-        @cambioEstado="(val) => cambioEstado(val)" @competidor="(val) => eliminarCompetidor(val)"></TablaComprobanteInscrito>
+        @cambioEstado="(val) => cambioEstado(val)" @competidor="(val) => eliminarCompetidor(val)" @mostrarEspera="loading = true"></TablaComprobanteInscrito>
     </Dialog>
+    
+    <!-- Diálogo de carga -->
+    <Dialog header="Espere" v-model:visible="loading" :modal="true" :closable="false" :style="{ width: '30vw' }">
+      <p>Espere, aprobando solicitud...</p>
+    </Dialog>
+
     <DataTable :value="usuarios" tableStyle="min-width: 50rem" paginator :rows="5"
       :rowsPerPageOptions="[5, 10, 20, 50]">
       <Column field="nombres" header="Nombres" sortable></Column>
@@ -107,7 +113,7 @@ export default {
       documentosUsuarios: [],
       documentosVisible: false,
       usuarioCorreo: null,
-
+      loading: false,
     }
   },
   methods: {
@@ -122,13 +128,13 @@ export default {
     async cambioEstado(val) {
       if (val === true) {
         this.$toast.add({ severity: 'info', summary: 'Confirmado', detail: 'Aprobado', life: 3000 });
-      }
-      else {
+      } else {
         this.$toast.add({ severity: 'error', summary: 'Rechazado', detail: 'Denegado', life: 3000 });
       }
-      /*this.usuarios = []
-      this.documentosVisible = false
-      await this.getUsuarios()*/
+      
+      await this.getUsuarios();
+      this.loading = false;
+      this.documentosVisible = false;
     },
     async eliminarCompetidor(val) {
       console.log("val de eliminar competidor",val);
