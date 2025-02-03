@@ -9,25 +9,38 @@
     </div>
 
     <DataTable v-if="selectedCampeonato"
-      :value="pruebas"
+      :value="pruebasCampeonato ? pruebas.filter(prueba => !pruebasCampeonato.some(pruebaCampeonato => pruebaCampeonato.id === prueba.id)) : pruebas"
       selectionMode="multiple" v-model:selection="selectedPrueba" paginator showGridlines :rows="5"
-      :rowsPerPageOptions="[5, 10, 20, 50]" tableStyle="min-width: 50rem" >
+      :rowsPerPageOptions="[5, 10, 20, 50]" tableStyle="min-width: 50rem">
       <Column selectionMode="multiple" headerStyle="width: 3rem;"></Column>
       <Column field="nombre" header="Nombre" sortable></Column>
       <Column field="tipo" header="Tipo" sortable></Column>
+      <Column field="criterio" header="Criterio" sortable></Column>
     </DataTable>
 
+    <div class="flex flex-column" v-if="selectedCampeonato">
+      <h2>Pruebas Actuales del Campeonato </h2>
+      <DataTable v-if=" pruebasCampeonato && pruebasCampeonato.length>0" :value="pruebasCampeonato" paginator showGridlines :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]"
+        tableStyle="min-width: 50rem">
+        <Column field="nombre" header="Nombre" sortable></Column>
+        <Column field="tipo" header="Tipo" sortable></Column>
+        <Column field="criterio" header="Criterio" sortable></Column>
+      </DataTable>
+      <Message v-else severity="info" :closable="false">
+        El campeonato aún no tiene pruebas asignadas.
+      </Message>
+    </div>
+
     <div class="centerElement mt-3">
-      <Button :disabled="isButtonDisabled" @click="asignarPruebas">Finalizar registro</Button>
+      <Button @click="asignarPruebas" :disabled="isSubmitting">Finalizar registro</Button>
     </div>
   </div>
 </template>
 
 <script>
 import { obtenerPruebasFachada } from '@/modules/Campeonatos/helpers/ObtenerPruebasHelper.js';
-import { obtenerCampeonatosFachada } from '@/modules/Campeonatos/helpers/ObtenerCampeonatosHelper.js';
+import { obtenerCampeonatosAsignablesFachada } from '@/modules/Campeonatos/helpers/ObtenerCampeonatosHelper.js';
 import { registroCampeonatoPruebaFachada } from '@/modules/Campeonatos/helpers/CampeonatoPruebaHelper';
-import { consultarCampeonatosFachada } from '../helpers/CampeonatosNacionalHelper';
 
 export default {
   mounted() {
@@ -45,19 +58,22 @@ export default {
     },
     async listarCampeonatos() {
       try {
-        this.campeonatos = await obtenerCampeonatosFachada(this.usuario.ciudad);
+        this.campeonatos = await obtenerCampeonatosAsignablesFachada(this.usuario.ciudad);
         console.log('Campeonatos obtenidos:', this.campeonatos);
       } catch (error) {
         console.error('Error al obtener los campeonatos:', error);
       }
     },
     async asignarPruebas() {
-      this.isButtonDisabled = true;
+      if (this.isSubmitting) return;
+      this.isSubmitting = true;
+
       if (!this.selectedCampeonato || !this.selectedPrueba.length) {
         this.$toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'Debe seleccionar un campeonato y al menos una prueba', life: 3000 });
-        this.isButtonDisabled = false;
+        this.isSubmitting = false;
         return;
       }
+
       console.log('id campeonato: ', this.selectedCampeonato.id);
       try {
         for (const prueba of this.selectedPrueba) {
@@ -81,45 +97,13 @@ export default {
       } catch (error) {
         console.error('Error al registrar las pruebas:', error);
         this.$toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo asignar las pruebas al campeonato', life: 3000 });
-        this.isButtonDisabled = false;
+      } finally {
+        this.isSubmitting = false;
       }
     },
-    async obtenerPruebasIngresadas() {
-      try {
-        let campeonatos = localStorage.getItem('campeonatos');
-        console.log(campeonatos);
-        /*if (campeonatos) {
-          // Si existen, parsear y usar los campeonatos guardados
-          console.log("Campeonatos obtenidos desde Local Storage");
-          campeonatos = JSON.parse(campeonatos);
-          let campeonato = campeonatos.find(c => c.id === this.selectedCampeonato.id);
-          this.pruebasCampeonato = campeonato.pruebas;
-          console.log("Pruebas del campeonato:", this.pruebasCampeonato);
-        } else {
-          // Si no existen, consultar a la fachada
-          console.log("Campeonatos obtenidos desde LA API");
-          campeonatos = await consultarCampeonatosFachada();
-          // Guardar campeonatos en Local Storage para futuras consultas
-          localStorage.setItem('campeonatos', JSON.stringify(campeonatos));
-          let campeonato = campeonatos.find(c => c.id === this.selectedCampeonato.id);
-          this.pruebasCampeonato = campeonato.pruebas;
-          console.log("Pruebas del campeonato:", this.pruebasCampeonato);
-        }*/
-        // Si no existen, consultar a la fachada
-        console.log("Campeonatos obtenidos desde LA API");
-        campeonatos = await consultarCampeonatosFachada();
-        // Guardar campeonatos en Local Storage para futuras consultas
-        localStorage.setItem('campeonatos', JSON.stringify(campeonatos));
-        let campeonato = campeonatos.find(c => c.id === this.selectedCampeonato.id);
-        this.pruebasCampeonato = campeonato.pruebas;
-        console.log("Pruebas del campeonato:", this.pruebasCampeonato);
-
-      } catch (error) {
-        console.error("Error obteniendo campeonatos:", error);
-      }
-    },
-    getRowClass(data) {
-      return this.pruebasCampeonato.some(prueba => prueba.id === data.id) ? 'row-disabled' : '';
+    obtenerPruebasIngresadas() {
+      this.pruebasCampeonato = this.selectedCampeonato.pruebas;
+      console.log("Pruebas del campeonato:", this.pruebasCampeonato);
     }
   },
   data() {
@@ -130,7 +114,7 @@ export default {
       selectedPrueba: [],
       campeonatos: [],
       selectedCampeonato: null,
-      isButtonDisabled: false,
+      isSubmitting: false
     };
   },
 };
