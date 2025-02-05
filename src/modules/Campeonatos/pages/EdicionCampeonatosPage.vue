@@ -154,7 +154,7 @@ export default {
     methods: {
         async triggerUpload() {
             // Llama al método uploadFile del componente hijo
-            await this.$refs.cargarArchivoEdicionCampeonato.uploadFile(this.uploadPath);
+            await this.$refs.cargarArchivoEdicionCampeonato.uploadFile(this.uploadPath + `/${this.campeonato.nombre}`);
         },
         handleUpload(uploadedData) {
             console.log('Archivo subido:', uploadedData);
@@ -167,11 +167,33 @@ export default {
         handleFileUploadError() {
             this.toast.add({ severity: 'error', summary: 'Error', detail: 'Por favor, selecciona un archivo antes de registrar el campeonato.', life: 3000 });
         },
+        async verificarArchivoExistente(rutaArchivo) {
+            const storageRef = storage.ref();
+            const archivoRef = storageRef.child(rutaArchivo);
+            try {
+                // Intenta obtener los metadatos del archivo
+                await archivoRef.getDownloadURL();
+                console.log("El archivo existe. ");
+                return true; // El archivo existe
+            } catch (error) {
+                if (error.code === 'storage/object-not-found') {
+                    console.log("El archivo no existe.");
+                    return false; // El archivo no existe
+                } else {
+                    console.error("Error al verificar el archivo:", error);
+                    throw error; // Manejar otros errores
+                }
+            }
+        },
         async actualizarCampeonato() {
             if (this.hasDoc) {
                 try {
                     await this.triggerUpload(); // Llama al método para subir el archivo
-
+                    if(await this.verificarArchivoExistente(this.uploadPath + `/${this.campeonato.nombre}/${this.doc.nombre}`)){
+                        this.hasDoc = false;
+                        this.$toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'Este documento ya está asignado al Campeonato', life: 3000 });
+                        return;
+                    }
                     // Validar que haya un archivo subido
                     if (!this.uploadedFileUrl) {
                         this.$toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'No se puede actualizar el campeonato sin un archivo subido.', life: 3000 });

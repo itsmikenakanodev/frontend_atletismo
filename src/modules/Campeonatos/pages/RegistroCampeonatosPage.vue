@@ -161,7 +161,7 @@ export default {
     methods: {
         async triggerUpload() {
             // Llama al método uploadFile del componente hijo
-            await this.$refs.cargarArchivoCampeonato.uploadFile(this.uploadPath);
+            await this.$refs.cargarArchivoCampeonato.uploadFile(this.uploadPath+``);
         },
         handleUpload(uploadedData) {
             console.log('Archivo subido:', uploadedData);

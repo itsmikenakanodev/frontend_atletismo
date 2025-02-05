@@ -84,9 +84,8 @@
                   </button>
 
                   <!-- Botón de edición -->
-                  <button class="accion-boton" v-if="usuario && usuario.rol && usuario.ciudad === campeonato.ciudad && new Date(campeonato.inscripcionInicio) > new Date() &&
-                    (usuario.rol.id === 1 || usuario.rol.id === 6) &&
-                    !campeonatoFinalizado(campeonato)" @click="mostrarEdicionCampeonato(campeonato.id) ">
+                  <button class="accion-boton" v-if="usuario && usuario.rol && usuario.ciudad === campeonato.sede && new Date(campeonato.inscripcionInicio) > new Date() &&
+                    (usuario.rol.id === 1 || usuario.rol.id === 6) && !campeonatoFinalizado(campeonato)" @click="mostrarEdicionCampeonato(campeonato.id) ">
                     Editar
                   </button>
 
@@ -104,7 +103,7 @@
 
                   <!-- Botón de eliminar campeonato para roles 1 y 6 -->
                   <button class="accion-boton boton-eliminar" 
-                    v-if="usuario && usuario.rol && usuario.provincia === campeonato.provincia && (usuario.rol.id === 1 || usuario.rol.id === 6) && new Date(campeonato.inscripcionInicio) > new Date()"
+                    v-if="usuario && usuario.rol && usuario.ciudad === campeonato.sede && (usuario.rol.id === 1 || usuario.rol.id === 6) && new Date(campeonato.inscripcionInicio) > new Date()"
                     @click="eliminarCampeonato(campeonato.id)">
                     Eliminar Campeonato
                   </button>
