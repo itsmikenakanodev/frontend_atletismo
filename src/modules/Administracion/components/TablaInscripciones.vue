@@ -137,8 +137,6 @@ export default {
       this.documentosVisible = false;
     },
     async eliminarCompetidor(val) {
-      console.log("val de eliminar competidor",val);
-      console.log(this.usuarios);
       const competidor = this.usuarios.find(usuario => usuario.documento.id == val);
       if(competidor){
         await eliminarCompetidorFachada(competidor.id);
@@ -154,6 +152,7 @@ export default {
       this.documentosVisible = true
       this.usuarioCorreo = data.email
       this.usuarioId = data.id
+      console.log(this.usuario)
     },
     async getUsuarios() {
       let tipoSus = {

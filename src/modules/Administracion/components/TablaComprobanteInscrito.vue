@@ -119,61 +119,38 @@ export default {
         acceptLabel: 'Aprobar',
         accept: () => {
           this.$emit('mostrarEspera');
-          this.enviarCorreo(true).then(() => { 
+          this.enviarCorreo(true).then(() => {
             this.$emit('cambioEstado', true);
           });
         },
         reject: async () => {
           this.$emit('mostrarEspera');
-          await eliminarDocumentoSocioFachada(this.documentosUsuarios[0].id);
-          this.enviarCorreo(false).then(() => { 
+          const idDocumento = this.documentosUsuarios[0].id;
+          const url = this.documentosUsuarios[0].link;
+          try {
+            await this.deleteUploadedFile(url); // Eliminar el archivo de Firebase Storage
+            await eliminarDocumentoSocioFachada(idDocumento);
+          } catch (error) {
+            console.error('Error al eliminar el documento:', error.message);
+          }
+          
+          this.enviarCorreo(false).then(() => {
             this.$emit('cambioEstado', false);
+            this.$emit('competidor', idDocumento);
           });
         }
       });
     },
-    async eliminarCarpeta() {
-      const ref = storage.ref(this.correo);
-
+    async deleteUploadedFile(fileUrl) {
+      // Extraer el nombre del archivo de la URL
+      const fileName = decodeURIComponent(fileUrl.split('/').pop().split('?')[0]); // Obtener solo el nombre del archivo
+      console.log("Deleting", fileName)
+      const storageRef = storage.ref(`${fileName}`);
       try {
-        // Listar todos los archivos en la carpeta
-        const listResult = await ref.listAll();
-
-        // Eliminar todos los archivos encontrados
-        const deletePromises = listResult.items.map((itemRef) =>
-          itemRef.delete()
-        );
-        await Promise.all(deletePromises);
-
-        // Verificar si hay subcarpetas y eliminarlas recursivamente
-        const deleteSubfolderPromises = listResult.prefixes.map((folderRef) =>
-          this.eliminarCarpeta(folderRef.fullPath)
-        );
-        await Promise.all(deleteSubfolderPromises);
-
-        console.log(`Carpeta '${this.correo}' eliminada con éxito.`);
-      } catch (error) {
-        console.error("Error al eliminar la carpeta:", error);
-      }
-    },
-    async eliminarArchivoHandler(correo, nombreArchivo) {
-      if (correo && nombreArchivo) {
-        const filePath = `${correo}/${nombreArchivo}`;
-        try {
-          await this.eliminarArchivo(filePath);
-          alert("Archivo eliminado con éxito");
-        } catch (error) {
-          alert("Error al eliminar el archivo: " + error.message);
-        }
-      }
-    },
-    async eliminarArchivo(filePath) {
-      const ref = storage.ref(filePath);
-      try {
-        await ref.delete();
-        console.log(`Archivo '${filePath}' eliminado con éxito.`);
-      } catch (error) {
-        console.error("Error al eliminar el archivo:", error);
+        await storageRef.delete(); // Eliminar el archivo de Firebase Storage
+        console.log('Archivo eliminado:', fileName);
+      } catch (err) {
+        console.error('Error al eliminar el archivo:', err.message);
       }
     },
   },
