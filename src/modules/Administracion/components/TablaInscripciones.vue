@@ -16,15 +16,15 @@
       :rowsPerPageOptions="[5, 10, 20, 50]">
       <Column field="nombres" header="Nombres" sortable></Column>
       <Column field="apellidos" header="Apellidos" sortable></Column>
-      <Column field="ciudad" header="Provincia" sortable></Column>
-      <Column field="email" header="Email" sortable></Column>
-      <Column field="telefono" header="Telefono" sortable></Column>
+      <Column field="nombreCampeonato" header="Campeonato" sortable></Column>
       <Column header="Edad" field="fechaNacimiento" sortable>
         <template #body="slotProps">
           <span>{{ calcularFechaNacimiento(slotProps.data.fechaNacimiento) }}</span>
         </template>
       </Column>
       <Column field="sexo" header="Sexo" sortable></Column>
+      <Column field="cantidadPruebas" header="Nro Pruebas" sortable></Column>
+      <Column field="total" header="Total a Pagar" sortable></Column>
       <Column field="estadoRegistro" header="Estado">
         <template #body="slotProps">
           <Tag :severity=getSeverety(slotProps) :value=getValue(slotProps) rounded></Tag>
@@ -54,17 +54,7 @@
           <Skeleton></Skeleton>
         </template>
       </Column>
-      <Column field="ciudad" header="Provincia" sortable>
-        <template #body>
-          <Skeleton></Skeleton>
-        </template>
-      </Column>
-      <Column field="email" header="Email" sortable>
-        <template #body>
-          <Skeleton></Skeleton>
-        </template>
-      </Column>
-      <Column field="telefono" header="Telefono" sortable>
+      <Column field="nombreCampeonato" header="Campeonato" sortable>
         <template #body>
           <Skeleton></Skeleton>
         </template>
@@ -75,6 +65,16 @@
         </template>
       </Column>
       <Column field="sexo" header="Sexo" sortable>
+        <template #body>
+          <Skeleton></Skeleton>
+        </template>
+      </Column>
+      <Column field="cantidadPruebas" header="Nro Pruebas" sortable>
+        <template #body>
+          <Skeleton></Skeleton>
+        </template>
+      </Column>
+      <Column field="total" header="Total a Pagar" sortable>
         <template #body>
           <Skeleton></Skeleton>
         </template>
@@ -161,6 +161,7 @@ export default {
         estado: "Pendiente"
       };
       await consultarInscripcionFachada(tipoSus).then((response) => this.usuarios = response);
+      console.log(this.usuarios);
     },
     getValue(slotProps) { 
       if (slotProps.data.estadoRegistro === true) {

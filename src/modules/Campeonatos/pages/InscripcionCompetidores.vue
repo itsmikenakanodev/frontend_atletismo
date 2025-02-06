@@ -278,9 +278,7 @@ export default {
         await guardarDocFachada(this.doc);
         await this.registerPruebas(pruebasSeleccionadas);
         this.showToast('success', 'Éxito', 'Inscripción exitosa');
-        setTimeout(() => {
-                    this.$router.push("/");
-                }, 3000);
+        setTimeout(() => this.$router.push("/"), 3000);    
       } catch (error) {
         // Si ocurre un error, eliminar el archivo subido
         await this.deleteUploadedFile(this.uploadedFileUrl);
@@ -300,6 +298,8 @@ export default {
         fechaInscripcion: hoy.toISOString(),
         estadoParticipacion: "Pendiente",
         categoria: this.form.categoria,
+        totalPagar: this.pagoTotal,
+        cantidadPruebas: this.campeonato.pruebas.filter(prueba => prueba.selected).length,
         usuario: this.usuario,
         campeonato: {
           id: this.campeonato.id
