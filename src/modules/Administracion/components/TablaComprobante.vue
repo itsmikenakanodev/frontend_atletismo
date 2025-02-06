@@ -74,7 +74,7 @@
               </div>
             </div>
           `;
-          await eliminarUsuarioFachada(this.id);
+          await actualizarEstadoUsuarioFachada(this.id);
         } else {
           this.cuerpoCorreo.cuerpo =
             "Tu comprobante de pago no es correcto, suscripción denegada!";
@@ -96,7 +96,6 @@
           `;
           await eliminarUsuarioFachada(this.id);
         }
-        await actualizarEstadoUsuarioFachada(this.id);
         await enviarcorreoFachada(this.cuerpoCorreo);
       },
       cambiarEstado() {
