@@ -75,6 +75,7 @@ export default {
             </div>
           </div>
         `;
+        await actualizarEstadoSocioUsuarioFachada(this.id);
       } else {
         this.cuerpoCorreo.cuerpo =
           "Tu comprobante de pago no es válido, suscripción denegada! Por favor, verifica que tu pago sea válido e intenta enviar tu comprobante nuevamente.";
@@ -94,8 +95,9 @@ export default {
             </div>
           </div>
         `;
+        
       }
-      await actualizarEstadoSocioUsuarioFachada(this.id);
+      
       await enviarcorreoFachada(this.cuerpoCorreo);
     },
     cambiarEstado() {
