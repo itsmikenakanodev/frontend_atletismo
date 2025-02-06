@@ -91,7 +91,7 @@
                 @uploaded="handleUpload" @file-upload-error="handleFileUploadError" />
             <div class="centerElement">
                 <div class="form-group">
-                    <button type="submit">Solicitar registro</button>
+                    <button type="submit" :disabled="!isFormValid">Solicitar registro</button>
                 </div>
             </div>
         </form>
@@ -176,6 +176,21 @@ export default {
             uploadedFileUrl: '',
             accept: 'application/pdf'
         };
+    },
+    computed: {
+        isFormValid() {
+            const today = new Date();
+            const birthDate = new Date(this.user.fechaNacimiento);
+            const age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            const dayDiff = today.getDate() - birthDate.getDate();
+            const isAdult = age > 18 || (age === 18 && monthDiff > 0) || (age === 18 && monthDiff === 0 && dayDiff >= 0);
+
+            return this.user.nombres && this.user.apellidos && this.user.cedula && this.user.direccion &&
+                   this.user.ciudad && this.user.email && this.user.password && this.user.fechaNacimiento &&
+                   this.user.sexo && this.user.telefono && this.user.contactoNombre && this.user.contactoTelefono &&
+                   isAdult;
+        }
     },
     methods: {
         async triggerUpload() {
@@ -388,5 +403,12 @@ h2 {
     display: flex;
     justify-content: center;
 
+}
+
+.form-group button:disabled {
+    background-color: #ccc; /* Color de fondo para el botón deshabilitado */
+    color: #666; /* Color del texto para el botón deshabilitado */
+    cursor: not-allowed; /* Cambia el cursor para indicar que está deshabilitado */
+    opacity: 0.7; /* Opacidad para dar un efecto de deshabilitado */
 }
 </style>

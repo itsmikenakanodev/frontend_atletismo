@@ -101,7 +101,7 @@
 
         <strong v-if="pagoTotal">Total a pagar: {{ pagoTotal }} USD.</strong>
 
-        <h3 class="titulo">Suba su archivo aquí</h3>
+        <h3 class="titulo">Ingrese su comprobante de pago a continuación:</h3>
 
         <div class="centerElement">
           <div>

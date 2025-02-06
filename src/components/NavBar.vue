@@ -97,14 +97,7 @@ export default {
                   },
                   visible: true,
                 },
-                {
-                  label: "Suscripciones",
-                  icon: "pi pi-money-bill",
-                  command: () => {
-                    router.push("/administracion/suscripciones");
-                  },
-                  visible: true,
-                },
+                
                 {
                   label: "Inscripciones",
                   icon: "pi pi-pencil",
