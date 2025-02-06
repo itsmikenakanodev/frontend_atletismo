@@ -57,55 +57,45 @@ export default {
       window.open(data.link, "_blank");
     },
     async enviarCorreo(val) {
-
       if (val) {
-        this.cuerpoCorreo.cuerpo = "Tu suscripción fue aprobada.";
-        this.cuerpoCorreo.mensajeHtml = `
-          <body>
-            <div style="color:rgb(144,221,240); text-align: center;">
-              <img width="100%" height="100%" src="../../Inicio/aname-footer.png"/>
-            </div>
-            <br>
-            <p style="color:rgb(44, 102, 110); font-family: Arial; font-size:12px; line-height: 1em;">
-              El presente correo es para informar el siguiente comunicado: <br>  
-            </p>
-            <p style="color:rgb(44, 102, 110); font-family: Arial; font-size:12px; line-height: 1em;" > `+
-              this.cuerpoCorreo.cuerpo + 
-              `
+        this.cuerpoCorreo.cuerpo =
+          "Tu suscripción fue aprobada.";
+        this.cuerpoCorreo.mensajeHtml =
+          `
+          <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; background-color: #f9f9f9;">
+            <h3 style="color: #333;">${this.cuerpoCorreo.cuerpo}</h3>
+            <p style="font-family: Arial; font-size:12px; line-height: 1em;">
+              ¡Bienvenido! Estamos felices de tenerte con nosotros.
             </p>
             <p style="font-family: Arial; font-size:12px; line-height: 1em;">
-              <b>Gracias por la atención</b><br>
+              <b>Gracias por unirte a nosotros.</b><br>
               <b>Saludos cordiales,</b> <br><br>
             </p>
-            <img src="../../Inicio/Aletismo.jpg" width="100%" height="100%"/>
-          </body>
-        `;
-        await actualizarEstadoSocioUsuarioFachada(this.id);
-      }
-      else {
-        this.cuerpoCorreo.cuerpo = "Tu comprobante de pago no es válido, suscripción denegada! Por favor, verifica que tu pago sea válido e intenta enviar tu comprobante nuevamente.";
-        this.cuerpoCorreo.mensajeHtml = `
-          <body>
             <div style="color:rgb(144,221,240); text-align: center;">
-              <img width="100%" height="100%" src="../../Inicio/aname-footer.png"/>
             </div>
-            <br>
-            <p style="color:rgb(44, 102, 110); font-family: Arial; font-size:12px; line-height: 1em;">
-              El presente correo es para informar el siguiente comunicado: <br>  
-            </p>
-            <p style="color:rgb(44, 102, 110); font-family: Arial; font-size:12px; line-height: 1em;" > `+
-              this.cuerpoCorreo.cuerpo + 
-              `
+          </div>
+        `;
+      } else {
+        this.cuerpoCorreo.cuerpo =
+          "Tu comprobante de pago no es válido, suscripción denegada! Por favor, verifica que tu pago sea válido e intenta enviar tu comprobante nuevamente.";
+        this.cuerpoCorreo.mensajeHtml =
+          `
+          <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; background-color: #f9f9f9;">
+            <h3 style="color: #333;">${this.cuerpoCorreo.cuerpo}</h3>
+            <p style="font-family: Arial; font-size:12px; line-height: 1em;">
+              Lamentamos informarte que tus documentos no son válidos. 
+              Por favor, intenta registrarte nuevamente.
             </p>
             <p style="font-family: Arial; font-size:12px; line-height: 1em;">
-              <b>Gracias por la atención</b><br>
+              <b>Gracias por tu comprensión.</b><br>
               <b>Saludos cordiales,</b> <br><br>
             </p>
-            <img src="../../Inicio/Aletismo.jpg" width="100%" height="100%"/>
-          </body>
+            <div style="color:rgb(144,221,240); text-align: center;">
+            </div>
+          </div>
         `;
       }
-
+      await actualizarEstadoSocioUsuarioFachada(this.id);
       await enviarcorreoFachada(this.cuerpoCorreo);
     },
     cambiarEstado() {
