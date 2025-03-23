@@ -173,7 +173,7 @@ export default {
             try {
                 // Intenta obtener los metadatos del archivo
                 await archivoRef.getDownloadURL();
-                console.log("El archivo existe. ");
+                console.log("El archivo existe. ", rutaArchivo);
                 return true; // El archivo existe
             } catch (error) {
                 if (error.code === 'storage/object-not-found') {
@@ -188,12 +188,14 @@ export default {
         async actualizarCampeonato() {
             if (this.hasDoc) {
                 try {
-                    await this.triggerUpload(); // Llama al método para subir el archivo
+                    
                     if(await this.verificarArchivoExistente(this.uploadPath + `/${this.campeonato.nombre}/${this.doc.nombre}`)){
                         this.hasDoc = false;
                         this.$toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'Este documento ya está asignado al Campeonato', life: 3000 });
                         return;
                     }
+                    await this.triggerUpload(); // Llama al método para subir el archivo
+                   
                     // Validar que haya un archivo subido
                     if (!this.uploadedFileUrl) {
                         this.$toast.add({ severity: 'warn', summary: 'Advertencia', detail: 'No se puede actualizar el campeonato sin un archivo subido.', life: 3000 });
