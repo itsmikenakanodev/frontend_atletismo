@@ -78,22 +78,17 @@
                 <div class="botones-acciones">
                   <div class="espaciador"></div>
                   <!-- Botón de inscripción/reportes para rol 5 -->
-                  <button class="accion-boton" v-if="usuario && usuario.rol && usuario.rol.id === 5 && getTagValue(campeonato) === 'Inscripciones abiertas'"
+                  <button class="accion-boton" 
+                    v-if="usuario && usuario.rol && usuario.rol.id === 5 && 
+                      (getTagValue(campeonato) === 'Inscripciones abiertas' || getTagValue(campeonato) === 'Finalizado')"
                     @click="campeonatoFinalizado(campeonato) ? verReportes(campeonato) : verificarInscripcion(campeonato)">
-                    {{ campeonatoFinalizado(campeonato) ? 'Ver Reportes' : (inscritosStatus[campeonato.id] ? 'Inscrito' : 'Inscribirse') }}
+                    {{ campeonatoFinalizado(campeonato) || getTagValue(campeonato) === 'Finalizado' ? 'Ver Reportes' : (inscritosStatus[campeonato.id] ? 'Inscrito' : 'Inscribirse') }}
                   </button>
 
                   <!-- Botón de edición -->
                   <button class="accion-boton" v-if="usuario && usuario.rol && usuario.ciudad === campeonato.sede && new Date(campeonato.inscripcionInicio) > new Date() &&
                     (usuario.rol.id === 1 || usuario.rol.id === 6) && !campeonatoFinalizado(campeonato)" @click="mostrarEdicionCampeonato(campeonato.id) ">
                     Editar
-                  </button>
-
-                  <!-- Nuevo botón de Ver Reportes para roles 1 y 6 -->
-                  <button class="accion-boton"
-                    v-if="usuario && usuario.rol && (usuario.rol.id === 1 || usuario.rol.id === 6)"
-                    @click="verReportes(campeonato)">
-                    Ver Reportes
                   </button>
 
                   <!-- Botón de ver documentos -->
