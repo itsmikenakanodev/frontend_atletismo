@@ -20,6 +20,11 @@
           <li><strong>Uso de Imagen:</strong> Autorizo el uso de mi imagen en fotografías o videos capturados durante el
             campeonato para fines de promoción y difusión del evento.</li>
         </ul>
+    <p><strong>Cálculo del Precio de Inscripción:</strong></p>
+    <ul>
+      <li>Las primeras tres pruebas tienen un costo de 25 dólares, sin importar si se inscribe en 1, 2 o 3 pruebas.</li>
+      <li>A partir de la cuarta prueba, se añadirá un costo adicional de 10 dólares por cada prueba extra en la que se inscriba.</li>
+    </ul>
       </div>
       <button @click="acceptTerms" class="accept-button">Aceptar</button>
     </div>
@@ -85,21 +90,33 @@
         <table id="pruebasTable" class="display pruebas-table">
           <thead>
             <tr>
-              <th>Seleccionar</th>
+              <th class="select-column">Seleccionar</th>
               <th>Nombre prueba</th>
               <th>Tipo</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="prueba in campeonato.pruebas" :key="prueba.id">
-              <td><input type="checkbox" v-model="prueba.selected" /></td>
+              <td class="select-column"><input type="checkbox" v-model="prueba.selected" /></td>
               <td>{{ prueba.nombre }}</td>
               <td>{{ prueba.tipo }}</td>
             </tr>
           </tbody>
         </table>
 
-        <strong v-if="pagoTotal">Total a pagar: {{ pagoTotal }} USD.</strong>
+        <div class="precio-info-container">
+          <span class="precio-info">
+            Ver detalles de cómo se calculan los precios 
+            <span class="tooltip-text">
+              Las primeras tres pruebas tienen un costo de 25 dólares, sin importar si se inscribe en 1, 2 o 3 pruebas.
+              A partir de la cuarta prueba, se añadirá un costo adicional de 10 dólares por cada prueba extra en la que se inscriba.
+            </span>
+          </span>
+        </div>
+
+        <div class="total-pagar">
+          <strong v-if="pagoTotal">Total a pagar: {{ pagoTotal }} USD.</strong>
+        </div>
 
         <h3 class="titulo">Ingrese su comprobante de pago a continuación:</h3>
 
@@ -491,7 +508,7 @@ h2 {
 .pruebas-table td {
   border: 1px solid #90ddf0;
   padding: 10px;
-  text-align: left;
+  text-align: center;
   background-color: #2c666e;
   color: #90ddf0;
 }
@@ -509,6 +526,8 @@ h2 {
 .pruebas-table input[type="checkbox"] {
   width: 20px;
   height: 20px;
+  margin: 0 auto;
+  display: block;
 }
 
 .pruebas-table input[type="text"] {
@@ -549,7 +568,7 @@ h2 {
   background: #ffffff;
   padding: 25px;
   max-width: 90%; /* Cambiado a 90% para ser más responsivo */
-  max-height: 80%; /* Limitar la altura máxima */
+  max-height: 86%; /* Limitar la altura máxima */
   overflow-y: auto; /* Permitir desplazamiento vertical */
   border-radius: 8px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
@@ -621,5 +640,60 @@ h2 {
 
 .accept-button:hover {
   background-color: #055a67;
+}
+
+.precio-info {
+  color: #90ddf0;
+  text-decoration: underline;
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  width: 300px;
+  background-color: #2c666e;
+  color: #f0edee;
+  text-align: center;
+  border-radius: 6px;
+  padding: 10px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.precio-info:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+.tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #2c666e transparent transparent transparent;
+}
+
+.select-column {
+  width: 100px;
+}
+
+.precio-info-container {
+  margin: 20px 0;
+  text-align: left;
+}
+
+.total-pagar {
+  margin: 20px 0;
+  font-size: 1.2em;
 }
 </style>

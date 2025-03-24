@@ -79,7 +79,7 @@
                   <div class="espaciador"></div>
                   <!-- Botón de inscripción/reportes para rol 5 -->
                   <button class="accion-boton" v-if="usuario && usuario.rol && usuario.rol.id === 5 && getTagValue(campeonato) === 'Inscripciones abiertas'"
-                    @click="campeonatoFinalizado(campeonato) ? verReportes(campeonato) : mostrarInscripcionCampeonato(campeonato.id)">
+                    @click="campeonatoFinalizado(campeonato) ? verReportes(campeonato) : verificarInscripcion(campeonato)">
                     {{ campeonatoFinalizado(campeonato) ? 'Ver Reportes' : 'Inscribirse' }}
                   </button>
 
@@ -411,6 +411,37 @@ export default {
         console.error("Error eliminando campeonato:", error);
         this.$toast.add({ severity: 'error', summary: 'Error', detail: 'Hubo un error al intentar eliminar el campeonato', life: 3000 });
       }
+    },
+    async verificarInscripcion(campeonato) {
+      // Primero verifica si hay pruebas
+      if (!campeonato.pruebas || campeonato.pruebas.length === 0) {
+        this.$toast.add({
+          severity: 'info',
+          summary: 'Info',   
+          detail: 'No es posible inscribirse. El campeonato no tiene pruebas asignadas todavía.',
+          life: 3000
+        });
+        return;
+      }
+
+      // Si hay pruebas, verifica si ya está inscrito
+      const queryParams = {
+        idCampeonato: campeonato.id,
+        idUsuario: this.usuario.id
+      }
+      const verificado = await verificarCompetidorFachada(queryParams)
+      if(verificado){
+        this.$toast.add({
+          severity: 'info',
+          summary: 'Info',   
+          detail: 'Ya estás inscrito en este campeonato!',
+          life: 3000
+        });
+        return;
+      }
+
+      // Si no está inscrito y hay pruebas, procede con la inscripción
+      this.$router.push({ name: 'InscripcionCompetidores', params: { id: campeonato.id } });
     },
   }
 };
