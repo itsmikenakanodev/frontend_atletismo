@@ -80,7 +80,7 @@
                   <!-- Botón de inscripción/reportes para rol 5 -->
                   <button class="accion-boton" v-if="usuario && usuario.rol && usuario.rol.id === 5 && getTagValue(campeonato) === 'Inscripciones abiertas'"
                     @click="campeonatoFinalizado(campeonato) ? verReportes(campeonato) : verificarInscripcion(campeonato)">
-                    {{ campeonatoFinalizado(campeonato) ? 'Ver Reportes' : 'Inscribirse' }}
+                    {{ campeonatoFinalizado(campeonato) ? 'Ver Reportes' : (inscritosStatus[campeonato.id] ? 'Inscrito' : 'Inscribirse') }}
                   </button>
 
                   <!-- Botón de edición -->
@@ -176,6 +176,7 @@ export default {
       dialogVisible: false,
       pruebaAEliminar: null,
       campeonatoIdEliminar: null,
+      inscritosStatus: {}, // Nuevo objeto para almacenar el estado de inscripción
     };
   },
   async mounted() {
@@ -207,21 +208,21 @@ export default {
   },
   methods: {
     async obtenerCampeonatos(anio = new Date().getFullYear(), mes = new Date().getMonth() + 1) {
-      this.loading = true;  // Para cambios de mes/año
+      this.loading = true;
       
       this.campeonatos = await consultarCampeonatosFachadaFiltro(anio, mes);
-      console.log(this.campeonatos)
-      // Ordenar campeonatos
-      const hoy = new Date();
-      this.campeonatos.sort((a, b) => {
-        const fechaA = new Date(a.fechaInicio);
-        const fechaB = new Date(b.fechaInicio);
-        // Primero los que ya han comenzado
-        if (fechaA <= hoy && fechaB > hoy) return -1; // A está en progreso, B no
-        if (fechaA > hoy && fechaB <= hoy) return 1; // B está en progreso, A no
-        // Si ambos están en progreso o ambos no, ordenar por fecha
-        return fechaA - fechaB; 
-      });
+      
+      // Verificar el estado de inscripción para cada campeonato
+      if (this.usuario && this.usuario.rol && this.usuario.rol.id === 5) {
+        for (const campeonato of this.campeonatos) {
+          const queryParams = {
+            idCampeonato: campeonato.id,
+            idUsuario: this.usuario.id
+          }
+          const verificado = await verificarCompetidorFachada(queryParams);
+          this.inscritosStatus[campeonato.id] = verificado;
+        }
+      }
 
       this.loading = false;
     },
@@ -430,6 +431,8 @@ export default {
         idUsuario: this.usuario.id
       }
       const verificado = await verificarCompetidorFachada(queryParams)
+      this.inscritosStatus[campeonato.id] = verificado;
+
       if(verificado){
         this.$toast.add({
           severity: 'info',
@@ -442,6 +445,13 @@ export default {
 
       // Si no está inscrito y hay pruebas, procede con la inscripción
       this.$router.push({ name: 'InscripcionCompetidores', params: { id: campeonato.id } });
+    },
+    async isInscrito(campeonato) {
+      const queryParams = {
+        idCampeonato: campeonato.id,
+        idUsuario: this.usuario.id
+      }
+      return await verificarCompetidorFachada(queryParams);
     },
   }
 };
