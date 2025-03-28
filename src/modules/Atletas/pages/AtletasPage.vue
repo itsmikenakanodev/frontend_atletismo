@@ -80,6 +80,7 @@ export default {
         } else if (this.searchQuery !== this.searchedQuery) {
           this.atletas = [];
           this.totalAtletas = 0;
+          this.currentPage = 0;
           this.isNextDisabled = false;
           this.hasCheckedNextDisabled = false;
           this.searchedQuery = this.searchQuery
