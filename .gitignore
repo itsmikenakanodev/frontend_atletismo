@@ -31,3 +31,6 @@ storage.rules
 *.sw?
 
 *.tsbuildinfo
+.env.development
+.env.production
+public/config.js
