@@ -3,8 +3,8 @@
         <Toast />
         <h2>Crea nuevo campeonato</h2>
         <form @submit.prevent="registrarCampeonato()">
-            <div class="form-row centerElement">
-                <div class="form-group">
+            <div class="form-row">
+                <div class="form-group full-width">
                     <label for="name">Nombre</label>
                     <input type="text" id="name" placeholder="Ingresa nombre campeonato..." required
                         v-model="campeonato.nombre" />
@@ -41,28 +41,41 @@
             </div>
             <div class="form-row">
                 <div class="form-group ">
-                    <label for="startDate">Fecha Inicio</label>
-                    <input type="date" id="startDate" required v-model="campeonato.fechaInicio" :min="minFechaInicio"
-                        :max="campeonato.fechaFin" />
-                </div>
-                <div class="form-group ">
-                    <label for="finDate">Fecha Fin</label>
-                    <input type="date" id="finDate" required v-model="campeonato.fechaFin"
-                        :min="campeonato.fechaInicio" />
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group ">
                     <label for="regStartDate">Fecha Inicio Inscripción</label>
                     <input type="date" id="regStartDate" required v-model="campeonato.inscripcionInicio"
-                        :max="campeonato.fechaInicio" :min="minFechaInicio" />
+                        :min="minFechaInicio" />
                 </div>
                 <div class="form-group ">
                     <label for="regFinDate">Fecha Fin Inscripción</label>
                     <input type="date" id="regFinDate" required v-model="campeonato.inscripcionFin"
-                        :max="campeonato.fechaInicio" :min="campeonato.inscripcionInicio" />
+                        :min="campeonato.inscripcionInicio" :disabled="!campeonato.inscripcionInicio" />
                 </div>
             </div>
+
+            <!-- Mensaje informativo cuando no se han seleccionado las fechas de inscripción -->
+            <div v-if="!campeonato.inscripcionInicio || !campeonato.inscripcionFin" class="info-message">
+                <div class="message-content">
+                    <i class="pi pi-info-circle"></i>
+                    <p>Primero debes seleccionar las fechas de inicio y fin de inscripciones para poder configurar las fechas del campeonato.</p>
+                </div>
+            </div>
+
+            <!-- Campos de fechas del campeonato (solo aparecen cuando se han seleccionado las fechas de inscripción) -->
+            <div v-else class="form-row">
+                <div class="form-group ">
+                    <label for="startDate">Fecha Inicio Campeonato</label>
+                    <input type="date" id="startDate" required v-model="campeonato.fechaInicio" 
+                        :min="campeonato.inscripcionFin"
+                        :max="campeonato.fechaFin" />
+                </div>
+                <div class="form-group ">
+                    <label for="finDate">Fecha Fin Campeonato</label>
+                    <input type="date" id="finDate" required v-model="campeonato.fechaFin"
+                        :min="campeonato.fechaInicio" :disabled="!campeonato.fechaInicio" />
+                </div>
+            </div>
+
+
             <div class="form-row centerElement">
                 <div class="form-group">
                     <label for="name">Desea adjuntar un Documento?</label>
@@ -152,10 +165,12 @@ export default {
         }
     },
     computed: {
-        // La fecha mínima de inicio es el día en que se ingresa a la página
+        // La fecha mínima de inicio es un día después del día en que se ingresa a la página
         minFechaInicio() {
             const today = new Date();
-            return today.toISOString().split('T')[0]; // 'yyyy-mm-dd'
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            return tomorrow.toISOString().split('T')[0]; // 'yyyy-mm-dd'
         }
     },
     methods: {
@@ -188,7 +203,7 @@ export default {
 
             this.loading = true
             console.log(this.campeonato);
-            await registroCampeonatosFachada(this.campeonato).then(r => {
+            await registroCampeonatosFachada(this.campeonato).then(() => {
                 this.loading = false
                 this.$toast.add({ severity: 'info', summary: 'Info', detail: 'Registro de campeonato completado', life: 3000 });
                 setTimeout(() => {
@@ -259,13 +274,14 @@ h2 {
 
 .form-group {
     width: calc(50% - 10px);
-    text-align: center;
+    text-align: left;
 }
 
 .form-group label {
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
+    text-align: left;
 }
 
 .form-group input,
@@ -358,6 +374,7 @@ h2 {
     margin-bottom: 10px;
     font-weight: bold;
     font-size: 18px;
+    text-align: left;
 }
 
 .form-group input,
@@ -376,5 +393,67 @@ h2 {
     display: flex;
     justify-content: center;
 
+}
+
+/* Asegurar que los labels del nombre y documento estén alineados a la izquierda */
+.centerElement .form-group {
+    text-align: left;
+}
+
+/* Campo de nombre que ocupa todo el ancho */
+.full-width {
+    width: 100% !important;
+}
+
+/* Estilos para campos deshabilitados */
+.disabled-input {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #1a4a4d !important;
+}
+
+.help-text {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #90DDF0;
+    font-style: italic;
+}
+
+/* Estilos para campos de fecha deshabilitados */
+input[type="date"]:disabled {
+    cursor: not-allowed;
+    background-color: #1a4a4d !important;
+    color: #6b8b8f !important;
+}
+
+/* Estilos para el mensaje informativo */
+.info-message {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #2c666e;
+    border-radius: 8px;
+    border-left: 4px solid #90DDF0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.message-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.message-content i {
+    font-size: 24px;
+    color: #90DDF0;
+    flex-shrink: 0;
+}
+
+.message-content p {
+    margin: 0;
+    color: #f0edee;
+    font-size: 16px;
+    line-height: 1.5;
+    text-align: left;
 }
 </style>

@@ -8,24 +8,85 @@
         placeholder="Seleccione el campeonato" @change="obtenerPruebasIngresadas" />
     </div>
 
-    <DataTable v-if="selectedCampeonato"
+    <!-- Tabla para pantallas grandes (>768px) -->
+    <DataTable v-if="selectedCampeonato && screenWidth > 768"
       :value="pruebasCampeonato ? pruebas.filter(prueba => !pruebasCampeonato.some(pruebaCampeonato => pruebaCampeonato.id === prueba.id)) : pruebas"
       selectionMode="multiple" v-model:selection="selectedPrueba" paginator showGridlines :rows="5"
-      :rowsPerPageOptions="[5, 10, 20, 50]" tableStyle="min-width: 50rem">
+      :rowsPerPageOptions="[5, 10, 20, 50]" 
+      :scrollable="true" scrollHeight="400px">
       <Column selectionMode="multiple" headerStyle="width: 3rem;"></Column>
       <Column field="nombre" header="Nombre" sortable></Column>
       <Column field="tipo" header="Tipo" sortable></Column>
       <Column field="criterio" header="Criterio" sortable></Column>
     </DataTable>
 
+    <!-- Tabla para tablets (≤768px) -->
+    <DataTable v-if="selectedCampeonato && screenWidth <= 768 && screenWidth > 480"
+      :value="pruebasCampeonato ? pruebas.filter(prueba => !pruebasCampeonato.some(pruebaCampeonato => pruebaCampeonato.id === prueba.id)) : pruebas"
+      selectionMode="multiple" v-model:selection="selectedPrueba" paginator showGridlines :rows="5"
+      :rowsPerPageOptions="[5, 10, 20, 50]" 
+      :scrollable="true" scrollHeight="400px">
+      <Column selectionMode="multiple" headerStyle="width: 3rem;"></Column>
+      <Column field="nombre" header="Nombre" sortable></Column>
+      <Column field="tipo" header="Tipo" sortable></Column>
+    </DataTable>
+
+    <!-- Tabla para móviles (≤480px) -->
+    <DataTable v-if="selectedCampeonato && screenWidth <= 480 && screenWidth > 320"
+      :value="pruebasCampeonato ? pruebas.filter(prueba => !pruebasCampeonato.some(pruebaCampeonato => pruebaCampeonato.id === prueba.id)) : pruebas"
+      selectionMode="multiple" v-model:selection="selectedPrueba" paginator showGridlines :rows="5"
+      :rowsPerPageOptions="[5, 10, 20, 50]" 
+      :scrollable="true" scrollHeight="400px">
+      <Column selectionMode="multiple" headerStyle="width: 3rem;"></Column>
+      <Column field="nombre" header="Nombre" sortable></Column>
+      <Column field="tipo" header="Tipo" sortable></Column>
+    </DataTable>
+
+    <!-- Tabla para móviles muy pequeños (≤320px) -->
+    <DataTable v-if="selectedCampeonato && screenWidth <= 320"
+      :value="pruebasCampeonato ? pruebas.filter(prueba => !pruebasCampeonato.some(pruebaCampeonato => pruebaCampeonato.id === prueba.id)) : pruebas"
+      selectionMode="multiple" v-model:selection="selectedPrueba" paginator showGridlines :rows="5"
+      :rowsPerPageOptions="[5, 10, 20, 50]" 
+      :scrollable="true" scrollHeight="400px">
+      <Column selectionMode="multiple" headerStyle="width: 3rem;"></Column>
+      <Column field="nombre" header="Nombre" sortable></Column>
+    </DataTable>
+
     <div class="flex flex-column" v-if="selectedCampeonato">
       <h2>Pruebas Actuales del Campeonato </h2>
-      <DataTable v-if=" pruebasCampeonato && pruebasCampeonato.length>0" :value="pruebasCampeonato" paginator showGridlines :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]"
-        tableStyle="min-width: 50rem">
+      
+      <!-- Tabla para pantallas grandes (>768px) -->
+      <DataTable v-if="pruebasCampeonato && pruebasCampeonato.length>0 && screenWidth > 768" 
+        :value="pruebasCampeonato" paginator showGridlines :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]"
+        :scrollable="true" scrollHeight="400px">
         <Column field="nombre" header="Nombre" sortable></Column>
         <Column field="tipo" header="Tipo" sortable></Column>
         <Column field="criterio" header="Criterio" sortable></Column>
       </DataTable>
+
+      <!-- Tabla para tablets (≤768px) -->
+      <DataTable v-if="pruebasCampeonato && pruebasCampeonato.length>0 && screenWidth <= 768 && screenWidth > 480" 
+        :value="pruebasCampeonato" paginator showGridlines :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]"
+        :scrollable="true" scrollHeight="400px">
+        <Column field="nombre" header="Nombre" sortable></Column>
+        <Column field="tipo" header="Tipo" sortable></Column>
+      </DataTable>
+
+      <!-- Tabla para móviles (≤480px) -->
+      <DataTable v-if="pruebasCampeonato && pruebasCampeonato.length>0 && screenWidth <= 480 && screenWidth > 320" 
+        :value="pruebasCampeonato" paginator showGridlines :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]"
+        :scrollable="true" scrollHeight="400px">
+        <Column field="nombre" header="Nombre" sortable></Column>
+        <Column field="tipo" header="Tipo" sortable></Column>
+      </DataTable>
+
+      <!-- Tabla para móviles muy pequeños (≤320px) -->
+      <DataTable v-if="pruebasCampeonato && pruebasCampeonato.length>0 && screenWidth <= 320" 
+        :value="pruebasCampeonato" paginator showGridlines :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]"
+        :scrollable="true" scrollHeight="400px">
+        <Column field="nombre" header="Nombre" sortable></Column>
+      </DataTable>
+
       <Message v-else severity="info" :closable="false">
         El campeonato aún no tiene pruebas asignadas.
       </Message>
@@ -46,6 +107,11 @@ export default {
   mounted() {
     this.listarPruebas();
     this.listarCampeonatos();
+    this.updateScreenWidth();
+    window.addEventListener('resize', this.updateScreenWidth);
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.updateScreenWidth);
   },
   methods: {
     async listarPruebas() {
@@ -104,6 +170,9 @@ export default {
     obtenerPruebasIngresadas() {
       this.pruebasCampeonato = this.selectedCampeonato.pruebas;
       console.log("Pruebas del campeonato:", this.pruebasCampeonato);
+    },
+    updateScreenWidth() {
+      this.screenWidth = window.innerWidth;
     }
   },
   data() {
@@ -114,7 +183,8 @@ export default {
       selectedPrueba: [],
       campeonatos: [],
       selectedCampeonato: null,
-      isSubmitting: false
+      isSubmitting: false,
+      screenWidth: window.innerWidth
     };
   },
 };
@@ -187,4 +257,47 @@ button:hover {
   opacity: 0.5;
   /* Reduce la opacidad para indicar que está deshabilitado */
 }
+
+/* Estilos responsivos para DataTables */
+@media (max-width: 768px) {
+  .register-container {
+    padding: 20px;
+    margin-top: 2vh;
+  }
+  
+  h2 {
+    font-size: 20px;
+  }
+  
+  h3 {
+    font-size: 16px;
+  }
+  
+  /* Ajustar el dropdown en pantallas pequeñas */
+  .p-dropdown {
+    width: 100% !important;
+  }
+  
+  /* Hacer que el botón ocupe todo el ancho en móviles */
+  button {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-container {
+    padding: 15px;
+    margin-top: 1vh;
+  }
+  
+  h2 {
+    font-size: 18px;
+  }
+  
+  h3 {
+    font-size: 14px;
+  }
+}
+
+
 </style>

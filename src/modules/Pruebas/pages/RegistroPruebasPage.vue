@@ -200,13 +200,14 @@ h2 {
 
 .form-group {
   width: calc(100% - 10px);
-  text-align: center;
+  text-align: left;
 }
 
 .form-group label {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
+  text-align: left;
 }
 
 .form-group input,
@@ -222,7 +223,17 @@ h2 {
 
 .form-group input::placeholder {
   color: #90ddf0;
-  text-align: center; /* Asegura que el placeholder también esté centrado */
+  text-align: left;
+}
+
+/* Alinear placeholders de selects a la izquierda */
+.form-group select option {
+  text-align: left;
+}
+
+/* Para el primer option (placeholder) del select */
+.form-group select option[disabled] {
+  text-align: left;
 }
 
 .form-group button {
@@ -317,5 +328,10 @@ h2 {
 .centerElement {
   display: flex;
   justify-content: center;
+}
+
+/* Asegurar que los labels dentro de centerElement estén alineados a la izquierda */
+.centerElement .form-group {
+  text-align: left;
 }
 </style>
