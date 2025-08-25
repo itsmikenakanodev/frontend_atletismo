@@ -8,86 +8,48 @@
         placeholder="Seleccione el campeonato" @change="obtenerPruebasIngresadas" />
     </div>
 
-    <!-- Tabla para pantallas grandes (>768px) -->
-    <DataTable v-if="selectedCampeonato && screenWidth > 768"
-      :value="pruebasCampeonato ? pruebas.filter(prueba => !pruebasCampeonato.some(pruebaCampeonato => pruebaCampeonato.id === prueba.id)) : pruebas"
-      selectionMode="multiple" v-model:selection="selectedPrueba" paginator showGridlines :rows="5"
-      :rowsPerPageOptions="[5, 10, 20, 50]" 
-      :scrollable="true" scrollHeight="400px">
-      <Column selectionMode="multiple" headerStyle="width: 3rem;"></Column>
-      <Column field="nombre" header="Nombre" sortable></Column>
-      <Column field="tipo" header="Tipo" sortable></Column>
-      <Column field="criterio" header="Criterio" sortable></Column>
-    </DataTable>
-
-    <!-- Tabla para tablets (≤768px) -->
-    <DataTable v-if="selectedCampeonato && screenWidth <= 768 && screenWidth > 480"
-      :value="pruebasCampeonato ? pruebas.filter(prueba => !pruebasCampeonato.some(pruebaCampeonato => pruebaCampeonato.id === prueba.id)) : pruebas"
-      selectionMode="multiple" v-model:selection="selectedPrueba" paginator showGridlines :rows="5"
-      :rowsPerPageOptions="[5, 10, 20, 50]" 
-      :scrollable="true" scrollHeight="400px">
-      <Column selectionMode="multiple" headerStyle="width: 3rem;"></Column>
-      <Column field="nombre" header="Nombre" sortable></Column>
-      <Column field="tipo" header="Tipo" sortable></Column>
-    </DataTable>
-
-    <!-- Tabla para móviles (≤480px) -->
-    <DataTable v-if="selectedCampeonato && screenWidth <= 480 && screenWidth > 320"
-      :value="pruebasCampeonato ? pruebas.filter(prueba => !pruebasCampeonato.some(pruebaCampeonato => pruebaCampeonato.id === prueba.id)) : pruebas"
-      selectionMode="multiple" v-model:selection="selectedPrueba" paginator showGridlines :rows="5"
-      :rowsPerPageOptions="[5, 10, 20, 50]" 
-      :scrollable="true" scrollHeight="400px">
-      <Column selectionMode="multiple" headerStyle="width: 3rem;"></Column>
-      <Column field="nombre" header="Nombre" sortable></Column>
-      <Column field="tipo" header="Tipo" sortable></Column>
-    </DataTable>
-
-    <!-- Tabla para móviles muy pequeños (≤320px) -->
-    <DataTable v-if="selectedCampeonato && screenWidth <= 320"
-      :value="pruebasCampeonato ? pruebas.filter(prueba => !pruebasCampeonato.some(pruebaCampeonato => pruebaCampeonato.id === prueba.id)) : pruebas"
-      selectionMode="multiple" v-model:selection="selectedPrueba" paginator showGridlines :rows="5"
-      :rowsPerPageOptions="[5, 10, 20, 50]" 
-      :scrollable="true" scrollHeight="400px">
-      <Column selectionMode="multiple" headerStyle="width: 3rem;"></Column>
-      <Column field="nombre" header="Nombre" sortable></Column>
-    </DataTable>
+    <!-- Tabla principal de pruebas disponibles -->
+    <div v-if="selectedCampeonato">
+      <DataTable v-for="(tableConfig, index) in activeTableConfigs" 
+        :key="`main-${index}`"
+        :value="pruebasCampeonato ? pruebas.filter(prueba => !pruebasCampeonato.some(pruebaCampeonato => pruebaCampeonato.id === prueba.id)) : pruebas"
+        selectionMode="multiple" 
+        v-model:selection="selectedPrueba" 
+        paginator 
+        showGridlines 
+        :rows="5"
+        :rowsPerPageOptions="[5, 10, 20, 50]" 
+        :scrollable="true" 
+        scrollHeight="400px">
+        <Column v-if="tableConfig.showSelection" selectionMode="multiple" headerStyle="width: 3rem;"></Column>
+        <Column v-if="tableConfig.showNombre" field="nombre" header="Nombre" sortable></Column>
+        <Column v-if="tableConfig.showTipo" field="tipo" header="Tipo" sortable></Column>
+        <Column v-if="tableConfig.showCriterio" field="criterio" header="Criterio" sortable></Column>
+      </DataTable>
+    </div>
 
     <div class="flex flex-column" v-if="selectedCampeonato">
       <h2>Pruebas Actuales del Campeonato </h2>
       
-      <!-- Tabla para pantallas grandes (>768px) -->
-      <DataTable v-if="pruebasCampeonato && pruebasCampeonato.length>0 && screenWidth > 768" 
-        :value="pruebasCampeonato" paginator showGridlines :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]"
-        :scrollable="true" scrollHeight="400px">
-        <Column field="nombre" header="Nombre" sortable></Column>
-        <Column field="tipo" header="Tipo" sortable></Column>
-        <Column field="criterio" header="Criterio" sortable></Column>
-      </DataTable>
+      <!-- Tabla de pruebas actuales del campeonato -->
+      <div v-if="pruebasCampeonato && pruebasCampeonato.length>0">
+        <DataTable v-for="(tableConfig, index) in activeTableConfigs" 
+          :key="`current-${index}`"
+          :value="pruebasCampeonato" 
+          paginator 
+          showGridlines 
+          :rows="5" 
+          :rowsPerPageOptions="[5, 10, 20, 50]"
+          :scrollable="true" 
+          scrollHeight="400px">
+          <Column v-if="tableConfig.showNombre" field="nombre" header="Nombre" sortable></Column>
+          <Column v-if="tableConfig.showTipo" field="tipo" header="Tipo" sortable></Column>
+          <Column v-if="tableConfig.showCriterio" field="criterio" header="Criterio" sortable></Column>
+        </DataTable>
+      </div>
 
-      <!-- Tabla para tablets (≤768px) -->
-      <DataTable v-if="pruebasCampeonato && pruebasCampeonato.length>0 && screenWidth <= 768 && screenWidth > 480" 
-        :value="pruebasCampeonato" paginator showGridlines :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]"
-        :scrollable="true" scrollHeight="400px">
-        <Column field="nombre" header="Nombre" sortable></Column>
-        <Column field="tipo" header="Tipo" sortable></Column>
-      </DataTable>
-
-      <!-- Tabla para móviles (≤480px) -->
-      <DataTable v-if="pruebasCampeonato && pruebasCampeonato.length>0 && screenWidth <= 480 && screenWidth > 320" 
-        :value="pruebasCampeonato" paginator showGridlines :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]"
-        :scrollable="true" scrollHeight="400px">
-        <Column field="nombre" header="Nombre" sortable></Column>
-        <Column field="tipo" header="Tipo" sortable></Column>
-      </DataTable>
-
-      <!-- Tabla para móviles muy pequeños (≤320px) -->
-      <DataTable v-if="pruebasCampeonato && pruebasCampeonato.length>0 && screenWidth <= 320" 
-        :value="pruebasCampeonato" paginator showGridlines :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]"
-        :scrollable="true" scrollHeight="400px">
-        <Column field="nombre" header="Nombre" sortable></Column>
-      </DataTable>
-
-      <Message v-else severity="info" :closable="false">
+      <!-- Mensaje cuando no hay pruebas asignadas -->
+      <Message v-else-if="!pruebasCampeonato || pruebasCampeonato.length === 0" severity="info" :closable="false">
         El campeonato aún no tiene pruebas asignadas.
       </Message>
     </div>
@@ -184,8 +146,60 @@ export default {
       campeonatos: [],
       selectedCampeonato: null,
       isSubmitting: false,
-      screenWidth: window.innerWidth
+      screenWidth: window.innerWidth,
+      // Configuración de las tablas para diferentes tamaños de pantalla
+      tableConfigs: [
+        {
+          name: 'pantalla-grande',
+          minWidth: 768,
+          showSelection: true,
+          showNombre: true,
+          showTipo: true,
+          showCriterio: true
+        },
+        {
+          name: 'tablet',
+          minWidth: 480,
+          maxWidth: 768,
+          showSelection: true,
+          showNombre: true,
+          showTipo: true,
+          showCriterio: false
+        },
+        {
+          name: 'movil',
+          minWidth: 320,
+          maxWidth: 480,
+          showSelection: true,
+          showNombre: true,
+          showTipo: true,
+          showCriterio: false
+        },
+        {
+          name: 'movil-pequeno',
+          maxWidth: 320,
+          showSelection: true,
+          showNombre: true,
+          showTipo: false,
+          showCriterio: false
+        }
+      ]
     };
+  },
+  computed: {
+    // Filtrar las configuraciones de tabla según el tamaño de pantalla actual
+    activeTableConfigs() {
+      return this.tableConfigs.filter(config => {
+        if (config.minWidth && config.maxWidth) {
+          return this.screenWidth > config.minWidth && this.screenWidth <= config.maxWidth;
+        } else if (config.minWidth) {
+          return this.screenWidth > config.minWidth;
+        } else if (config.maxWidth) {
+          return this.screenWidth <= config.maxWidth;
+        }
+        return false;
+      });
+    }
   },
 };
 </script>

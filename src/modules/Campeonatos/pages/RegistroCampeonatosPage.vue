@@ -65,7 +65,7 @@
                 <div class="form-group ">
                     <label for="startDate">Fecha Inicio Campeonato</label>
                     <input type="date" id="startDate" required v-model="campeonato.fechaInicio" 
-                        :min="campeonato.inscripcionFin"
+                        :min="minFechaInicioCampeonato"
                         :max="campeonato.fechaFin" />
                 </div>
                 <div class="form-group ">
@@ -165,12 +165,22 @@ export default {
         }
     },
     computed: {
-        // La fecha mínima de inicio es un día después del día en que se ingresa a la página
+        // La fecha mínima de inicio de inscripciones es un día después del día en que se ingresa a la página
         minFechaInicio() {
             const today = new Date();
             const tomorrow = new Date(today);
             tomorrow.setDate(today.getDate() + 1);
             return tomorrow.toISOString().split('T')[0]; // 'yyyy-mm-dd'
+        },
+        // La fecha mínima de inicio del campeonato es un día después de la fecha fin de inscripciones
+        minFechaInicioCampeonato() {
+            if (!this.campeonato.inscripcionFin) {
+                return this.minFechaInicio;
+            }
+            const fechaFinInscripcion = new Date(this.campeonato.inscripcionFin);
+            const diaDespues = new Date(fechaFinInscripcion);
+            diaDespues.setDate(fechaFinInscripcion.getDate() + 1);
+            return diaDespues.toISOString().split('T')[0];
         }
     },
     methods: {
