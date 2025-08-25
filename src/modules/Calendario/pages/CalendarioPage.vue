@@ -313,11 +313,11 @@ export default {
       }
     },
     getTagSeverity(campeonato) {
-      const today = new Date();
-      const fechaInicio = new Date(campeonato.fechaInicio);
-      const fechaFin = new Date(campeonato.fechaFin);
-      const InscripcionInicio = new Date(campeonato.inscripcionInicio);
-      const InscripcionFin = new Date(campeonato.inscripcionFin);
+      const today =  this.toDateOnly(new Date());
+      const fechaInicio  =  this.parseLocalDate(campeonato.fechaInicio);
+      const fechaFin =  this.parseLocalDate(campeonato.fechaFin);
+      const InscripcionInicio =  this.parseLocalDate(campeonato.inscripcionInicio);
+      const InscripcionFin =  this.parseLocalDate(campeonato.inscripcionFin);
 
       if (today < InscripcionInicio) {
         return "info"; // Por iniciar inscripciones
@@ -325,7 +325,7 @@ export default {
         return "warning"; // Inscripciones abiertas
       }
 
-      if (today < fechaInicio) {
+      if (today < fechaInicio && today > InscripcionFin) {
         return "info"; // Por iniciar
       } else if (today >= fechaInicio && today <= fechaFin) {
         return "warning"; // En progreso
@@ -333,21 +333,30 @@ export default {
         return "success"; // Finalizado
       }
     },
+    parseLocalDate(dateString) {
+      if (!dateString) return null;
+      const [year, month, day] = dateString.split("-").map(Number);
+      return new Date(year, month - 1, day); // JS cuenta meses desde 0
+    },
+    toDateOnly(date) {
+      const d = new Date(date);
+      d.setHours(0, 0, 0, 0); // deja solo la parte de la fecha
+      return d;
+    },
     getTagValue(campeonato) {
-      const today = new Date();
-      const fechaInicio = new Date(campeonato.fechaInicio);
-      const fechaFin = new Date(campeonato.fechaFin);
+      const today =  this.toDateOnly(new Date());
+      const fechaInicio  =  this.parseLocalDate(campeonato.fechaInicio);
+      const fechaFin =  this.parseLocalDate(campeonato.fechaFin);
+      const InscripcionInicio =  this.parseLocalDate(campeonato.inscripcionInicio);
+      const InscripcionFin =  this.parseLocalDate(campeonato.inscripcionFin);
 
-      const InscripcionInicio = new Date(campeonato.inscripcionInicio);
-      const InscripcionFin = new Date(campeonato.inscripcionFin);
-
-      if (today < InscripcionInicio) {
+      if (today < InscripcionInicio ) {
         return "Por iniciar Inscripciones";
-      } else if (today >= InscripcionInicio && today <= InscripcionFin) {
+      } else if (today >= InscripcionInicio  && today <= InscripcionFin ) {
         return "Inscripciones abiertas";
       }
 
-      if (today < fechaInicio) {
+      if (today < fechaInicio && today > InscripcionFin) {
         return "Por iniciar";
       } else if (today >= fechaInicio && today <= fechaFin) {
         return "En progreso";

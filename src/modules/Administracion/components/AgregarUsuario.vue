@@ -179,7 +179,7 @@ h2 {
 
 .form-group {
     width: calc(50% - 10px);
-    text-align: center;
+    text-align: left;
 }
 
 .form-group label {
@@ -197,6 +197,7 @@ h2 {
     box-sizing: border-box;
     background-color: #2c666e;
     color: #f0edee;
+    text-align: left;
 }
 
 .form-group input::placeholder {
