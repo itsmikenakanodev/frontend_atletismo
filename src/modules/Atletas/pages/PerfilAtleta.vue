@@ -34,24 +34,24 @@
         </div>
       </div>
 
-
       <div v-if="mostrarMarcas && resultados.length">
         <div class="mejores-tiempos">
           <h3>Mejores Marcas</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Prueba</th>
-                <th>Mejor Marca</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(prueba, index) in pruebas" :key="index">
-                <td>{{ prueba }}</td>
-                <td>{{ getMejorTiempo(resultados.filter(r => r.nombrePrueba === prueba)) }}</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="card">
+            <DataTable :value="pruebas" tableStyle="min-width: 50rem" paginator :rows="5"
+              :rowsPerPageOptions="[5, 10, 20]">
+              <Column field="nombre" header="Prueba" sortable>
+                <template #body="slotProps">
+                  {{ slotProps.data }}
+                </template>
+              </Column>
+              <Column field="mejorMarca" header="Mejor Marca" sortable>
+                <template #body="slotProps">
+                  {{ getMejorTiempo(resultados.filter(r => r.nombrePrueba === slotProps.data)) }}
+                </template>
+              </Column>
+            </DataTable>
+          </div>
         </div>
       </div>
 
@@ -65,32 +65,28 @@
                 <i :class="expandedPruebas.includes(index) ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"></i>
               </div>
               <div v-if="expandedPruebas.includes(index)" class="prueba-details">
-                <table class="progreso-table">
-                  <thead>
-                    <tr>
-                      <th>Competencia</th>
-                      <th>Marca</th>
-                      <th>Posición</th>
-                      <th>Viento (m/s)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="resultado in resultados.filter(r => r.nombrePrueba === prueba)" :key="resultado.id">
-                      <td>{{ resultado.nombreCampeonato }}</td>
-                      <td>
-                        <span v-if="resultado.criterioPrueba === 'Tiempo'">{{ resultado.marca.toFixed(2) }} segundos</span>
-                        <span v-else-if="resultado.criterioPrueba === 'Distancia'">{{ resultado.distancia }} metros</span>
-                        <span v-else-if="resultado.criterioPrueba === 'Puntos'">{{ resultado.puntaje }} puntos</span>
+                <div class="card">
+                  <DataTable :value="resultados.filter(r => r.nombrePrueba === prueba)" 
+                    tableStyle="min-width: 50rem" paginator :rows="5"
+                    :rowsPerPageOptions="[5, 10, 20]">
+                    <Column field="nombreCampeonato" header="Competencia" sortable></Column>
+                    <Column field="marca" header="Marca" sortable>
+                      <template #body="slotProps">
+                        <span v-if="slotProps.data.criterioPrueba === 'Tiempo'">{{ slotProps.data.marca.toFixed(2) }} segundos</span>
+                        <span v-else-if="slotProps.data.criterioPrueba === 'Distancia'">{{ slotProps.data.distancia }} metros</span>
+                        <span v-else-if="slotProps.data.criterioPrueba === 'Puntos'">{{ slotProps.data.puntaje }} puntos</span>
                         <span v-else>N/A</span>
-                      </td>
-                      <td>{{ resultado.posicion }}</td>
-                      <td>
-                        <span v-if="resultado.criterioPrueba === 'Tiempo'">{{ resultado.viento }}</span>
+                      </template>
+                    </Column>
+                    <Column field="posicion" header="Posición" sortable></Column>
+                    <Column field="viento" header="Viento (m/s)" sortable>
+                      <template #body="slotProps">
+                        <span v-if="slotProps.data.criterioPrueba === 'Tiempo'">{{ slotProps.data.viento }}</span>
                         <span v-else>No aplica</span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                      </template>
+                    </Column>
+                  </DataTable>
+                </div>
               </div>
             </div>
           </div>
@@ -282,22 +278,6 @@ h2 {
   margin-top: 20px; /* Espaciado superior */
 }
 
-table {
-  width: 100%; /* Ancho completo */
-  border-collapse: collapse; /* Colapsar bordes */
-  margin-bottom: 20px; /* Espaciado inferior */
-}
-
-th, td {
-  border: 1px solid #ddd; /* Borde de las celdas */
-  padding: 12px; /* Aumentar espaciado interno */
-  text-align: left; /* Alinear texto a la izquierda */
-}
-
-th {
-  background-color: #f2f2f2; /* Color de fondo para el encabezado */
-}
-
 .progreso {
   margin-top: 20px; /* Espaciado superior */
 }
@@ -319,24 +299,6 @@ th {
 
 .prueba-details {
   padding: 10px; /* Espaciado interno */
-}
-
-.progreso-table {
-  width: 100%; /* Ancho completo */
-  border-collapse: collapse; /* Colapsar bordes */
-}
-
-th {
-  background-color: #4b8b92; /* Color de fondo para el encabezado */
-  color: white; /* Color del texto en el encabezado */
-  padding: 8px; /* Espaciado interno */
-  text-align: left; /* Alinear texto a la izquierda */
-}
-
-td {
-  border: 1px solid #ddd; /* Borde de las celdas */
-  padding: 8px; /* Espaciado interno */
-  text-align: left; /* Alinear texto a la izquierda */
 }
 
 .toggle-buttons {
@@ -408,6 +370,11 @@ td {
 
 .spinner-blanco {
   color: white; /* Cambiar el color del texto a blanco */
+}
+
+/* Estilos para las tablas de PrimeVue */
+.card {
+  margin: 10px;
 }
 </style>
   
