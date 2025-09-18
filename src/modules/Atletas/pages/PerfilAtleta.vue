@@ -134,7 +134,7 @@ export default {
     if (storedUserData) {
       this.usuario = JSON.parse(storedUserData);
     } else {
-      this.usuario = {}; // Asegurarse de que usuario sea un objeto vacío si no hay datos
+      this.usuario = null; // Asegurarse de que usuario sea un objeto vacío si no hay datos
     }
 
     const cedula = this.$route.params.cedula; // Obtener la cédula del atleta de los parámetros de la ruta
