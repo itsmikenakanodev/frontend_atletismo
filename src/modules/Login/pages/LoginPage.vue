@@ -45,8 +45,8 @@ import { obtenerUsuarioFachada } from "../helpers/UsuarioHelper";
 export default {
   data() {
     return {
-      email: null,
-      password: null,
+      email: "prueba@admin.com",
+      password: "12345678",
       loading: false,
     };
   },
